@@ -102,7 +102,6 @@ pge_full <-
   )
 ```
 
-
 ```{r}
 pge_residential_chart <-
   pge_full %>%
