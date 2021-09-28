@@ -11,9 +11,148 @@ knitr::opts_chunk$set(echo = F)
 
 ```{r}
 library(tidyverse)
+library(plotly)
 ```
 
 ```{r}
+years <- 2017:2021
+quarters <- 1:4
+types <- c("Electric","Gas")
+
+pge_full <- NULL
+
+for(year in years){
+  for(quarter in quarters){
+    for(type in types){
+      filename <- 
+        paste0(
+          "pge/PGE_",
+          year,
+          "_Q",
+          quarter,
+          "_",
+          type,
+          "UsageByZip.csv"
+        )
+      
+      print(filename)
+      
+      if(file.exists(filename)){
+        temp <- read_csv(filename)
+        if(type == "Electric"){
+          ## mutate electric to BTU
+          mutatedTemp <- 
+            temp %>% 
+            filter(
+              CUSTOMERCLASS %in%
+                c("Elec- Residential", "Elec- Commercial")
+            ) %>% 
+            group_by(MONTH, YEAR, CUSTOMERCLASS) %>% 
+            summarize(
+              TOTALKWH = 
+                sum(
+                  TOTALKWH,
+                  na.rm = T
+                )
+            ) %>% 
+            mutate(
+                TOTALKBTU =
+                  TOTALKWH * 3.412
+            )
+        } else {
+          ## mutate gas to BTU
+          mutatedTemp <- 
+            temp %>% 
+            filter(
+              CUSTOMERCLASS %in%
+                c("Gas- Residential", "Gas- Commercial")
+            ) %>% 
+            group_by(MONTH, YEAR, CUSTOMERCLASS) %>% 
+            summarize(
+              TOTALTHM = 
+                sum(
+                  TOTALTHM,
+                  na.rm = T
+                )
+            ) %>% 
+            mutate(
+                TOTALKBTU =
+                  TOTALTHM * 100,000
+            )
+        }
+         pge_full <- rbind(pge_full,mutatedTemp)
+         saveRDS(pge_full, "pge_full.rds")
+      }
+    }  
+  }
+}  
+```
+
+```{r}
+pge_full <-
+  unite(
+    pge_full,
+    Date,
+    MONTH,
+    YEAR,
+    sep = "-",
+    remove = T,
+    na.rm = F
+
+  )
+```
+
+
+```{r}
+pge_residential_chart <-
+  pge_full %>%
+  filter(
+    CUSTOMERCLASS %in% c("Elec- Residnetial", "Gas- Residential")
+  ) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = Date,
+      y = TOTALKBTU,
+      fill = CUSTOMERCLASS
+    ),
+    stat = "identity",
+    position = "stack"
+  ) +
+  labs(
+    x = "Month",
+    y = "kBTU",
+    title = "PG&E Territory Residential Monthly Electricity and Gas Usage, 2017-2021",
+    fill = "Residential Power Type"
+  )
+
+pge_residential_chart
+  
+pge_commercial_chart <-
+  pge_full %>%
+  filter(
+    CUSTOMERCLASS %in% c("Elec- Commercial", "Gas- Commercial")
+  ) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = Date,
+      y = TOTALKBTU,
+      fill = CUSTOMERCLASS
+    ),
+    stat = "identity",
+    position = "stack"
+  ) +
+  labs(
+    x = "Month",
+    y = "kBTU",
+    title = "PG&E Territory Commercial Monthly Electricity and Gas Usage, 2017-2021",
+    fill = "Commercial Power Type"
+  )
+
+pge_commercial_chart  
 
 ```
+
+
 
