@@ -32,7 +32,6 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ```{r cars}
 summary(cars)
-1+5
 ```
 
 ## Including Plots
