@@ -5,7 +5,7 @@ date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r}
 knitr::opts_chunk$set(echo = F)
 ```
 
@@ -107,7 +107,7 @@ pge_full <-
 pge_residential_chart <-
   pge_full %>%
   filter(
-    CUSTOMERCLASS %in% c("Elec- Residnetial", "Gas- Residential")
+    CUSTOMERCLASS %in% c("Elec- Residential", "Gas- Residential")
   ) %>% 
   ggplot() +
   geom_bar(
@@ -125,8 +125,11 @@ pge_residential_chart <-
     title = "PG&E Territory Residential Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Residential Power Type"
   )
+pge_residential_chart %>% ggplotly()
 
 pge_residential_chart
+
+
   
 pge_commercial_chart <-
   pge_full %>%
@@ -149,8 +152,12 @@ pge_commercial_chart <-
     title = "PG&E Territory Commercial Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Commercial Power Type"
   )
-
+pge_commercial_chart %>% ggplotly()
 pge_commercial_chart  
+
+
+
+
 
 ```
 
