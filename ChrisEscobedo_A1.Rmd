@@ -12,9 +12,11 @@ knitr::opts_chunk$set(echo = F)
 ```{r}
 library(tidyverse)
 library(plotly)
+library(stringr)
+library(lubridate)
 ```
 
-```{r}
+```{r, message = F}
 years <- 2017:2021
 quarters <- 1:4
 types <- c("Electric","Gas")
@@ -96,10 +98,11 @@ pge_full <-
     MONTH,
     YEAR,
     sep = "-",
-    remove = T,
+    remove = F,
     na.rm = F
-
   )
+
+
 ```
 
 ```{r}
@@ -124,12 +127,10 @@ pge_residential_chart <-
     title = "PG&E Territory Residential Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Residential Power Type"
   )
+
 pge_residential_chart %>% ggplotly()
 
-pge_residential_chart
 
-
-  
 pge_commercial_chart <-
   pge_full %>%
   filter(
@@ -145,14 +146,14 @@ pge_commercial_chart <-
     stat = "identity",
     position = "stack"
   ) +
-  labs(
+    labs(
     x = "Month",
     y = "kBTU",
     title = "PG&E Territory Commercial Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Commercial Power Type"
   )
 pge_commercial_chart %>% ggplotly()
-pge_commercial_chart  
+
 
 
 
