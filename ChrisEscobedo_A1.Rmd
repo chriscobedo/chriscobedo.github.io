@@ -6,10 +6,7 @@ output: html_document
 ---
 
 ```{r}
-knitr::opts_chunk$set(echo = F)
-```
-
-```{r}
+knitr::opts_chunk$set(echo = F, warnings = F, messages = F)
 library(tidyverse)
 library(plotly)
 library(stringr)
@@ -126,7 +123,7 @@ pge_residential_chart <-
   labs(
     x = "Year",
     y = "kBTU",
-    title = "PG&E Territory Residential Monthly Electricity and Gas Usage, 2017-2021",
+    title = "PG&E Territory Residential Electricity and Gas Usage, 2017-2021",
     fill = "Residential Power Type"
   )
 
@@ -151,17 +148,14 @@ pge_commercial_chart <-
     labs(
     x = "Year",
     y = "kBTU",
-    title = "PG&E Territory Commercial Monthly Electricity and Gas Usage, 2017-2021",
+    title = "PG&E Territory Commercial Electricity and Gas Usage, 2017-2021",
     fill = "Commercial Power Type"
   )
 pge_commercial_chart %>% ggplotly()
 
-
-
-
-
-
 ```
+Something to Note is that there appears to be no electricity usage, commercial or residential, at the beginning of 2020. There likely was a disruption to data collection that occured at this time due to the onset of the pandemic. 
 
+Other than this disruption, it does not seem that there are major changes in average energy and gas useage over time.
 
 
