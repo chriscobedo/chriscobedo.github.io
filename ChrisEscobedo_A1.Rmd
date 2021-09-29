@@ -91,30 +91,32 @@ for(year in years){
 ```
 
 ```{r}
-pge_full <-
-  unite(
-    pge_full,
-    Date,
-    MONTH,
-    YEAR,
-    sep = "-",
-    remove = F,
-    na.rm = F
+pge_full_dates <- pge_full %>% 
+  mutate(
+    DATE = 
+      paste(
+        YEAR,
+        MONTH, 
+        "01",
+        sep="-"
+      ) %>% as.Date()
   )
+
+
 
 
 ```
 
 ```{r}
 pge_residential_chart <-
-  pge_full %>%
+  pge_full_dates %>%
   filter(
     CUSTOMERCLASS %in% c("Elec- Residential", "Gas- Residential")
   ) %>% 
   ggplot() +
   geom_bar(
     aes(
-      x = Date,
+      x = DATE,
       y = TOTALKBTU,
       fill = CUSTOMERCLASS
     ),
@@ -122,7 +124,7 @@ pge_residential_chart <-
     position = "stack"
   ) +
   labs(
-    x = "Month",
+    x = "Year",
     y = "kBTU",
     title = "PG&E Territory Residential Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Residential Power Type"
@@ -132,14 +134,14 @@ pge_residential_chart %>% ggplotly()
 
 
 pge_commercial_chart <-
-  pge_full %>%
+  pge_full_dates %>%
   filter(
     CUSTOMERCLASS %in% c("Elec- Commercial", "Gas- Commercial")
   ) %>% 
   ggplot() +
   geom_bar(
     aes(
-      x = Date,
+      x = DATE,
       y = TOTALKBTU,
       fill = CUSTOMERCLASS
     ),
@@ -147,7 +149,7 @@ pge_commercial_chart <-
     position = "stack"
   ) +
     labs(
-    x = "Month",
+    x = "Year",
     y = "kBTU",
     title = "PG&E Territory Commercial Monthly Electricity and Gas Usage, 2017-2021",
     fill = "Commercial Power Type"
