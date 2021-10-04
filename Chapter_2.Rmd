@@ -406,7 +406,109 @@ nfo_pop_2020 <- smc_pop_2020 %>%
 mapview(nfo_pop_2020, zcol = "pop")
 ```
 
+```{r}
+bay_pdas <- st_read("https://opendata.arcgis.com/datasets/4df9cb38d77346a289252ced4ffa0ca0_0.geojson")
 
+smc_pdas <-
+  bay_pdas %>% 
+  filter(county == "San Mateo") %>% 
+  st_transform(4269)
+
+smc_pdas_blocks <- smc_blocks_2020[smc_pdas, ]
+
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = smc_pdas,
+    stroke = F,
+    fillOpacity = 0.5
+  ) %>% 
+  addPolygons(
+    data = smc_pdas_blocks,
+    color = "red",
+    weight = 0.75,
+    fill = F
+  )
+
+smc_pdas_blocks_1 <- smc_pdas_blocks %>% 
+  select(block = GEOID20) %>% 
+  left_join(smc_pop_2020)
+
+sum(smc_pdas_blocks_1$pop)
+
+
+smc_pdas_blocks_2 <-
+  smc_pdas_blocks_1 %>% 
+  st_centroid() %>% 
+  .[smc_pdas, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(smc_pdas_blocks_1 %>% select(block)) %>% 
+  st_as_sf()
+
+sum(smc_pdas_blocks_2$pop)
+
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = smc_pdas,
+    stroke = F,
+    fillOpacity = 0.5
+  ) %>% 
+  addPolygons(
+    data = smc_pdas_blocks_2,
+    color = "red",
+    weight = 0.75,
+    fill = F
+  )
+```
+
+```{r}
+smc_pdas_blocks_area <-
+  smc_pdas_blocks %>% 
+  st_transform(26910) %>% 
+  mutate(area = st_area(.))
+
+smc_pdas_blocks_intersection <-
+  smc_pdas_blocks_area %>% 
+  st_intersection(
+    smc_pdas %>% 
+      st_transform(26910)
+  )
+
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = smc_pdas,
+    stroke = F,
+    fillOpacity = 0.5
+  ) %>% 
+  addPolygons(
+    data = smc_pdas_blocks_intersection %>% 
+      st_transform(4269),
+    color = "red",
+    weight = 0.75,
+    fill = F
+  )
+
+
+smc_pdas_blocks_3 <-
+  smc_pdas_blocks %>% 
+  select(block = GEOID20) %>% 
+  left_join(smc_pop_2020) %>% 
+  st_transform(26910) %>% 
+  mutate(original_area = st_area(.)) %>% 
+  st_intersection(
+    smc_pdas %>% 
+      st_transform(26910)
+  ) %>% 
+  mutate(
+    leftover_area = st_area(.),
+    perc_area = leftover_area / original_area,
+    pop = pop * perc_area
+  )
+
+sum(smc_pdas_blocks_3$pop) %>% round()
+```
 
 
 
