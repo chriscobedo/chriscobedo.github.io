@@ -130,7 +130,36 @@ alameda_pop_race_2020 <-
     sep = "!!"
   )
 
-total_oakland_blocks <-
+alameda_pop_race_2010 <-
+  getCensus(
+    name = "dec/pl",
+    vintage = 2020,
+    region = "block:*", 
+    regionin = "state:06+county:001",
+    vars = "group(P1)"
+  ) %>% 
+  mutate(
+    block =
+      paste0(state,county,tract,block)
+  ) %>% 
+  select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
+  pivot_longer(
+    ends_with("N"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    dec_vars_2020 %>% 
+      select(name, label)
+  ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"category1","category2"),
+    sep = "!!"
+  )
+
+combined_oakland_blocks <-
   oakland_blocks_all %>% 
   select(block = GEOID) %>% 
   left_join(alameda_pop_race_2020) %>% 
@@ -145,6 +174,8 @@ total_oakland_blocks <-
     perc_area = leftover_area / original_area,
     pop = pop * perc_area
   )
+
+population_2010
 
 ```
 
