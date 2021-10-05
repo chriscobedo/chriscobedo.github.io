@@ -27,15 +27,12 @@ Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 oakland_boundary <- 
   places("CA", cb = T, progress_bar = FALSE) %>% 
   filter(NAME == "Oakland")
-  
-mapview(oakland_boundary, alpha.regions = 0.1)
 
 alameda_blocks <- 
   blocks("CA", county = 001, year = 2020) %>% 
   mutate(
     GEOID = GEOID20
   )
-
 
 blocks_within_oakland <-
   alameda_blocks %>% 
@@ -59,13 +56,6 @@ blocks_within_oakland_2010 <-
   st_set_geometry(NULL) %>% 
   left_join(alameda_blocks_2010 %>% select(GEOID)) %>% 
   st_as_sf()
-
-
-
-mapview(blocks_within_oakland, alpha.regions = 0.1) + mapview(oakland_boundary, alpha.regions = 0)
-
-
-oakland_blocks_all <- blocks_within_oakland[blocks_within_oakland_2010, ]
 
 
 oakland_blocks_area <-
@@ -98,6 +88,12 @@ leaflet() %>%
 dec_vars_2020 <-
   listCensusMetadata(
     name = "2020/dec/pl",
+    type = "variables"
+  )
+
+dec_vars_2010 <-
+  listCensusMetadata(
+    name = "2010/dec/pl",
     type = "variables"
   )
 
@@ -143,7 +139,7 @@ alameda_pop_race_2020 <-
 alameda_pop_race_2010 <-
   getCensus(
     name = "dec/pl",
-    vintage = 2020,
+    vintage = 2010,
     region = "block:*", 
     regionin = "state:06+county:001",
     vars = "group(P1)"
@@ -154,12 +150,12 @@ alameda_pop_race_2010 <-
   ) %>% 
   select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
   pivot_longer(
-    ends_with("N"),
+    c(!"block"),
     names_to = "name",
     values_to = "estimate"
   ) %>%
   left_join(
-    dec_vars_2020 %>% 
+    dec_vars_2010 %>% 
       select(name, label)
   ) %>% 
   select(-name) %>% 
@@ -179,6 +175,7 @@ alameda_pop_race_2010 <-
   filter(race != "") %>% 
   select(block, race, pop = estimate)
 
+
 combined_oakland_blocks <-
   oakland_blocks %>% 
   st_transform(26910) %>% 
@@ -194,7 +191,6 @@ combined_oakland_blocks <-
 
 
 
-population_2010 <-
   
 
 ```
