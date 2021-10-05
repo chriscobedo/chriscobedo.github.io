@@ -204,7 +204,7 @@ updated_combined_oakland_blocks <-
 ```
 
 
-For the calculation of population change, we mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
+For the calculation of population change, I mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
 
 ```{r}
 density_change_oakland <-
@@ -215,7 +215,8 @@ density_change_oakland <-
   ) %>% 
   mutate(
     pop_2010 = pop * perc_area,
-    pop = original_pop_2010
+    original_pop_2010 = pop,
+    pop = NULL
   ) %>% 
   left_join(
     alameda_pop_race_2020,
