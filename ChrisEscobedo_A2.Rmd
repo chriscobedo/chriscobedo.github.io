@@ -136,6 +136,7 @@ alameda_pop_race_2020 <-
   filter(race != "") %>% 
   select(block, race, pop = estimate)
 
+
 alameda_pop_race_2010 <-
   getCensus(
     name = "dec/pl",
@@ -150,10 +151,12 @@ alameda_pop_race_2010 <-
   ) %>% 
   select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
   pivot_longer(
-    c(!"block"),
+    starts_with(c("P0")),
     names_to = "name",
     values_to = "estimate"
   ) %>%
+  
+  alameda_pop_race_2010 <- alameda_pop_race_2010 %>% 
   left_join(
     dec_vars_2010 %>% 
       select(name, label)
@@ -179,22 +182,60 @@ alameda_pop_race_2010 <-
 combined_oakland_blocks <-
   oakland_blocks %>% 
   st_transform(26910) %>% 
-  mutate(original_area = st_area(.)) %>% 
+  mutate(area_2020 = st_area(.)) %>% 
   st_intersection(
     oakland_blocks_2010 %>% 
       st_transform(26910)
   ) %>% 
   mutate(
     leftover_area = st_area(.),
-    perc_area = leftover_area / original_area
+  )
+```
+
+```{r}
+updated_combined_oakland_blocks <-
+  combined_oakland_blocks %>% 
+  select(
+    GEOID20, GEOID10, area_2020, leftover_area, perc_area,geometry
+  ) %>% 
+  mutate(
+    area_2020 = area_2020 * 0.0002471053814671,
+    leftover_area = leftover_area * 0.0002471053814671,
+    perc_area = leftover_area / area_2020
+  )
+```
+
+
+For the calculation of population change, we mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
+
+```{r}
+density_change_oakland <-
+  updated_combined_oakland_blocks %>% 
+  left_join(
+    alameda_pop_race_2010,
+    by = c("GEOID10" = "block")
   )
 
 
-
+  
   
 
 ```
 
+```{r}
+   %>% 
+  mutate(
+    pop_2010 = pop * perc_area,
+    pop = original_pop_2010
+  ) %>% 
+  left_join(
+    alameda_pop_race_2020,
+    by = c("GEOID20" = block)
+  ) %>% 
+  mutate(
+    difference = (pop - pop_2010) / area_2020
+  )
+```
 
 
 Reflect on your findings. Explain any key assumptions you made in the analysis, or caveats about the data sources that you think the reader should be aware of. 
