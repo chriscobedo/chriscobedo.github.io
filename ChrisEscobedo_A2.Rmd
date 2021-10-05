@@ -155,8 +155,6 @@ alameda_pop_race_2010 <-
     names_to = "name",
     values_to = "estimate"
   ) %>%
-  
-  alameda_pop_race_2010 <- alameda_pop_race_2010 %>% 
   left_join(
     dec_vars_2010 %>% 
       select(name, label)
@@ -164,13 +162,13 @@ alameda_pop_race_2010 <-
   select(-name) %>% 
   separate(
     label,
-    into = c(NA,NA,"category1","category2"),
+    into = c(NA,"category1","category2"),
     sep = "!!"
   ) %>% 
   mutate(
     race = case_when(
-      category1 == "Population of two or more races:" & is.na(category2) ~ "Two or more races",
-      category1 == "Population of two or more races:" ~ "",
+      category1 == "Two or More Races" & is.na(category2) ~ "Two or more races",
+      category1 == "Two or More Races" ~ "",
       !is.na(category2) ~ category2,
       TRUE ~ ""
     )
@@ -214,16 +212,7 @@ density_change_oakland <-
   left_join(
     alameda_pop_race_2010,
     by = c("GEOID10" = "block")
-  )
-
-
-  
-  
-
-```
-
-```{r}
-   %>% 
+  ) %>% 
   mutate(
     pop_2010 = pop * perc_area,
     pop = original_pop_2010
@@ -233,8 +222,12 @@ density_change_oakland <-
     by = c("GEOID20" = block)
   ) %>% 
   mutate(
-    difference = (pop - pop_2010) / area_2020
+    density_change= (pop - pop_2010) / area_2020
   )
+
+
+  
+  
 ```
 
 
