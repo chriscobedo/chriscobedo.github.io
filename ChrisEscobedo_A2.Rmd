@@ -21,6 +21,8 @@ library(censusapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
+2020 blocks are larger in the Oakland area, so 2020 was used for the shapefiles.
+
 ```{r}
 oakland_boundary <- 
   places("CA", cb = T, progress_bar = FALSE) %>% 
@@ -28,18 +30,59 @@ oakland_boundary <-
   
 mapview(oakland_boundary, alpha.regions = 0.1)
 
-oakland_blocks <- 
-  blocks("CA", county = 001, year = 2020) 
+alameda_blocks <- 
+  blocks("CA", county = 001, year = 2020) %>% 
+  mutate(
+    GEOID = GEOID20
+  )
 
-pal = mapviewPalette("mapviewTopoColors")
+
+blocks_within_oakland <-
+  alameda_blocks %>% 
+  st_centroid() %>% 
+  .[oakland_boundary, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(alameda_blocks %>% select(GEOID)) %>% 
+  st_as_sf()
 
 
-mapview(oakland_blocks, alpha.regions = .2, col.regions = "blue") + mapview(oakland_boundary, alpha.regions = 0, col.regions = "red")
+alameda_blocks_2010 <- 
+  blocks("CA", county = 001, year = 2010) %>% 
+  mutate(
+    GEOID = GEOID10
+  )
 
-oakland_blocks <- 
-  blocks("CA", county = 001, year = 2010)
+blocks_within_oakland_2010 <-
+  alameda_blocks_2010 %>% 
+  st_centroid() %>% 
+  .[oakland_boundary, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(alameda_blocks_2010 %>% select(GEOID)) %>% 
+  st_as_sf()
 
-mapview(oakland_blocks, alpha.regions = 0.1) + mapview(oakland_boundary, alpha.regions = 0)
+mapview(blocks_within_oakland, alpha.regions = 0.1) + mapview(oakland_boundary, alpha.regions = 0)
+
+
+oakland_blocks_all <- blocks_within_oakland[blocks_within_oakland_2010, ]
+
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = blocks_within_oakland_2010,
+    stroke = F,
+    fillOpacity = 0.5
+  ) %>% 
+  addPolygons(
+    data = oakland_blocks_all,
+    color = "red",
+    weight = 0.75,
+    fill = F
+  )
+
+oakland_blocks_area <-
+  smc_pdas_blocks %>% 
+  st_transform(26910) %>% 
+  mutate(area = st_area(.))
   
 ```
 
