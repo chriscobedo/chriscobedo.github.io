@@ -59,7 +59,7 @@ blocks_within_oakland_2010 <-
 
 
 oakland_blocks_area <-
-  oakland_blocks_all %>% 
+  blocks_within_oakland %>% 
   st_transform(26910) %>% 
   mutate(area = st_area(.))
 
@@ -175,14 +175,16 @@ alameda_pop_race_2010 <-
   ) %>% 
   filter(race != "") %>% 
   select(block, race, pop = estimate)
+```
 
 
+```{r}
 combined_oakland_blocks <-
-  oakland_blocks %>% 
+  blocks_within_oakland %>% 
   st_transform(26910) %>% 
   mutate(area_2020 = st_area(.)) %>% 
   st_intersection(
-    oakland_blocks_2010 %>% 
+    blocks_within_oakland_2010 %>% 
       st_transform(26910)
   ) %>% 
   mutate(
@@ -203,7 +205,6 @@ updated_combined_oakland_blocks <-
   )
 ```
 
-
 For the calculation of population change, I mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
 
 ```{r}
@@ -220,11 +221,13 @@ density_change_oakland <-
   ) %>% 
   left_join(
     alameda_pop_race_2020,
-    by = c("GEOID20" = block)
+    by = c("GEOID20" = "block")
   ) %>% 
   mutate(
     density_change= (pop - pop_2010) / area_2020
   )
+
+pal <- colorBin("RdYlGn", domain = density_change_oakland$density_changes)
 
 
   
