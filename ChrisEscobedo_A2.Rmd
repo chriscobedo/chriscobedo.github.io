@@ -60,11 +60,26 @@ blocks_within_oakland_2010 <-
   left_join(alameda_blocks_2010 %>% select(GEOID)) %>% 
   st_as_sf()
 
+
+
 mapview(blocks_within_oakland, alpha.regions = 0.1) + mapview(oakland_boundary, alpha.regions = 0)
 
 
 oakland_blocks_all <- blocks_within_oakland[blocks_within_oakland_2010, ]
 
+
+oakland_blocks_area <-
+  oakland_blocks_all %>% 
+  st_transform(26910) %>% 
+  mutate(area = st_area(.))
+
+oakland_blocks_intersection <-
+  oakland_blocks_area %>% 
+  st_intersection(
+    blocks_within_oakland %>% 
+      st_transform(26910)
+  )
+  
 leaflet() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addPolygons(
@@ -73,17 +88,64 @@ leaflet() %>%
     fillOpacity = 0.5
   ) %>% 
   addPolygons(
-    data = oakland_blocks_all,
+    data = oakland_blocks_intersection %>% 
+      st_transform(4269),
     color = "red",
     weight = 0.75,
     fill = F
   )
 
-oakland_blocks_area <-
-  smc_pdas_blocks %>% 
+dec_vars_2020 <-
+  listCensusMetadata(
+    name = "2020/dec/pl",
+    type = "variables"
+  )
+
+alameda_pop_race_2020 <-
+  getCensus(
+    name = "dec/pl",
+    vintage = 2020,
+    region = "block:*", 
+    regionin = "state:06+county:001",
+    vars = "group(P1)"
+  ) %>% 
+  mutate(
+    block =
+      paste0(state,county,tract,block)
+  ) %>% 
+  select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
+  pivot_longer(
+    ends_with("N"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    dec_vars_2020 %>% 
+      select(name, label)
+  ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"category1","category2"),
+    sep = "!!"
+  )
+
+total_oakland_blocks <-
+  oakland_blocks_all %>% 
+  select(block = GEOID) %>% 
+  left_join(alameda_pop_race_2020) %>% 
   st_transform(26910) %>% 
-  mutate(area = st_area(.))
-  
+  mutate(original_area = st_area(.)) %>% 
+  st_intersection(
+    oakland_blocks_2010 %>% 
+      st_transform(26910)
+  ) %>% 
+  mutate(
+    leftover_area = st_area(.),
+    perc_area = leftover_area / original_area,
+    pop = pop * perc_area
+  )
+
 ```
 
 
