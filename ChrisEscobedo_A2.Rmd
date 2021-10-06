@@ -221,22 +221,49 @@ combined_alameda_pop_race <-
   ) %>% 
   filter(race_20 == race_10)
 
-combined_oakland_blocks_GEOIDs <-
+oakland_blocks_pop_GEOIDs <-
   blocks_within_oakland %>% 
   select(block = GEOID) %>% 
-  left_join(alameda_pop_race_2010) %>% 
+  left_join(combined_alameda_pop_race) %>% 
   mutate(
-    pop_2010 = pop,
-    race_2010 = race,
+    pop_change = pop_20 - pop_10
   ) %>% 
-  select(!c(race, pop)) %>% 
-  left_join(alameda_pop_race_2020)
+  st_transform(26910) %>% 
+  mutate(
+    area = as.numeric(st_area(.)),
+    area = area * 0.0002471053814671,
+    density_change = pop_change / area
+  ) %>% 
+  st_transform(st_crs(blocks_within_oakland))
 
 
+densityPal <- colorBin("RdYlGn", domain = oakland_blocks_pop_GEOIDs$density_change)
 
-pal <- colorBin("RdYlGn", domain = density_change_oakland$density_changes)
-
-
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(
+    data = oakland_blocks_pop_GEOIDs,
+    fillColor = ~densityPal(density_change),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.75,
+    weight = 1,
+    label = ~paste0(
+      round(density_change, digits = 3),
+      "people/acre change in",
+      block
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = oakland_blocks_pop_GEOIDs,
+    pal = densityPal,
+    values = ~density_change,
+    title = "Oakland Population Density<br>change in people/acre<br>by race from 2010-2020"
+  )
   
   
 ```
