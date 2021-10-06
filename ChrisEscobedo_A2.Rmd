@@ -175,9 +175,9 @@ combined_oakland_blocks <-
 
 For the calculation of population change, I mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
 
-I can't quite fuigure out how to get the cookie cutter method to work.
+I can't quite figure out how to get the cookie cutter method to work.
 
-```{r, message=TRUE}
+
 density_change_oakland <-
   combined_oakland_blocks %>% 
   select(block = GEOID20, perc_area, area_2020) %>% 
@@ -198,7 +198,7 @@ density_change_oakland <-
   mutate(
     density_change = pop - pop_2010
   )
-```
+
 
 Instead, I'll just use matching GEOIDs for now and create the map.
 
@@ -239,6 +239,7 @@ oakland_blocks_pop_GEOIDs <-
 
 densityPal <- colorBin("RdYlGn", domain = oakland_blocks_pop_GEOIDs$density_change)
 
+
 leaflet() %>% 
   addTiles() %>% 
   addPolygons(
@@ -267,6 +268,6 @@ leaflet() %>%
   
   
 ```
-
+I need to keep working on displaying the map properly, with a proper range and having layers for the races. 
 
 Reflect on your findings. Explain any key assumptions you made in the analysis, or caveats about the data sources that you think the reader should be aware of. 
