@@ -57,34 +57,6 @@ blocks_within_oakland_2010 <-
   left_join(alameda_blocks_2010 %>% select(GEOID)) %>% 
   st_as_sf()
 
-
-oakland_blocks_area <-
-  blocks_within_oakland %>% 
-  st_transform(26910) %>% 
-  mutate(area = st_area(.))
-
-oakland_blocks_intersection <-
-  oakland_blocks_area %>% 
-  st_intersection(
-    blocks_within_oakland %>% 
-      st_transform(26910)
-  )
-  
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addPolygons(
-    data = blocks_within_oakland_2010,
-    stroke = F,
-    fillOpacity = 0.5
-  ) %>% 
-  addPolygons(
-    data = oakland_blocks_intersection %>% 
-      st_transform(4269),
-    color = "red",
-    weight = 0.75,
-    fill = F
-  )
-
 dec_vars_2020 <-
   listCensusMetadata(
     name = "2020/dec/pl",
@@ -182,49 +154,49 @@ alameda_pop_race_2010 <-
 combined_oakland_blocks <-
   blocks_within_oakland %>% 
   st_transform(26910) %>% 
-  mutate(area_2020 = st_area(.)) %>% 
+  mutate(area_2020 = as.numeric(st_area(.))) %>% 
   st_intersection(
     blocks_within_oakland_2010 %>% 
       st_transform(26910)
   ) %>% 
   mutate(
-    leftover_area = st_area(.),
-  )
-```
-
-```{r}
-updated_combined_oakland_blocks <-
-  combined_oakland_blocks %>% 
+    leftover_area = as.numeric(st_area(.)),
+  ) %>% 
   select(
-    GEOID20, GEOID10, area_2020, leftover_area, perc_area,geometry
+    GEOID20, GEOID10, area_2020, leftover_area, geometry
   ) %>% 
   mutate(
     area_2020 = area_2020 * 0.0002471053814671,
     leftover_area = leftover_area * 0.0002471053814671,
     perc_area = leftover_area / area_2020
   )
+
 ```
 
 For the calculation of population change, I mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
 
 ```{r}
 density_change_oakland <-
-  updated_combined_oakland_blocks %>% 
+  combined_oakland_blocks %>% 
   left_join(
     alameda_pop_race_2010,
     by = c("GEOID10" = "block")
   ) %>% 
   mutate(
-    pop_2010 = pop * perc_area,
+    pop_2010 = round(pop * perc_area),
     original_pop_2010 = pop,
-    pop = NULL
+    pop = NULL,
+    race_2010 = race,
+    race = NULL
   ) %>% 
   left_join(
     alameda_pop_race_2020,
     by = c("GEOID20" = "block")
-  ) %>% 
+  )
+    
+density_change_oakland <- density_change_oakland %>% 
   mutate(
-    density_change= (pop - pop_2010) / area_2020
+    density_change = pop - pop_2010
   )
 
 pal <- colorBin("RdYlGn", domain = density_change_oakland$density_changes)
