@@ -102,7 +102,35 @@ pums_calculations <-
   ) %>% 
   st_as_sf()
   
+heat_vuln_pal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = pums_calculations$perc_high_energy_burden_pop
+)
 
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data = pums_calculations,
+    fillColor = ~heat_vuln_pal(perc_high_energy_burden_pop),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.5,
+    weight = 1,
+    label = ~paste0(
+      round(perc_high_energy_burden_pop), 
+      "% of population with an above average energy burden"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = pums_calculations,
+    pal = heat_vuln_pal,
+    values = ~perc_high_energy_burden_pop,
+    title = "% of population with<br>an above average<br>energy burden<br>for the Bay Area"
+  )
 
 ```
 
