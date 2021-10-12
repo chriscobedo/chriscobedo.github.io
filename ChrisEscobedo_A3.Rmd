@@ -19,3 +19,101 @@ library(censusapi)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
+
+```{r, include = F}
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+ca_pumas <- 
+  pumas("CA", cb = T, progress_bar = F)
+
+bay_counties <- 
+  counties("CA", cb = T, progress_bar = F) %>% 
+  filter(NAME %in% bay_county_names)
+
+bay_pumas <- 
+  ca_pumas %>% 
+  st_centroid() %>% 
+  .[bay_counties, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(ca_pumas %>% select(GEOID10)) %>% 
+  st_as_sf() %>% 
+  mutate(
+    PUMACE10 = as.numeric(PUMACE10)
+  )
+```
+
+The measure I will use for heat vulnerability will be energy burden.
+
+I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Energy burden is the percentage of income spent on all energy needs. I have considered a household to have a higher energy burden if they have an energy burden higher than the median for the bay area. I will sum gas and electric costs for each individual and calculate the median. I will include the individuals in the high-vulnerability index if the energy burden is greater than the median. 
+
+```{r, include = F}
+pums_2019_1yr <- getCensus(
+  name = "acs/acs1/pums",
+  vintage = 2019,
+  region = "public use microdata area:*", 
+  regionin = "state:06",
+  vars = c(
+    "SERIALNO",
+    "SPORDER",
+    "PWGTP",
+    "WGTP",
+    "HINCP",
+    "ELEP",
+    "GASP"
+  )
+)
+
+pums_calculations <-
+  pums_2019_1yr %>% 
+  mutate(
+    public_use_microdata_area = as.numeric(public_use_microdata_area),
+    net_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
+    energy_burden = (net_energy_cost)/ (as.numeric(HINCP)/12) *100,
+    avg_energy_burden = median(energy_burden),
+    PWGTP = as.numeric(PWGTP),
+    high_energy_burden_pop = ifelse(
+      (energy_burden > avg_energy_burden),
+      PWGTP,
+      0
+    )
+  ) %>% 
+  group_by(public_use_microdata_area) %>% 
+  summarize(
+    perc_high_energy_burden_pop =
+      sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100
+  ) %>% 
+  left_join(
+    bay_pumas %>% 
+      select(PUMACE10),
+    by = c("public_use_microdata_area" = "PUMACE10")
+  ) %>% 
+  st_as_sf()
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
