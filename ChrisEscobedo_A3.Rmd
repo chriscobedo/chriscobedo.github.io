@@ -57,6 +57,8 @@ The measure I will use for heat vulnerability will be energy burden.
 
 I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Energy burden is the percentage of income spent on all energy needs. I have considered a household to have a higher energy burden if they have an energy burden higher than the median for the bay area. I will sum gas and electric costs for each individual and calculate the median. I will include the individuals in the high-vulnerability index if the energy burden is greater than the median. 
 
+Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and not generalizable for energy burden comparisons across the state or country.
+
 ```{r, include = F}
 pums_2019_1yr <- getCensus(
   name = "acs/acs1/pums",
