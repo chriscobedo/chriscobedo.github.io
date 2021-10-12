@@ -52,8 +52,8 @@ bay_pumas <-
     PUMACE10 = as.numeric(PUMACE10)
   )
 ```
+## Heat Vulnerability Index
 
-##Heat Vulnerability Index
 I created a heat vulnerability index using the measure of "energy burden". Energy burden is the percentage of income spent on all energy per household.
 
 I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Those with higher energy costs, due to infrastructure, etc, and those with less ability to pay for energy, due to income, will thus be more vulnerable to these extreme heat events.
@@ -61,15 +61,6 @@ I have chosen energy burden as the vulnerability index, as it demonstrates a hou
 I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. I will sum gas and electricity costs for each individual and then calculate the median. I will include the individuals in the high-vulnerability index if their energy burden is greater than the median. 
 
 The average energy burden was calculated to be about 2% for all of the bay area PUMAs.
-
-
-####Disclaimers:
-Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and are not generalizable for energy burden comparisons across the state or country. 
-
-Also, since the "high energy burden" threshold was created using the median, and not a meticulously researched threshold, it might be over inclusive to those people that might not technically be considered as having a high energy burden to those in the field of energy.
-
-Furthermore, I made the decision to categorize those with negative income as having a 100% energy burden, as they will spend more than their income on energy costs.
-
 
 ```{r, include = F}
 pums_2019_1yr <- getCensus(
@@ -119,15 +110,20 @@ pums_calculations <-
     by = c("public_use_microdata_area" = "PUMACE10")
   ) %>% 
   st_as_sf()
-  
+```
+#### Disclaimers:
+
+Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and are not generalizable for energy burden comparisons across the state or country. 
+
+Also, since the "high energy burden" threshold was created using the median, and not a meticulously researched threshold, it might be over inclusive to those people that might not technically be considered as having a high energy burden to those in the field of energy.
+
+Furthermore, I made the decision to categorize those with negative income as having a 100% energy burden, as they will spend more than their income on energy costs.
+
+```{r}
 heat_vuln_pal <- colorNumeric(
   palette = "YlOrRd",
   domain = pums_calculations$total_high_energy_burden_pop
 )
-```
-
-```{r}
-
 ```
 ## Heat Vulnerability Map
 
@@ -160,7 +156,7 @@ leaflet() %>%
     title = "Population with an<br>above average<br>energy burden<br>for the Bay Area"
   )
 ```
-##Discussion
+## Discussion
 
 The map shows that some PUMAs in the bay area have a population with a disproportionate energy burden. Most of the population with the highest energy burden lives in the North and East Bay regions.
 
