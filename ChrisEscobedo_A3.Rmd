@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3"
-author: "Chris"
+author: "Chris Escobedo"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: html_document
 ---
@@ -53,11 +53,21 @@ bay_pumas <-
   )
 ```
 
-The measure I will use for heat vulnerability will be energy burden.
+I created a heat vulnerability index using the measure of "energy burden". Energy burden is the percentage of income spent on all energy per household.
 
-I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Energy burden is the percentage of income spent on all energy needs. I have considered a household to have a higher energy burden if they have an energy burden higher than the median for the bay area. I will sum gas and electric costs for each individual and calculate the median. I will include the individuals in the high-vulnerability index if the energy burden is greater than the median. 
+I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Those with higher energy costs, due to infrastructure, etc, and those with less ability to pay for energy, due to income, will thus be more vulnerable to these extreme heat events.
 
-Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and not generalizable for energy burden comparisons across the state or country.
+I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. I will sum gas and electricity costs for each individual and then calculate the median. I will include the individuals in the high-vulnerability index if their energy burden is greater than the median. 
+
+The average energy burden was calculated to be about 2% for all of the bay area PUMAs.
+
+
+Disclaimers:
+Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and are not generalizable for energy burden comparisons across the state or country. 
+
+Also, since the "high energy burden" threshold was created using the median, and not a meticulously researched threshold, it might be over inclusive to those people that might not technically be considered as having a high energy burden to those in the field of energy.
+
+Furthermore, I made the decision to categorize those with negative income as having a 100% energy burden, as they will spend more than their income on energy costs.
 
 ```{r, include = F}
 pums_2019_1yr <- getCensus(
@@ -81,11 +91,16 @@ pums_calculations <-
   mutate(
     public_use_microdata_area = as.numeric(public_use_microdata_area),
     net_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
-    energy_burden = (net_energy_cost)/ (as.numeric(HINCP)/12) *100,
+    energy_burden = ifelse(
+      (as.numeric(HINCP) > 0),
+      (net_energy_cost)/ (as.numeric(HINCP)/12) *100,
+      100
+   ),
     avg_energy_burden = median(energy_burden),
     PWGTP = as.numeric(PWGTP),
     high_energy_burden_pop = ifelse(
-      (energy_burden > avg_energy_burden),
+      (energy_burden > avg_energy_burden) |
+        (as.numeric(HINCP) < 0),
       PWGTP,
       0
     )
@@ -93,7 +108,8 @@ pums_calculations <-
   group_by(public_use_microdata_area) %>% 
   summarize(
     perc_high_energy_burden_pop =
-      sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100
+      sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100,
+    total_high_energy_burden_pop = sum(high_energy_burden_pop)
   ) %>% 
   left_join(
     bay_pumas %>% 
@@ -104,21 +120,27 @@ pums_calculations <-
   
 heat_vuln_pal <- colorNumeric(
   palette = "YlOrRd",
-  domain = pums_calculations$perc_high_energy_burden_pop
+  domain = pums_calculations$total_high_energy_burden_pop
 )
+```
 
+
+The following map shows the number of people that have a higher than average energy burden for the Bay Area. Those that are counted in this map represent the population with the highest heat vulnerability.
+
+
+```{r, warning = F}
 leaflet() %>%
   addTiles() %>% 
   addPolygons(
     data = pums_calculations,
-    fillColor = ~heat_vuln_pal(perc_high_energy_burden_pop),
+    fillColor = ~heat_vuln_pal(total_high_energy_burden_pop),
     color = "white",
     opacity = 0.5,
-    fillOpacity = 0.85,
+    fillOpacity = 0.8,
     weight = 1,
     label = ~paste0(
-      round(perc_high_energy_burden_pop), 
-      "% of population with an above average energy burden"
+      total_high_energy_burden_pop, 
+      " people with an above average energy burden"
     ),
     highlightOptions = highlightOptions(
       weight = 2,
@@ -128,13 +150,22 @@ leaflet() %>%
   addLegend(
     data = pums_calculations,
     pal = heat_vuln_pal,
-    values = ~perc_high_energy_burden_pop,
-    title = "% of population with<br>an above average<br>energy burden<br>for the Bay Area"
+    values = ~total_high_energy_burden_pop,
+    title = "Population with an<br>above average<br>energy burden<br>for the Bay Area"
   )
+```
+The map shows that some PUMAs in the bay area have a population with a disproportionate energy burden. Most of the population with the highest energy burden lives in the North and East Bay regions.
 
+The total number of heat-vulnerable people (higher than average energy burden) in the Bay Area:
+```{r}
+sum(pums_calculations$total_high_energy_burden_pop)
+```
+The total number of people living in the Bay Area PUMAs:
+```{r}
+sum(as.numeric(pums_2019_1yr$PWGTP))
 ```
 
-
+This map is somewhat useful, as it shows the areas where large populations will need more support during extreme heat events. It also can help planners think about where infrastructure, such as cooling centers or weatherization assistance programs, would make the biggest impact for the most vulnerable. Since the map is not very granular, it does not give specific spatial information about where those populations exist and what their neighborhood and community infrastructure is like. Still, it can be useful to at least narrow down where the most vulnerable populations exist. 
 
 
 
