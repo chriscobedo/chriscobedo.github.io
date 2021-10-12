@@ -173,7 +173,7 @@ The total number of people living in the Bay Area PUMAs:
 sum(as.numeric(pums_2019_1yr$PWGTP))
 ```
 
-This map is somewhat useful, as it shows the areas where large populations will need more support during extreme heat events. It also can help planners think about where infrastructure, such as cooling centers or weatherization assistance programs, would make the biggest impact for the most vulnerable. Since the map is not very granular, it does not give specific spatial information about where those populations exist and what their neighborhood and community infrastructure is like. Still, it can be useful to at least narrow down where the most vulnerable populations exist. 
+This map is somewhat useful, as it shows the areas where large populations will need more support during extreme heat events. It also can help planners think about where infrastructure, such as cooling centers or weatherization assistance programs, would make the biggest impact for the most vulnerable. Since the map is not very granular, it does not give specific spatial information about where those populations exist and what their neighborhood and community infrastructure is like. Still, it can be a useful tool to narrow down where the most vulnerable populations exist. 
 
 
 
