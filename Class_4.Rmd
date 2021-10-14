@@ -5,25 +5,14 @@ date: "10/14/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
 ```{r}
-acs_vars_2019_5yr <-
-  listCensusMetadata(
-    name = "2019/acs/acs5",
-    type = "variables"
-  )
-
-  saveRDS(acs_vars_2019_5yr ,"acs_vars_2019_5yr.rds")
-
-
-
-
 library(tidyverse)
 library(censusapi)
-Sys.setenv(CENSUS_KEY="c8aa67e4086b4b5ce3a8717f59faa9a28f611dab")
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
 bay_income_white_2019 <- 
   getCensus(
@@ -55,7 +44,85 @@ bay_income_white_2019 <-
   ) %>% 
   filter(
     !is.na(income)
+  ) %>% 
+  mutate(
+    race = "white alone"
   )
+```
+
+for loop version
+```{r}
+full_dataset <- NULL
+
+for(x in 1:7){
+  #temp <- your code
   
+  full_dataset <- 
+    rbind(full_dataset, temp)
+}
+```
+
+"tidy" version
+```{r}
+bay_income_race_2019 <-
+  1:7 %>% 
+  map_dfr(function(x){
+    
+    #your code here
+    
+  })
+```
+
+
+```{r}
+
+race_categories <-c(
+  "White alone",
+  "Black or African American alone",
+  "American Indian and Alaska Native alone",
+  "Asian alone",
+  "Native Hawaiian and Other Pacific Islander alone",
+  "Some Other Race alone",
+  "Two or more Races"
+)
+
+bay_income_race_2019 <-
+  1:7 %>% 
+  map_dfr(function(x){
+    
+  getCensus(
+    name = "acs/acs5",
+    vintage = "2019",
+    region = "county:001,013,041,055,075,081,085,095,097",
+    regionin = "state:06",
+    vars = paste0("group(B19001",LETTERS[x],")")
+  ) %>% 
+  select(ends_with("E") & -c(state, NAME)
+  ) %>%
+  summarize_all(sum) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>% 
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label)
+  ) %>% 
+  separate(
+    label,
+    into = c(NA, NA, "income"),
+    sep = "!!"
+  ) %>% 
+  select(
+    -c(name)
+  ) %>% 
+  filter(
+    !is.na(income)
+  ) %>% 
+  mutate(
+    race = race_categories[x]
+  )
+})
 ```
 
