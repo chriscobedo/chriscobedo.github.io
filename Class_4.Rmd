@@ -124,5 +124,11 @@ bay_income_race_2019 <-
     race = race_categories[x]
   )
 })
+
+bay_income_race_2019_pivot <-
+  bay_income_race_2019 %>% 
+  pivot_wider(
+    
+  )
 ```
 
