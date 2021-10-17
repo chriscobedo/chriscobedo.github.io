@@ -58,7 +58,9 @@ I created a heat vulnerability index using the measure of "energy burden". Energ
 
 I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Those with higher energy costs, due to infrastructure, etc, and those with less ability to pay for energy, due to income, will thus be more vulnerable to these extreme heat events.
 
-I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. I will sum gas and electricity costs for each individual and then calculate the median. I will include the individuals in the high-vulnerability index if their energy burden is greater than the median. 
+I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. 
+
+I will sum gas and electricity costs for each individual and then calculate the median from the totals. I will include the individuals in the high-vulnerability index if their energy burden is greater than the median. 
 
 The average energy burden was calculated to be about 2% for all of the bay area PUMAs.
 
@@ -101,7 +103,7 @@ pums_calculations <-
   group_by(public_use_microdata_area) %>% 
   summarize(
     perc_high_energy_burden_pop =
-      sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100,
+      round(sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100),
     total_high_energy_burden_pop = sum(high_energy_burden_pop)
   ) %>% 
   left_join(
@@ -122,12 +124,12 @@ Furthermore, I made the decision to categorize those with negative income as hav
 ```{r}
 heat_vuln_pal <- colorNumeric(
   palette = "YlOrRd",
-  domain = pums_calculations$total_high_energy_burden_pop
+  domain = pums_calculations$perc_high_energy_burden_pop
 )
 ```
 ## Heat Vulnerability Map
 
-The following map shows the number of people that have a higher than average energy burden for the Bay Area. Those that are counted in this map represent the population with the highest heat vulnerability.
+The following map shows the percentage of the population with a higher than average energy burden for the Bay Area, for each PUMA.
 
 
 ```{r, warning = F}
@@ -135,14 +137,14 @@ leaflet() %>%
   addTiles() %>% 
   addPolygons(
     data = pums_calculations,
-    fillColor = ~heat_vuln_pal(total_high_energy_burden_pop),
+    fillColor = ~heat_vuln_pal(perc_high_energy_burden_pop),
     color = "white",
     opacity = 0.5,
     fillOpacity = 0.8,
     weight = 1,
     label = ~paste0(
-      total_high_energy_burden_pop, 
-      " people with an above average energy burden"
+      perc_high_energy_burden_pop, 
+      "% of population with an above average energy burden"
     ),
     highlightOptions = highlightOptions(
       weight = 2,
@@ -152,8 +154,8 @@ leaflet() %>%
   addLegend(
     data = pums_calculations,
     pal = heat_vuln_pal,
-    values = ~total_high_energy_burden_pop,
-    title = "Population with an<br>above average<br>energy burden<br>for the Bay Area"
+    values = ~perc_high_energy_burden_pop,
+    title = "Population with an<br>above average energy burden<br>for the Bay Area"
   )
 ```
 ## Discussion
