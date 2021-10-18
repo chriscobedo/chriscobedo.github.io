@@ -60,9 +60,23 @@ I have chosen energy burden as the vulnerability index, as it demonstrates a hou
 
 I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. 
 
-I will sum gas and electricity costs for each individual and then calculate the median from the totals. I will include the individuals in the high-vulnerability index if their energy burden is greater than the median. 
+#### Calculations for Energy Burden
+
+To get total energy cost for each individual, I will sum the cost of gas and the cost of electricity using the data provided by the ACS. Both variables use data from the 2019 ACS PUMS 1 Year Survey. The monthly cost of gas for an individual was provided from the variable coded as GASP. The monthly cost of electricity for an individual was provided from the variable coded as ELEP.
+
+    Monthly Energy Cost = Monthly Cost of Gas(GASP) + Monthly Cost of Electricity(ELEP)
+
+To calculate the energy burden, I divided the Monthly Energy Cost by the Monthly Household Income for each individual. The household income data was taken from the 2019 ACS PUMS 1 Year Survey. The annual household income for an individual was provided from the variable coded as HINCP. This was divided by 12 to create monthly household income.
+
+    Energy Burden = Monthly Energy Cost / Monthly Household Income
+
+I will calculate the median energy burden for the entire population from these totals. I will consider an individual to be highly vulnerable to heat if their energy burden is greater than the median. 
+
+    Average Energy Burden = median(Energy Burden) 
 
 The average energy burden was calculated to be about 2% for all of the bay area PUMAs.
+
+Each individual that had an energy burden that was greater than 2% was considered to be vulnerable to extreme heat.
 
 ```{r, include = F}
 pums_2019_1yr <- getCensus(
@@ -85,17 +99,16 @@ pums_calculations <-
   pums_2019_1yr %>% 
   mutate(
     public_use_microdata_area = as.numeric(public_use_microdata_area),
-    net_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
+    monthly_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
     energy_burden = ifelse(
       (as.numeric(HINCP) > 0),
-      (net_energy_cost)/ (as.numeric(HINCP)/12) *100,
+      (monthly_energy_cost)/ (as.numeric(HINCP)/12) *100,
       100
    ),
     avg_energy_burden = median(energy_burden),
     PWGTP = as.numeric(PWGTP),
     high_energy_burden_pop = ifelse(
-      (energy_burden > avg_energy_burden) |
-        (as.numeric(HINCP) < 0),
+      (energy_burden > avg_energy_burden),
       PWGTP,
       0
     )
@@ -155,7 +168,7 @@ leaflet() %>%
     data = pums_calculations,
     pal = heat_vuln_pal,
     values = ~perc_high_energy_burden_pop,
-    title = "Population with an<br>above average energy burden<br>for the Bay Area"
+    title = "Population with an above<br>average energy burden<br>for the Bay Area"
   )
 ```
 ## Discussion
