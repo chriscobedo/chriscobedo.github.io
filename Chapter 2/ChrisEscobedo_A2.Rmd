@@ -1,0 +1,275 @@
+---
+title: "ChrisEscobedo_A2"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+
+```{r}
+library(tidyverse)
+library(sf)
+library(tigris)
+library(leaflet)
+library(mapview)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+2020 blocks are larger in the Oakland area, so 2020 was used for the shapefiles.
+
+```{r, include = F}
+oakland_boundary <- 
+  places("CA", cb = T, progress_bar = FALSE) %>% 
+  filter(NAME == "Oakland")
+
+alameda_blocks <- 
+  blocks("CA", county = 001, year = 2020, progress_bar = FALSE) %>% 
+  mutate(
+    GEOID = GEOID20
+  )
+
+blocks_within_oakland <-
+  alameda_blocks %>% 
+  st_centroid() %>% 
+  .[oakland_boundary, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(alameda_blocks %>% select(GEOID)) %>% 
+  st_as_sf()
+
+
+alameda_blocks_2010 <- 
+  blocks("CA", county = 001, year = 2010, progress_bar = FALSE) %>% 
+  mutate(
+    GEOID = GEOID10
+  )
+
+blocks_within_oakland_2010 <-
+  alameda_blocks_2010 %>% 
+  st_centroid() %>% 
+  .[oakland_boundary, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(alameda_blocks_2010 %>% select(GEOID)) %>% 
+  st_as_sf()
+
+dec_vars_2020 <-
+  listCensusMetadata(
+    name = "2020/dec/pl",
+    type = "variables"
+  )
+
+dec_vars_2010 <-
+  listCensusMetadata(
+    name = "2010/dec/pl",
+    type = "variables"
+  )
+
+alameda_pop_race_2020 <-
+  getCensus(
+    name = "dec/pl",
+    vintage = 2020,
+    region = "block:*", 
+    regionin = "state:06+county:001",
+    vars = "group(P1)"
+  ) %>% 
+  mutate(
+    block =
+      paste0(state,county,tract,block)
+  ) %>% 
+  select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
+  pivot_longer(
+    ends_with("N"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    dec_vars_2020 %>% 
+      select(name, label)
+  ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"category1","category2"),
+    sep = "!!"
+  ) %>% 
+  mutate(
+    race = case_when(
+      category1 == "Population of two or more races:" & is.na(category2) ~ "Two or more races",
+      category1 == "Population of two or more races:" ~ "",
+      !is.na(category2) ~ category2,
+      TRUE ~ ""
+    )
+  ) %>% 
+  filter(race != "") %>% 
+  select(block, race, pop = estimate)
+
+
+alameda_pop_race_2010 <-
+  getCensus(
+    name = "dec/pl",
+    vintage = 2010,
+    region = "block:*", 
+    regionin = "state:06+county:001",
+    vars = "group(P1)"
+  ) %>% 
+  mutate(
+    block =
+      paste0(state,county,tract,block)
+  ) %>% 
+  select(!c(GEO_ID,state,county,tract,NAME) & !ends_with(c("NA"))) %>% 
+  pivot_longer(
+    starts_with(c("P0")),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    dec_vars_2010 %>% 
+      select(name, label)
+  ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,"category1","category2"),
+    sep = "!!"
+  ) %>% 
+  mutate(
+    race = case_when(
+      category1 == "Two or More Races" & is.na(category2) ~ "Two or more races",
+      category1 == "Two or More Races" ~ "",
+      !is.na(category2) ~ category2,
+      TRUE ~ ""
+    )
+  ) %>% 
+  filter(race != "") %>% 
+  select(block, race, pop = estimate)
+```
+
+
+```{r, include = F}
+combined_oakland_blocks <-
+  blocks_within_oakland %>% 
+  st_transform(26910) %>% 
+  mutate(area_2020 = as.numeric(st_area(.))) %>% 
+  st_intersection(
+    blocks_within_oakland_2010 %>% 
+      st_transform(26910)
+  ) %>% 
+  mutate(
+    leftover_area = as.numeric(st_area(.)),
+  ) %>% 
+  select(
+    GEOID20, GEOID10, area_2020, leftover_area,
+  ) %>% 
+  mutate(
+    area_2020 = area_2020 * 0.0002471053814671,
+    leftover_area = leftover_area * 0.0002471053814671,
+    perc_area = leftover_area / area_2020
+  )
+
+```
+
+For the calculation of population change, I mapped the census blocks from 2010 to match the blocks of 2020, assuming proportional distribution of population within the census block areas. 
+
+I can't quite figure out how to get the cookie cutter method to work.
+
+
+density_change_oakland <-
+  combined_oakland_blocks %>% 
+  select(block = GEOID20, perc_area, area_2020) %>% 
+  left_join(
+    alameda_pop_race_2010,
+  ) %>% 
+  mutate(
+    pop_2010 = pop * perc_area,
+    original_pop_2010 = pop,
+    pop = NULL,
+    race_2010 = race,
+    race = NULL
+  ) %>% 
+  left_join(
+    alameda_pop_race_2020,
+    by = c("GEOID20" = "block")
+  ) %>% 
+  mutate(
+    density_change = pop - pop_2010
+  )
+
+
+Instead, I'll just use matching GEOIDs for now and create the map.
+
+```{r, message=F}
+combined_alameda_pop_race <-
+  alameda_pop_race_2020 %>% 
+  mutate(
+    pop_20 = pop,
+    race_20 = race,
+    pop=NULL,
+    race=NULL
+  ) %>% 
+  left_join(alameda_pop_race_2010,
+            by = "block", "race = race_20") %>% 
+  mutate(
+    pop_10 = pop,
+    race_10 = race,
+    pop=NULL,
+    race=NULL
+  ) %>% 
+  filter(race_20 == race_10)
+
+oakland_blocks_pop_GEOIDs <-
+  blocks_within_oakland %>% 
+  select(block = GEOID) %>% 
+  left_join(combined_alameda_pop_race) %>% 
+  mutate(
+    pop_change = pop_20 - pop_10
+  ) %>% 
+  st_transform(26910) %>% 
+  mutate(
+    area = as.numeric(st_area(.)),
+    area = area * 0.0002471053814671,
+    density_change = pop_change / area
+  ) %>% 
+  st_transform(st_crs(blocks_within_oakland))
+
+
+density_bins <- c(-4000, -3000, -2000, -1000, -100, -50, 0, 50, 100, 150, 200, Inf)
+
+densityPal <- colorBin("RdYlGn", domain = oakland_blocks_pop_GEOIDs$density_change, bins = density_bins)
+
+
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(
+    data = oakland_blocks_pop_GEOIDs,
+    fillColor = ~densityPal(density_change),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.75,
+    weight = 1,
+    label = ~paste0(
+      round(density_change, digits = 2),
+      " people/acre change in ",
+      block
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = oakland_blocks_pop_GEOIDs,
+    pal = densityPal,
+    values = ~density_change,
+    title = "Oakland Population Density<br>change in people/acre<br>by race from 2010-2020"
+  )
+  
+  
+```
+I need to keep working on displaying the map properly, with a proper range and having layers for the races. 
+
+Reflect on your findings. Explain any key assumptions you made in the analysis, or caveats about the data sources that you think the reader should be aware of. 

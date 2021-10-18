@@ -1,0 +1,199 @@
+---
+title: "Assignment 3"
+author: "Chris Escobedo"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(sf)
+library(tigris)
+library(leaflet)
+library(mapview)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+```{r, include = F}
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+ca_pumas <- 
+  pumas("CA", cb = T, progress_bar = F)
+
+bay_counties <- 
+  counties("CA", cb = T, progress_bar = F) %>% 
+  filter(NAME %in% bay_county_names)
+
+bay_pumas <- 
+  ca_pumas %>% 
+  st_centroid() %>% 
+  .[bay_counties, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(ca_pumas %>% select(GEOID10)) %>% 
+  st_as_sf() %>% 
+  mutate(
+    PUMACE10 = as.numeric(PUMACE10)
+  )
+```
+## Heat Vulnerability Index
+
+I created a heat vulnerability index using the measure of "energy burden". Energy burden is the percentage of income spent on all energy per household.
+
+I have chosen energy burden as the vulnerability index, as it demonstrates a households relative ability to pay more for cooling during extreme weather events. Those with higher energy costs, due to infrastructure, etc, and those with less ability to pay for energy, due to income, will thus be more vulnerable to these extreme heat events.
+
+I have considered a household to have a higher energy burden if they have an energy burden that is higher than the median energy burden for the entire bay area. 
+
+#### Calculations for Energy Burden
+
+To get total energy cost for each individual, I will sum the cost of gas and the cost of electricity using the data provided by the ACS. Both variables use data from the 2019 ACS PUMS 1 Year Survey. The monthly cost of gas for an individual was provided from the variable coded as GASP. The monthly cost of electricity for an individual was provided from the variable coded as ELEP.
+
+    Monthly Energy Cost = Monthly Cost of Gas(GASP) + Monthly Cost of Electricity(ELEP)
+
+To calculate the energy burden, I divided the Monthly Energy Cost by the Monthly Household Income for each individual. The household income data was taken from the 2019 ACS PUMS 1 Year Survey. The annual household income for an individual was provided from the variable coded as HINCP. This was divided by 12 to create monthly household income.
+
+    Energy Burden = Monthly Energy Cost / Monthly Household Income
+
+I will calculate the median energy burden for the entire population from these totals. I will consider an individual to be highly vulnerable to heat if their energy burden is greater than the median. 
+
+    Average Energy Burden = median(Energy Burden) 
+
+The average energy burden was calculated to be about 2% for all of the bay area PUMAs.
+
+Each individual that had an energy burden that was greater than 2% was considered to be vulnerable to extreme heat.
+
+```{r, include = F}
+pums_2019_1yr <- getCensus(
+  name = "acs/acs1/pums",
+  vintage = 2019,
+  region = "public use microdata area:*", 
+  regionin = "state:06",
+  vars = c(
+    "SERIALNO",
+    "SPORDER",
+    "PWGTP",
+    "WGTP",
+    "HINCP",
+    "ELEP",
+    "GASP"
+  )
+)
+
+pums_calculations <-
+  pums_2019_1yr %>% 
+  mutate(
+    public_use_microdata_area = as.numeric(public_use_microdata_area),
+    monthly_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
+    energy_burden = ifelse(
+      (as.numeric(HINCP) > 0),
+      (monthly_energy_cost)/ (as.numeric(HINCP)/12) *100,
+      100
+   ),
+    avg_energy_burden = median(energy_burden),
+    PWGTP = as.numeric(PWGTP),
+    high_energy_burden_pop = ifelse(
+      (energy_burden > avg_energy_burden),
+      PWGTP,
+      0
+    )
+  ) %>% 
+  group_by(public_use_microdata_area) %>% 
+  summarize(
+    perc_high_energy_burden_pop =
+      round(sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100),
+    total_high_energy_burden_pop = sum(high_energy_burden_pop)
+  ) %>% 
+  left_join(
+    bay_pumas %>% 
+      select(PUMACE10),
+    by = c("public_use_microdata_area" = "PUMACE10")
+  ) %>% 
+  st_as_sf()
+```
+#### Disclaimers:
+
+Because the population with a high energy burden is calculated using the average energy burden for the bay area, the results for energy burden will be relative to other areas of the bay area, and are not generalizable for energy burden comparisons across the state or country. 
+
+Also, since the "high energy burden" threshold was created using the median, and not a meticulously researched threshold, it might be over inclusive to those people that might not technically be considered as having a high energy burden to those in the field of energy.
+
+Furthermore, I made the decision to categorize those with negative income as having a 100% energy burden, as they will spend more than their income on energy costs.
+
+```{r}
+heat_vuln_pal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = pums_calculations$perc_high_energy_burden_pop
+)
+```
+## Heat Vulnerability Map
+
+The following map shows the percentage of the population with a higher than average energy burden for the Bay Area, for each PUMA.
+
+
+```{r, warning = F}
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data = pums_calculations,
+    fillColor = ~heat_vuln_pal(perc_high_energy_burden_pop),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = 1,
+    label = ~paste0(
+      perc_high_energy_burden_pop, 
+      "% of population with an above average energy burden"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = pums_calculations,
+    pal = heat_vuln_pal,
+    values = ~perc_high_energy_burden_pop,
+    title = "Population with an above<br>average energy burden<br>for the Bay Area"
+  )
+```
+## Discussion
+
+The map shows that some PUMAs in the bay area have a population with a disproportionate energy burden. Most of the population with the highest energy burden lives in the North and East Bay regions.
+
+The total number of heat-vulnerable people (higher than average energy burden) in the Bay Area:
+```{r}
+sum(pums_calculations$total_high_energy_burden_pop)
+```
+The total number of people living in the Bay Area PUMAs:
+```{r}
+sum(as.numeric(pums_2019_1yr$PWGTP))
+```
+
+This map is somewhat useful, as it shows the areas where large populations will need more support during extreme heat events. It also can help planners think about where infrastructure, such as cooling centers or weatherization assistance programs, would make the biggest impact for the most vulnerable. Since the map is not very granular, it does not give specific spatial information about where those populations exist and what their neighborhood and community infrastructure is like. Still, it can be a useful tool to narrow down where the most vulnerable populations exist. 
+
+
+
+
+
+
+
+
+
+
+
+
