@@ -60,8 +60,44 @@ alameda_education_race <-
       filter(!is.na(education)) %>% 
       mutate(race = census_race_categories[x]) %>% 
       group_by(education, race) %>% 
-      summarize(estimate = sum(estimate)) 
+      summarize(estimate = sum(estimate))
   }) 
+
+total_alameda__race <- 
+  alameda_education_race %>% 
+  group_by(race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(education = "Total")
+
+
+alameda_education_race %>% 
+  rbind(total_alameda__race) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = education %>% factor(levels = rev(c("Total",unique(alameda_education_race$education)))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(unique(alameda_education_race$race)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Education Attainment",
+    y = "Proportion of population 25 years or older",
+    title = "Bay Area educational attainment by race",
+    fill = "Race"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
 
 ```
 
