@@ -106,6 +106,8 @@ bay_income_race %>%
 ```{r}
 library(readxl)
 library(ggplot2)
+library(censusapi)
+library(tigris)
 
 ces4 <- read_excel(
     "~/Documents/GitHub/chriscobedo.github.io/Chapter 4/CalEnviroScreen_4.0Excel_ADA_D1_2021.xlsx",
@@ -285,7 +287,9 @@ bay_pm25_race_fill <-
     )
   )
 
+bay_pm25_race_stacked
 
+bay_pm25_race_fill
 
 ```
 
