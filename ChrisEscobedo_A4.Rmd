@@ -19,7 +19,13 @@ library(censusapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r}
+```{r, include = F}
+acs_vars_2019_5yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs5",
+    type = "variables"
+  )
+
 census_race_categories <- 
   c(
     "White Alone",
@@ -68,14 +74,16 @@ total_alameda__race <-
   group_by(race) %>% 
   summarize(estimate = sum(estimate)) %>% 
   mutate(education = "Total")
+```
 
 
+```{r}
 alameda_education_race %>% 
   rbind(total_alameda__race) %>% 
   ggplot() +
   geom_bar(
     aes(
-      x = education %>% factor(levels = rev(c("Total",unique(alameda_education_race$education)))),
+      x = education %>% factor(levels = rev(c("Total","Less than high school diploma","High school graduate (includes equivalency)","Some college or associate's degree","Bachelor's degree or higher"))),
       y = estimate,
       fill = race %>% factor(levels = rev(unique(alameda_education_race$race)))
     ),
@@ -101,6 +109,9 @@ alameda_education_race %>%
 
 ```
 
+### Discussion
+
+The map shows some slight over and under representations of race for some races. The white alone category is very underrepresented in the population with less than a high school diploma. The white alone category is slightly over represented in the populations with some college and with a bachelors degree. Black people are very underrepresented in those with a bachelors degree but underrepresented in those with less than a high school diploma as well. Its interesting to note that the category for "some other race alone" is extremely over represented in the population with less than a high school diploma and very underrepresented the populations with some college and with a bachelors degree. This map did not include ethnicity, so it may include those that are latinx or in some other race category. The map also includes only the population older than 25 years.
 
 
 
