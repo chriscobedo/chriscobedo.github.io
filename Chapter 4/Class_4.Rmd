@@ -42,9 +42,7 @@ bay_income_white_2019 <-
   select(
     -c(name)
   ) %>% 
-  filter(
-    !is.na(income)
-  ) %>% 
+  filter(!is.na(income)) %>% 
   mutate(
     race = "white alone"
   )
