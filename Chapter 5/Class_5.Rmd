@@ -1,0 +1,51 @@
+---
+title: "Class_5"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(mapview)
+library(tigris)
+library(censusapi)
+library(readxl)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+```{r}
+ces4 <- read_excel("calenviroscreen40resultsdatadictionary_F_2021.xlsx")
+
+colnames(ces4_clean)
+
+ces4_clean <-
+  ces4 %>% 
+  select(!ends_with("Pctl"))
+
+sum(is.na(ces4_clean$Poverty))
+
+ca_tracts <- tracts("CA")
+
+ces4_map <- ces4_clean %>% 
+  left_join(
+    ca_tracts %>% 
+      transmute(GEOID = GEOID %>% as.numeric()),
+    by = c("Census Tract" = "GEOID") 
+  ) %>% 
+  st_as_sf()
+
+mapview(ces4_map, zcol = "Asthma")
+
+```
+
+
+
+
