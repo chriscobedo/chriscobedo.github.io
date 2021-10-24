@@ -123,9 +123,52 @@ get_sumsq_residuals <- function(x){
 
 ```
 
-
+optimization
 ```{r}
+optimization <- optim(c(0,0), get_sumsq_residuals)
 
+optimization
+
+ggplot(
+  data = bay_education_income_tract,
+  aes(
+      x = perc_college,
+      y = perc_over100k
+    )
+) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_line(
+    aes(
+      x = perc_college,
+      y = perc_college * optimization$par[1] + optimization$par[2]
+    ),
+    color = "red",
+    linetype = 2,
+    size = 2
+  )
+
+##testing residuals
+slope <- optimization$par[1]
+yintercept <- optimization$par[2]
+
+best_fit_candidate <- slope * bay_education_income_tract$perc_college + yintercept 
+
+residuals <- bay_education_income_tract$perc_over100k - best_fit_candidate
+
+mean(residuals)
+
+plot(density(residuals))
+
+```
+
+regression analysis model
+```{r}
+model <- lm(perc_over100k ~ perc_college, bay_education_income_tract)
+
+summary(model)
+
+predict(model, data.frame(perc_college = 0.5))
 ```
 
 
