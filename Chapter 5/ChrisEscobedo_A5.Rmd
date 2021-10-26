@@ -158,11 +158,12 @@ model <- lm(Asthma ~ PM2.5, ces4_map)
 
 summary(model)
 ```
+
 #### Discussion
 The best fit line does not seem to represent the data very well. The median residual is not centered around zero, is not very close to zero, and does not have symmetrical distribution. The standard error for the slope coefficient is also relatively high, at .156. 
 
 Still we can glean some information from this plot. The linear regression analysis suggest the following. 
-An increase of 1 in PM2.5 is associated with an increase of 1.7228 in Asthma. 1.49% of the variation in Asthma is explained by the variation in PM2.5
+An increase of 1 µg/m3 PM2.5 per year on average is associated with an increase of 1.7228 ED visits per year per 10,000 people for Asthma. 1.49% of the variation in Asthma is explained by the variation in PM2.5.
 
 
 
