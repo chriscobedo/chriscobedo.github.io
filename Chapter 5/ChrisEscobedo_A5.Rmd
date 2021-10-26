@@ -118,14 +118,10 @@ leaflet() %>%
   )
 ```
 #### Discusssion of Maps
-
-The Asthma Map...
-
-The PM2.5 Map ... 
-
-Both maps show disproportionately high prevalence of Asthma and PM2.5 in the central valley and in certain urban areas, such as East Los Angeles County and . 
+Both maps show disproportionately high prevalence of Asthma and PM2.5 in the central valley and in certain urban areas, such as East Los Angeles County. However, an interesting thing to note is that although it seemed PM2.5 levels were high throughout most urban areas, Asthma levels were not always distributed in the same way. Overall, the levels of prevalence did seem to be correlated at first glance, so I will see if this assumption is correct with a more rigorous examination.
 
 ## Asthma and PM2.5 Scatter Plot
+
 
 ```{r}
 
