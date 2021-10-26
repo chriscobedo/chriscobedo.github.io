@@ -157,7 +157,10 @@ model <- lm(Asthma ~ PM2.5, ces4_map)
 summary(model)
 ```
 #### Discussion
-The best fit line does not represent the data well. The median residual is not centerd around zero, is not very close to zero, and does not have symmetrical distribution. 
+The best fit line does not seem to represent the data very well. The median residual is not centered around zero, is not very close to zero, and does not have symmetrical distribution. 
+
+Still we can glean some information from this plot. The linear regression analysis suggest the following. 
+An increase of _ in _ is associated with an increase of _ in _. _% of the variation in _ is explained by the variation in _.
 
 
 
