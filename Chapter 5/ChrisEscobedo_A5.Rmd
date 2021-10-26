@@ -33,7 +33,16 @@ acs_vars_2019_5yr <-
 ```{r, include = F}
 ces4 <- read_excel("calenviroscreen40resultsdatadictionary_F_2021.xlsx")
 
-ca_tracts <- tracts("CA","Santa Clara", cb = T, progress_bar = F)
+ca_tracts <- tracts("CA",c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"), cb = T, progress_bar = F)
 
 ces4_map <- ces4 %>% 
   left_join(
@@ -46,7 +55,9 @@ ces4_map <- ces4 %>%
 ```
 ## Asthma and PM2.5 Concentration Maps
 
-The following maps show the concentration of asthma and PM2.5 prevalence in Santa Clara County. The data used to create the maps comes from CalEnviroScreen 4.0, released on October 20, 2021. The maps are at the level of Census Tracts.
+The following maps show the concentration of asthma and PM2.5 prevalence in Bay Area Counties. The data used to create the maps comes from CalEnviroScreen 4.0, released on October 20, 2021. The maps are at the level of Census Tracts.
+
+
 
 #### Asthma Data
 The data for the map showing the prevalence of Asthma is the rate of Emergency Department visits for asthma per 10,000 people per year, averaged over 2015-2017. Thus, the data is only up to date until 2017 and may reflect numbers that are no longer accurate. 
