@@ -84,7 +84,7 @@ leaflet() %>%
   )
 ```
 #### PM2.5 Data
-The Data for the PM2.5 map 
+The PM2.5 map contains data on the fine particle pollution throughout the state. The data represents the annual mean concentration of PM2.5 (the weighted average of measured monitor concentrations and satellite observations, µg/m3), over three years, from 2015 to 2017. Thus, the data may also only be accurate up until 2017 and may be outdated. 
 
 ```{r}
 PM_pal <- colorNumeric(
