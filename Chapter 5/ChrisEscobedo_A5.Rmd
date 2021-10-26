@@ -19,6 +19,7 @@ library(gtools)
 library(car)
 library(tigris)
 library(censusapi)
+library(readxl)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
@@ -29,8 +30,37 @@ acs_vars_2019_5yr <-
   )
 ```
 
-```{r}
 
+```{r}
+ces4 <- read_excel("calenviroscreen40resultsdatadictionary_F_2021.xlsx")
+
+ca_tracts <- tracts("CA")
+
+ces4_map <- ces4 %>% 
+  left_join(
+    ca_tracts %>% 
+      transmute(GEOID = GEOID %>% as.numeric()),
+    by = c("Census Tract" = "GEOID") 
+  ) %>% 
+  st_as_sf()
+
+```
+## Asthma and PM2.5 concentration Maps
+
+The following maps show the concentration of asthma and PM2.5 prevalence. The data used to create the maps comes from CalEnviroScreen 4.0, released on October 20, 2021.
+
+#### Asthma Data
+
+
+
+#### PM2.5 Data
+
+
+
+```{r}
+mapview(ces4_map, zcol = "Asthma")
+
+mapview(ces4_map, zcol = "Asthma")
 ```
 
 
