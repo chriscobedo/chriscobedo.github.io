@@ -31,7 +31,7 @@ acs_vars_2019_5yr <-
 ```
 
 
-```{r}
+```{r, include = F}
 ces4 <- read_excel("calenviroscreen40resultsdatadictionary_F_2021.xlsx")
 
 ca_tracts <- tracts("CA")
@@ -54,7 +54,7 @@ The data for the map showing the prevalence of Asthma is the rate of Emergency D
 
 ```{r, warning = F}
 Asthma_pal <- colorNumeric(
-  palette = "YlOrRd",
+  palette = "Purples",
   domain = ces4_map$Asthma
 )
 
@@ -86,7 +86,7 @@ leaflet() %>%
 #### PM2.5 Data
 The PM2.5 map contains data on the fine particle pollution throughout the state. The data represents the annual mean concentration of PM2.5 (the weighted average of measured monitor concentrations and satellite observations, µg/m3), over three years, from 2015 to 2017. Thus, the data may also only be accurate up until 2017 and may be outdated. 
 
-```{r}
+```{r, warning = F}
 PM_pal <- colorNumeric(
   palette = "Purples",
   domain = ces4_map$PM2.5
@@ -123,7 +123,7 @@ The Asthma Map...
 
 The PM2.5 Map ... 
 
-Both maps
+Both maps show disproportionately high prevalence of Asthma and PM2.5 in the central valley and in certain urban areas, such as East Los Angeles County and . 
 
 ## Asthma and PM2.5 Scatter Plot
 
