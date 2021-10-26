@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-```{r}
+```{r, include = F}}
 library(tidyverse)
 library(sf)
 library(leaflet)
@@ -45,26 +45,84 @@ ces4_map <- ces4 %>%
   st_as_sf()
 
 ```
-## Asthma and PM2.5 concentration Maps
+## Asthma and PM2.5 Concentration Maps
 
 The following maps show the concentration of asthma and PM2.5 prevalence. The data used to create the maps comes from CalEnviroScreen 4.0, released on October 20, 2021.
 
 #### Asthma Data
+The data for the map showing the prevalence of Asthma is the rate of Emergency Department visits for asthma per 10,000 people per year, averaged over 2015-2017. Thus, the data is only up to date until 2017 and may reflect numbers that are no longer accurate. 
 
+```{r, warning = F}
+Asthma_pal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = ces4_map$Asthma
+)
 
-```{r}
-mapview(ces4_map, zcol = "Asthma")
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data =ces4_map,
+    fillColor = ~Asthma_pal(Asthma),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = 1,
+    label = ~paste0(
+      round(Asthma), 
+      " ED visits for Asthma per year per 10,000"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = ces4_map,
+    pal = Asthma_pal,
+    values = ~Asthma,
+    title = "ED visits for Asthma<br>per year per 10,000,<br>averaged over 2015-2017"
+  )
 ```
-
-
 #### PM2.5 Data
-
+The Data for the PM2.5 map 
 
 ```{r}
-mapview(ces4_map, zcol = "PM2.5")
+PM_pal <- colorNumeric(
+  palette = "Purples",
+  domain = ces4_map$PM2.5
+)
+
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data =ces4_map,
+    fillColor = ~PM_pal(PM2.5),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = .5,
+    label = ~paste0(
+      round(PM2.5), 
+      " ED visits for Asthma per year per 10,000"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = ces4_map,
+    pal = PM_pal,
+    values = ~PM2.5,
+    title = "ED visits for Asthma<br>per year per 10,000,<br>averaged over 2015-2017"
+  )
 ```
 
+## Asthma and PM2.5 Scatter Plot
 
+```{r}
+
+```
 
 
 
