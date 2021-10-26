@@ -147,7 +147,11 @@ ggplot(
 ) +
   geom_point() +
   geom_smooth(method = "lm")
+```
+The line does not appear to fit the data well, since the data is not normally distributed. It seems as though points is clustered in the bottom center of the plot, but since there are some very high levels of asthma, the distribution is off. The best fit line currently shows a slight positive correlation.
 
+
+```{r}
 model <- lm(Asthma ~ PM2.5, ces4_map)
 
 summary(model)
