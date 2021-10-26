@@ -52,15 +52,16 @@ The following maps show the concentration of asthma and PM2.5 prevalence. The da
 #### Asthma Data
 
 
+```{r}
+mapview(ces4_map, zcol = "Asthma")
+```
+
 
 #### PM2.5 Data
 
 
-
 ```{r}
-mapview(ces4_map, zcol = "Asthma")
-
-mapview(ces4_map, zcol = "Asthma")
+mapview(ces4_map, zcol = "PM2.5")
 ```
 
 
