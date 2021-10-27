@@ -102,7 +102,7 @@ pums_calculations <-
     monthly_energy_cost = as.numeric(ELEP) + as.numeric(GASP),
     energy_burden = ifelse(
       (as.numeric(HINCP) > 0),
-      (monthly_energy_cost)/ (as.numeric(HINCP)/12) *100,
+      (monthly_energy_cost) / (as.numeric(HINCP)/12) *100,
       100
    ),
     avg_energy_burden = median(energy_burden),
@@ -116,7 +116,7 @@ pums_calculations <-
   group_by(public_use_microdata_area) %>% 
   summarize(
     perc_high_energy_burden_pop =
-      round(sum(high_energy_burden_pop, na.rm =T)/sum(PWGTP, na.rm = T)*100),
+      round(sum(high_energy_burden_pop, na.rm = T) / sum(PWGTP, na.rm = T)*100),
     total_high_energy_burden_pop = sum(high_energy_burden_pop)
   ) %>% 
   left_join(
