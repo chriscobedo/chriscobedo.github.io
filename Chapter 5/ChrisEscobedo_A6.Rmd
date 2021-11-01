@@ -57,12 +57,25 @@ sf_pumas <-
   st_drop_geometry() %>% 
   left_join(ca_pumas %>% select(GEOID10)) %>% 
   st_as_sf()
+```
+
+## Map of San Francisco PUMAS
+
+```{r}
+mapview(sf_pumas)
+```
+
+There are a few geographical anomalies that appear on this map, including part of Angel Island, a sliver of Alameda, and the Farallon Islands. These will be ignored as they will not affect the analysis.
+
+```{r}
+sf_pums <- pums_2019_1yr %>% 
+  mutate (
+    PUMA = str_pad(public_use_microdata_area, 5, "left", "0")
+  ) %>% 
+  filter(PUMA %in% sf_pumas$PUMACE10)
 
 
 ```
-
-
-
 
 
 
