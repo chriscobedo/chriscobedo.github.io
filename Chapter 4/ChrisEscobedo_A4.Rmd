@@ -1,30 +1,121 @@
 ---
 title: "ChrisEscobedo_A4"
 author: "Chris"
-date: "10/17/2021"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-## R Markdown
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(tigris)
+library(censusapi)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-## Including Plots
+```{r, include = F}
+acs_vars_2019_5yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs5",
+    type = "variables"
+  )
 
-You can also embed plots, for example:
+census_race_categories <- 
+  c(
+    "White Alone",
+    "Black or African American",
+    "American Indian and Alaska Native Alone",
+    "Asian Alone",
+    "Native Hawaiian and Other Pacific Islander Alone",
+    "Some Other Race Alone",
+    "Two or More Races"
+  )
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+alameda_education_race <-
+  1:7 %>% 
+  map_dfr(function(x){
+    getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "county:001",
+      regionin = "state:06",
+      vars = paste0("group(C15002",LETTERS[x],")")
+    ) %>%
+      select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+      pivot_longer(
+        ends_with("E"),
+        names_to = "name",
+        values_to = "estimate"
+      ) %>%
+      left_join(
+        acs_vars_2019_5yr %>% 
+          select(name, label)
+      ) %>% 
+      select(-name) %>% 
+      separate(
+        label,
+        into = c(NA,NA,"sex", "education"),
+        sep = "!!"
+      ) %>% 
+      filter(!is.na(education)) %>% 
+      mutate(race = census_race_categories[x]) %>% 
+      group_by(education, race) %>% 
+      summarize(estimate = sum(estimate))
+  }) 
+
+total_alameda__race <- 
+  alameda_education_race %>% 
+  group_by(race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(education = "Total")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+alameda_education_race %>% 
+  rbind(total_alameda__race) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = education %>% factor(levels = rev(c("Total","Less than high school diploma","High school graduate (includes equivalency)","Some college or associate's degree","Bachelor's degree or higher"))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(unique(alameda_education_race$race)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Education Attainment",
+    y = "Proportion of population 25 years or older",
+    title = "Bay Area educational attainment by race",
+    fill = "Race"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+```
+#### Discussion
+
+The map shows some slight over and under representations of race for some races. The white alone category is very underrepresented in the population with less than a high school diploma. The white alone category is slightly over represented in the populations with some college and with a bachelors degree. Black people are very underrepresented in those with a bachelors degree but underrepresented in those with less than a high school diploma as well. Its interesting to note that the category for "some other race alone" is extremely over represented in the population with less than a high school diploma and very underrepresented the populations with some college and with a bachelors degree. This map did not include ethnicity, so it may include those that are latinx or in some other race category. The map also includes only the population older than 25 years.
+
+```{r}
+
+```
+
+
+
+
+

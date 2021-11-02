@@ -5,26 +5,293 @@ date: "10/17/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-## R Markdown
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(censusapi)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-## Including Plots
+```{r}
+census_race_categories <- 
+  c(
+    "White Alone",
+    "Black or African American",
+    "American Indian and Alaska Native Alone",
+    "Asian Alone",
+    "Native Hawaiian and Other Pacific Islander Alone",
+    "Some Other Race Alone",
+    "Two or More Races"
+  )
 
-You can also embed plots, for example:
+bay_income_race <-
+  1:7 %>% 
+  map_dfr(function(x){
+    getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "county:001,013,041,055,075,081,085,095,097",
+      regionin = "state:06",
+      vars = paste0("group(B19001",LETTERS[x],")")
+    ) %>%
+      select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+      pivot_longer(
+        ends_with("E"),
+        names_to = "name",
+        values_to = "estimate"
+      ) %>%
+      left_join(
+        acs_vars_2019_5yr %>% 
+          select(name, label)
+      ) %>% 
+      select(-name) %>% 
+      separate(
+        label,
+        into = c(NA,NA,"income"),
+        sep = "!!"
+      ) %>% 
+      filter(!is.na(income)) %>% 
+      mutate(race = census_race_categories[x])
+  })
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+bay_race_total <-
+  bay_income_race %>% 
+  group_by(race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(income = "Total")
+
+bay_income_race %>% 
+  group_by(income, race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  rbind(bay_race_total) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = income %>% factor(levels = rev(c("Total",unique(bay_income_race$income)))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(unique(bay_income_race$race)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Household income",
+    y = "Proportion of households",
+    title = "Bay Area household income by race",
+    fill = "Race of householder"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(censusapi)
+library(tigris)
+
+ces4 <- read_excel(
+    "~/Documents/GitHub/chriscobedo.github.io/Chapter 4/CalEnviroScreen_4.0Excel_ADA_D1_2021.xlsx",
+    sheet = "DRAFTCES4.0_results"
+  ) 
+
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+ca_tracts <- tracts("CA", cb = T, progress_bar = F)
+
+ces4_bay_pm25 <-
+  ces4 %>% 
+  filter(`California County` %in% bay_county_names) %>% 
+  select(`Census Tract`, PM2.5) %>% 
+  left_join(
+    ca_tracts %>% 
+      transmute(GEOID = as.numeric(GEOID)), 
+    by = c("Census Tract" = "GEOID")
+  ) %>% 
+  st_as_sf()
+
+pm25_pal <- colorNumeric(
+  palette = "Reds",
+  domain = ces4_bay_pm25$PM2.5
+)
+
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = ces4_bay_pm25,
+    fillColor = ~pm25_pal(PM2.5),
+    color = "white",
+    weight = 0.5,
+    fillOpacity = 0.5,
+    label = ~PM2.5
+  )
+
+summary(ces4_bay_pm25$PM2.5)
+
+census_race_categories <- 
+  c(
+    "White Alone",
+    "Black or African American",
+    "American Indian and Alaska Native Alone",
+    "Asian Alone",
+    "Native Hawaiian and Other Pacific Islander Alone",
+    "Some Other Race Alone",
+    "Two or More Races"
+  )
+
+bay_race_tracts <-
+  1:7 %>% 
+  map_dfr(function(x){
+    getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "tract:*",
+      regionin = "state:06+county:001,013,041,055,075,081,085,095,097",
+      vars = paste0("B19001",LETTERS[x],"_001E")
+    ) %>%
+      mutate(
+        tract = paste0(state, county, tract) %>% as.numeric(),
+        race = census_race_categories[x]
+      ) %>% 
+      select(
+        tract,
+        race,
+        estimate = paste0("B19001",LETTERS[x],"_001E")
+      )
+  })
+
+bay_pm25_race <-
+  bay_race_tracts %>% 
+  left_join(
+    ces4_bay_pm25 %>% 
+      st_drop_geometry(),
+    by = c("tract" = "Census Tract")
+  ) %>% 
+  mutate(
+    PM2.5_tier =
+      case_when(
+        PM2.5 < 6 ~ "5-6",
+        PM2.5 < 7 ~ "6-7",
+        PM2.5 < 8 ~ "7-8",
+        PM2.5 < 9 ~ "8-9",
+        PM2.5 < 10 ~ "9-10",
+        TRUE ~ "10-11"
+      ) 
+  ) %>% 
+  group_by(race, PM2.5_tier) %>% 
+  summarize(estimate = sum(estimate, na.rm = T))
+
+bay_pm25_race_stacked <-
+  bay_pm25_race %>% 
+  group_by(PM2.5_tier, race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  rbind(
+    bay_pm25_race %>% 
+      group_by(race) %>% 
+      summarize(estimate = sum(estimate)) %>% 
+      mutate(PM2.5_tier = "Total")
+  ) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = PM2.5_tier %>% factor(levels = rev(c("Total","5-6","6-7","7-8","8-9","9-10","10-11"))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(census_race_categories))
+    ),
+    stat = "identity",
+    position = "stack"
+  ) +
+  labs(
+    x = "PM2.5",
+    y = "Number of households",
+    title = "Bay Area PM2.5 exposure by race",
+    subtitle = "Annual mean concentration of PM2.5 (weighted average, µg/m3),\nover three years (2015 to 2017), aggregated by Census tract",
+    fill = "Race of householder"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  ) +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+
+bay_pm25_race_fill <-
+  bay_pm25_race %>% 
+  group_by(PM2.5_tier, race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  rbind(
+    bay_pm25_race %>% 
+      group_by(race) %>% 
+      summarize(estimate = sum(estimate)) %>% 
+      mutate(PM2.5_tier = "Total")
+  ) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = PM2.5_tier %>% factor(levels = rev(c("Total","5-6","6-7","7-8","8-9","9-10","10-11"))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(census_race_categories))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "PM2.5",
+    y = "Proportion of households",
+    title = "Bay Area PM2.5 exposure by race",
+    subtitle = "Annual mean concentration of PM2.5 (weighted average, µg/m3),\nover three years (2015 to 2017), aggregated by Census tract",
+    fill = "Race of householder"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  ) +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+
+bay_pm25_race_stacked
+
+bay_pm25_race_fill
+
+```
+
+
+
