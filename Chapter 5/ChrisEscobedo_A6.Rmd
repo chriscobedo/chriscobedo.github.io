@@ -107,9 +107,9 @@ sf_pums <- pums_2019_1yr %>%
 
 ## Lead Risk Model
 
-To create a model that could predict lead risk, a variable for lead risk was created by using PUMS data to find all houses with less than 90,000 annual income and at least one child under 6 years old.
+To create a model that could predict lead risk, a variable for lead risk was created using PUMS data to find all houses with an annual income of less than $90,000 and at least one child under 6 years old.
 
-The model uses the lead risk variable as the predicted variable, and uses BLD (Units in structure, TEN (Tenure), MV (When moved into this house or apartment), and PUMA (Public use microdata area code) as the predictors.
+The model uses the lead risk variable as the predicted variable, and uses BLD (Units in structure), TEN (Tenure), MV (When moved into the house or apartment), and PUMA (Public use microdata area code) as the predictors.
 
 #### Summary of Model
 
@@ -156,12 +156,12 @@ summary(logit_model)
 
 #### Example of Predicted Score
 
-The following is an example of a predicted score, using a random sample from the data. The random sample is labeled "example_row" in the table below and provides its predictor variables. Below that is the predicted score for lead risk for the random sample, which is .
+The following is an example of a predicted score, using a random sample from the data. The random sample is labeled "example_row" in the table below and provides its predictor variables. Below that is the predicted score for lead risk for the random sample, which is `r predict(logit_model, data.frame(example_row), type = "response")`.
 
 ```{r}
-example_row <- sample_n(sf_pums_factors,1)
+example_row <- sample_n(sf_pums_factors, 1)
 
-example_row
+print(example_row)
 
 predict(logit_model, data.frame(example_row), type = "response")
 ```
