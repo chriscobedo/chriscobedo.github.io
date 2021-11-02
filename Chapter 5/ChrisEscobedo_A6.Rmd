@@ -170,7 +170,7 @@ print(example_row)
 
 #### Predicted Score
 
-Below is the predicted score for lead risk for the random sample, which is `r predict(logit_model, data.frame(example_row), type = "response")`.
+Below is the predicted score for lead risk for the random sample.
 
 ```{r}
 predict(logit_model, data.frame(example_row), type = "response")
