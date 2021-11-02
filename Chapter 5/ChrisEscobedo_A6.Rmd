@@ -83,18 +83,29 @@ sf_pums_1960 <- sf_pums %>%
   filter(YBL %in% 1:3)
 
 sf_pums_clean <- sf_pums_1960 %>% 
-  group_by()
+  group_by(SERIALNO) %>% 
+  summarize(
+    Age_min = min(AGEP, na.rm = T),
+    WGTP = first(WGTP), 
+    YBL = first(YBL), 
+    BLD = first(BLD),
+    TEN = first(TEN), 
+    MV = first(MV), 
+    HINCP = first(HINCP), 
+    PUMA = first(PUMA)
+  )
   
 sf_pums_lead_risk <- sf_pums_clean %>% 
   mutate(
     leadrisk = 
       (ifelse(
-        HINCP < 90000 & AGEP < 6,
+        HINCP < 90000 & Age_min < 6,
         1,
         0
         )
       )
   )
+
 
 ```
 
