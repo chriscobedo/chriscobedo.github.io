@@ -20,7 +20,7 @@ library(censusapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r}
+```{r, warning = F}
 ca_pumas <-
   pumas("CA", cb = T, progress_bar = F)
 
