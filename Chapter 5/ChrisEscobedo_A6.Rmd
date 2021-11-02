@@ -20,7 +20,7 @@ library(censusapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r, warning = F}
+```{r, include = F}
 ca_pumas <-
   pumas("CA", cb = T, progress_bar = F)
 
@@ -39,7 +39,7 @@ sf_pumas <-
 
 ## Map of San Francisco PUMAS
 
-```{r}
+```{r, warning = F}
 mapview(sf_pumas)
 ```
 
@@ -160,7 +160,7 @@ The following is an example of a predicted score, using a random sample from the
 
 #### Random Sample
 
-The random sample is displayed below provides with its predictor variables. 
+The random sample is displayed below with its predictor variables. 
 
 ```{r}
 example_row <- sample_n(sf_pums_factors, 1)
@@ -170,7 +170,7 @@ print(example_row)
 
 #### Predicted Score
 
-Below is the predicted score for lead risk for the random sample.
+Below is the predicted score for "lead risk" for the random sample.
 
 ```{r}
 predict(logit_model, data.frame(example_row), type = "response")
