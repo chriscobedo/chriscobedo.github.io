@@ -154,15 +154,25 @@ logit_model <- glm(
 summary(logit_model)
 ```
 
-#### Example of Predicted Score
+## Example of Predicted Score
 
-The following is an example of a predicted score, using a random sample from the data. The random sample is labeled "example_row" in the table below and provides its predictor variables. Below that is the predicted score for lead risk for the random sample, which is `r predict(logit_model, data.frame(example_row), type = "response")`.
+The following is an example of a predicted score, using a random sample from the data. 
+
+#### Random Sample
+
+The random sample is displayed below provides with its predictor variables. 
 
 ```{r}
 example_row <- sample_n(sf_pums_factors, 1)
 
 print(example_row)
+```
 
+#### Predicted Score
+
+Below is the predicted score for lead risk for the random sample, which is `r predict(logit_model, data.frame(example_row), type = "response")`.
+
+```{r}
 predict(logit_model, data.frame(example_row), type = "response")
 ```
 
