@@ -69,7 +69,7 @@ alameda_education_race <-
       summarize(estimate = sum(estimate))
   }) 
 
-total_alameda__race <- 
+total_alameda_race <- 
   alameda_education_race %>% 
   group_by(race) %>% 
   summarize(estimate = sum(estimate)) %>% 
@@ -79,7 +79,7 @@ total_alameda__race <-
 
 ```{r}
 alameda_education_race %>% 
-  rbind(total_alameda__race) %>% 
+  rbind(total_alameda_race) %>% 
   ggplot() +
   geom_bar(
     aes(
