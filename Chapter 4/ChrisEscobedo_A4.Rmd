@@ -76,7 +76,6 @@ total_alameda_race <-
   mutate(education = "Total")
 ```
 
-
 ```{r}
 alameda_education_race %>% 
   rbind(total_alameda_race) %>% 
@@ -111,11 +110,139 @@ alameda_education_race %>%
 
 The map shows some slight over and under representations of race for some races. The white alone category is very underrepresented in the population with less than a high school diploma. The white alone category is slightly over represented in the populations with some college and with a bachelors degree. Black people are very underrepresented in those with a bachelors degree but underrepresented in those with less than a high school diploma as well. Its interesting to note that the category for "some other race alone" is extremely over represented in the population with less than a high school diploma and very underrepresented the populations with some college and with a bachelors degree. This map did not include ethnicity, so it may include those that are latinx or in some other race category. The map also includes only the population older than 25 years.
 
-```{r}
+```{r, include = F}
+census_ethnicity_categories <- 
+  c(
+    "White Alone, Not Latinx",
+    "Latinx"
+  )
 
+alameda_education_ethnicity <-
+  8:9 %>% 
+  map_dfr(function(x){
+    getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "county:001",
+      regionin = "state:06",
+      vars = paste0("group(C15002",LETTERS[x],")")
+    ) %>%
+      select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+      pivot_longer(
+        ends_with("E"),
+        names_to = "name",
+        values_to = "estimate"
+      ) %>% 
+      left_join(
+        acs_vars_2019_5yr %>% 
+          select(name, label)
+      ) %>% 
+      select(-name) %>% 
+      separate(
+        label,
+        into = c(NA,NA,"sex", "education"),
+        sep = "!!"
+      ) %>% 
+      filter(!is.na(education)) %>% 
+      mutate(ethnicity = census_ethnicity_categories[x - 7]) %>% 
+      group_by(education, ethnicity) %>% 
+      summarize(estimate = sum(estimate))
+  })
+
+acs_vars_2019_1yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs1",
+    type = "variables"
+  )
+
+# alameda_education_total <-
+#   getCensus(
+#     name = "acs/acs1",
+#     vintage = 2019,
+#     region = "county:001",
+#     regionin = "state:06",
+#     vars = "group(C15002)"
+#   ) %>%
+#   select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+#   pivot_longer(
+#     ends_with("E"),
+#     names_to = "name",
+#     values_to = "estimate"
+#   ) %>%
+#   left_join(
+#     acs_vars_2019_1yr %>%
+#     select(name, label)
+#   ) %>%
+#   select(-name) %>%
+#   separate(
+#     label,
+#     into = c(NA,NA,"sex", "education"),
+#     sep = "!!"
+#   ) %>%
+#   filter(!is.na(education)) %>%
+#   mutate(ethnicity = "All") %>%
+#   group_by(education, ethnicity) %>%
+#   summarize(estimate = sum(estimate))
+
+total_alameda_education <- 
+  alameda_education_race %>% 
+  group_by(education) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(ethnicity = "Total")
+  
+rows <- 1:4
+
+alameda_education_all_ethnicity <- total_alameda_education %>% 
+  rbind(alameda_education_ethnicity) 
+
+for(row in rows){
+  alameda_education_all_ethnicity[nrow(alameda_education_all_ethnicity) +1,] = c(
+    education = alameda_education_all_ethnicity[row,1], 
+    estimate = (as.numeric(alameda_education_all_ethnicity[row,2])) - (as.numeric(alameda_education_all_ethnicity[row+4,2])) - (as.numeric(alameda_education_all_ethnicity[row+8,2])),
+    ethnicity = "Not White, Not Latinx")
+}
+
+total_alameda_ethnicity <- 
+  alameda_education_all_ethnicity %>%
+  filter(!ethnicity == "Total") %>% 
+  group_by(ethnicity) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(education = "Total")
 ```
 
+```{r}
+alameda_education_all_ethnicity %>%
+  filter(!ethnicity == "Total") %>% 
+  rbind(total_alameda_ethnicity) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = education %>% factor(levels = rev(c("Total","Less than high school diploma","High school graduate (includes equivalency)","Some college or associate's degree","Bachelor's degree or higher"))),
+      y = estimate,
+      fill = ethnicity %>% factor(levels = rev(unique(alameda_education_all_ethnicity$ethnicity)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Education Attainment",
+    y = "Proportion of population 25 years or older",
+    title = "Bay Area educational attainment by ethnicity",
+    fill = "Ethnicity"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+```
 
+#### Discussion
 
 
 
