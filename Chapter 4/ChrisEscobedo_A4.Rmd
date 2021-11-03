@@ -92,7 +92,7 @@ alameda_education_race %>%
   labs(
     x = "Education Attainment",
     y = "Proportion of population 25 years or older",
-    title = "Bay Area educational attainment by race",
+    title = "Alameda educational attainment by race",
     fill = "Race"
   ) +
   coord_flip() +
@@ -227,7 +227,7 @@ alameda_education_all_ethnicity %>%
   labs(
     x = "Education Attainment",
     y = "Proportion of population 25 years or older",
-    title = "Bay Area educational attainment by ethnicity",
+    title = "Alameda educational attainment by ethnicity",
     fill = "Ethnicity"
   ) +
   coord_flip() +
