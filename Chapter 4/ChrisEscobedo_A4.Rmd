@@ -106,9 +106,10 @@ alameda_education_race %>%
     )
   )
 ```
+
 #### Discussion
 
-The map shows some slight over and under representations of race for some races. The white alone category is very underrepresented in the population with less than a high school diploma. The white alone category is slightly over represented in the populations with some college and with a bachelors degree. Black people are very underrepresented in those with a bachelors degree but underrepresented in those with less than a high school diploma as well. Its interesting to note that the category for "some other race alone" is extremely over represented in the population with less than a high school diploma and very underrepresented the populations with some college and with a bachelors degree. This map did not include ethnicity, so it may include those that are latinx or in some other race category. The map also includes only the population older than 25 years.
+The graph shows some slight over and under representations of race for some races. The white alone category is very underrepresented in the population with less than a high school diploma. The white alone category is slightly over represented in the populations with some college and with a bachelors degree. Black people are very underrepresented in those with a bachelors degree but underrepresented in those with less than a high school diploma as well. Its interesting to note that the category for "some other race alone" is extremely over represented in the population with less than a high school diploma and very underrepresented the populations with some college and with a bachelors degree. This map did not include ethnicity, so it may include those that are latinx or in some other race category. The map also includes only the population older than 25 years.
 
 ```{r, include = F}
 census_ethnicity_categories <- 
