@@ -394,6 +394,27 @@ rbind(
   )
 ```
 
+difference in difference regresstion (and tidy data)
+```{r}
+transit_did <-
+  match %>% 
+  st_drop_geometry() %>% 
+  select(-match) %>% 
+  pivot_longer(
+    -PUMA,
+    names_to = "year",
+    values_to = "bart"
+  ) %>% 
+  mutate(
+    year = year %>% as.numeric(),
+    time = ifelse(year >= 2017, 1, 0),
+    treated = ifelse(PUMA == "08504", 1, 0)
+  )
+
+did_reg <- lm(bart ~ treated*time, data = transit_did)
+
+summary(did_reg)
+```
 
 
 
