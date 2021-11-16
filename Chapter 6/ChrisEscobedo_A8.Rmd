@@ -204,13 +204,13 @@ summary(did_reg)
 
 ## Discussion
 
-The difference in difference analysis shows that the treatment of introducing a new BART station in Antioch added about 1097.22 new BART commuters. The model showed
+The difference in difference analysis shows that the treatment of introducing a new BART station in Antioch added about 1097.22 new BART commuters when compared to other similar PUMAS that did not receive the new BART station. The model also demonstrates a couple of baseline effects: the difference in the treated and control PUMAS pre-treatment, which was a difference of about 470.68 BART commuters and the difference between the controlled PUMAS from pre-treatment to post-treatment which was a difference of about 207.28 BART commuters.
 
-This result was also proven to be statistically significant, as the p-value is near zero, at 2.11e-06.
+These results were all proven to be statistically significant. Importantly, the result of the difference in difference analysis was statistically significant, as the p-value is near zero, at 2.11e-06. 
 
-This model includes several assumptions that the textbook example also includes. 
+This model includes several arbitrary choices and assumptions that are similar to the textbook example. Among these  are the variable we chose, which was BART ridership and the assumption that BART commuters answered “Subway or elevated car” in the ACS questionnaire to represent a BART commute trip. The model also assumes that other PUMAs did not receive similar treatment of adding a new BART station, which may not be true for all of them, skewing the ability to have "controls" in the data. The arbitrary size and populations of the PUMAs may also have an effect on the data. The choice to use ten controls was also arbitrary. Finally, PUMS data uses relatively small sample sizes, which may introduce additional noise into the analysis.
 
-In addition to those assumptions, this model has additional assumptions.
+In addition to those assumptions, this model has additional assumptions. The BART station opened in the middle of the year 2018, thus the ACS data could have been collected completely or partially before the station was opened. It is likely that at least some of the ACS data was collected after the station was completed, since there is a statistically significant difference in ridership between the Antioch PUMA in 2018 and the other control PUMAS. Still, the data may not be slightly skewed because of this timing. Furthermore, we  were only able to use two years of post-treatment data because of the data available. This might have left out possible trends of quickening or slowing of increases in the following years.
 
 
 
