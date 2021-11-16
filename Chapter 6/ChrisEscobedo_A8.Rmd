@@ -29,7 +29,7 @@ acs_vars_2019_5yr <-
   )
 ```
 
-```{r}
+```{r, warnings = F}
 ca_pumas <-
   pumas("CA", cb = T, progress_bar = F)
 
@@ -59,7 +59,7 @@ bay_pumas <-
   st_as_sf()
 ```
 
-```{r}
+```{r, warnings = F}
 pums_2014_2019_wts <- readRDS("pums_2014_2019_wts.rds") 
 
 pums_bart <- pums_2014_2019_wts %>%
@@ -113,7 +113,7 @@ match <- dist_matrix["01309",] %>%
 ```
 
 ## Map of Matched PUMAS
-```{r}
+```{r, warnings = F}
 leaflet() %>% 
   addTiles() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
@@ -180,6 +180,7 @@ rbind(
 ```
 
 ## Differnce in Difference Analysis
+
 ```{r}
 transit_did <-
   match %>% 
