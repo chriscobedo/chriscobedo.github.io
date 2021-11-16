@@ -204,7 +204,13 @@ summary(did_reg)
 
 ## Discussion
 
+The difference in difference analysis shows that the treatment of introducing a new BART station in Antioch added about 1097.22 new BART commuters. The model showed
 
+This result was also proven to be statistically significant, as the p-value is near zero, at 2.11e-06.
+
+This model includes several assumptions that the textbook example also includes. 
+
+In addition to those assumptions, this model has additional assumptions.
 
 
 
