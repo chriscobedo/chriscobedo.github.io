@@ -128,8 +128,78 @@ leaflet() %>%
   )
 ```
 
+## Plot of BART Ridership
+```{r}
+match_pumas <-
+  match %>% 
+  filter(!PUMA %in% c("01309")) %>% 
+  st_drop_geometry() %>% 
+  select(-match) %>% 
+  pivot_longer(
+    -PUMA,
+    names_to = "year",
+    values_to = "bart"
+  ) %>%
+  group_by(
+    year
+  ) %>% 
+  summarize(
+    bart = mean(bart),
+    PUMA = "Similar PUMAs"
+  )
 
+treatment_pumas <-
+  match %>% 
+  filter(PUMA %in% c("01309")) %>% 
+  select(-match) %>% 
+  st_drop_geometry() %>% 
+  pivot_longer(
+    -PUMA,
+    names_to = "year",
+    values_to = "bart"
+  )
 
+rbind(
+  treatment_pumas,
+  match_pumas
+) %>% 
+  ggplot(
+    aes(
+      x = as.numeric(year),
+      y = bart,
+      color = PUMA
+    )
+  ) +
+  geom_line() +
+  geom_vline(xintercept = 2018, linetype = "dashed") +
+  labs(
+    title = "Antioch vs. control neighborhoods, BART ridership",
+    x = "Year",
+    y = "BART commute riders"
+  )
+```
+
+## Differnce in Difference Analysis
+```{r}
+transit_did <-
+  match %>% 
+  st_drop_geometry() %>% 
+  select(-match) %>% 
+  pivot_longer(
+    -PUMA,
+    names_to = "year",
+    values_to = "bart"
+  ) %>% 
+  mutate(
+    year = year %>% as.numeric(),
+    time = ifelse(year >= 2018, 1, 0),
+    treated = ifelse(PUMA == "01309", 1, 0)
+  )
+
+did_reg <- lm(bart ~ treated*time, data = transit_did)
+
+summary(did_reg)
+```
 
 
 
