@@ -201,6 +201,8 @@ did_reg <- lm(bart ~ treated*time, data = transit_did)
 summary(did_reg)
 ```
 
+## Discussion
+
 
 
 
