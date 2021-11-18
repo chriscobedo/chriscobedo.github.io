@@ -46,18 +46,33 @@ pge_data <-
   )
 ```
 
+Inputs {.sidebar}
+-------------------------------------
+```{r}
+selectInput(
+  inputId = "year",
+  label = "Year: ",
+  choices = 2017:2020,
+  selected = 2020
+)
+```
+
 Column
 -------------------------------------
 
 ### Monthly consumption
 
 ```{r}
+plotlyOutput("plot")
+```
+
+```{r, context = "server"}
 chart <- pge_data %>% 
   filter(
     CUSTOMERCLASS %in% c(
       "Elec- Residential"
     ),
-    YEAR == 2020
+    YEAR == input$year
   ) %>% 
   ggplot(
     aes(
