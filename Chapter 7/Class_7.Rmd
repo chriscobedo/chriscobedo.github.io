@@ -67,51 +67,56 @@ plotlyOutput("plot")
 ```
 
 ```{r, context = "server"}
-chart <- pge_data %>% 
-  filter(
-    CUSTOMERCLASS %in% c(
-      "Elec- Residential"
-    ),
-    YEAR == input$year
-  ) %>% 
-  ggplot(
-    aes(
-      x = MONTH,
-      y = TOTALKBTU/1e9
-    )
-  ) +
-  geom_line(
-    aes(
-      color = YEAR %>% factor()
-    )
-  ) +
-  scale_x_discrete(
-    limits = c(
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    )
-  ) +
-  labs(
-    x = "",
-    y = "Total kBTUs (billions)",
-    title = "Residential Energy Consumption in the Bay Area, 2020",
-    color = "Year"
-  ) + 
-  theme(legend.position = "none")
-
-chart %>% 
-  ggplotly() %>% 
-  config(displayModeBar = F)
+observeEvent(input$year, {
+  chart <- pge_data %>% 
+    filter(
+      CUSTOMERCLASS %in% c(
+        "Elec- Residential"
+      ),
+      YEAR == input$year
+    ) %>% 
+    ggplot(
+      aes(
+        x = MONTH,
+        y = TOTALKBTU/1e9
+      )
+    ) +
+    geom_line(
+      aes(
+        color = YEAR %>% factor()
+      )
+    ) +
+    scale_x_discrete(
+      limits = c(
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      )
+    ) +
+    labs(
+      x = "",
+      y = "Total kBTUs (billions)",
+      title = paste0("Residential Energy Consumption in the Bay Area, ",input$year),
+      color = "Year"
+    ) + 
+    theme(legend.position = "none")
+  
+  output$plot <- renderPlotly({
+    chart %>% 
+      ggplotly() %>% 
+      config(displayModeBar = F)
+  })
+  
+})
 ```
 
 Column
