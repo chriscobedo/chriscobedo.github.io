@@ -87,13 +87,13 @@ observeEvent({
 
   chart <- pge_data %>% 
     filter(
-      CUSTOMERCLASS == input$CUSTOMERCLASS,
-      YEAR == input$year
+      CUSTOMERCLASS == input$customerclass,
+      YEAR %in% c(input$year)
     ) %>% 
     ggplot(
       aes(
         x = MONTH,
-        y = TOTALKBTU/1e9
+        y = TOTALKBTU/1e9,
       )
     ) +
     geom_line(
@@ -144,12 +144,15 @@ leafletOutput("map")
 ```
 
 ```{r, context = "server"}
-observeEvent(input$year, {
-  
-  pge_res_elec <-
+observeEvent({
+  input$year
+  input$customerclass
+  }, {
+    
+  pge_class <-
     pge_data_raw %>% 
     filter(
-      CUSTOMERCLASS == "Elec- Residential",
+      CUSTOMERCLASS == input$customerclass,
       YEAR == input$year
     ) %>% 
     mutate(
@@ -169,14 +172,14 @@ observeEvent(input$year, {
   res_pal <- colorNumeric(
     palette = "Reds",
     domain = 
-      pge_res_elec$TOTALKBTU
+      pge_class$TOTALKBTU
   )
   
   output$map <- renderLeaflet({
     leaflet() %>% 
       addProviderTiles(provider = providers$CartoDB.Positron) %>% 
       addPolygons(
-        data = pge_res_elec,
+        data = pge_class,
         fillColor = ~res_pal(TOTALKBTU),
         color = "white",
         opacity = 0.5,
@@ -193,10 +196,10 @@ observeEvent(input$year, {
         )
       ) %>% 
       addLegend(
-        data = pge_res_elec,
+        data = pge_class,
         pal = res_pal,
         values = ~TOTALKBTU,
-        title = paste0("Total Residential<br>Electricity (kBTU), ", input$year)
+        title = paste0("Total Electricity (kBTU),<br>", input$year)
       )
   })
   
