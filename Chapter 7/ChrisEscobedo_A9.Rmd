@@ -47,12 +47,27 @@ Inputs {.sidebar}
 -------------------------------------
 
 ```{r}
-selectInput(
-  inputId = "year", 
+# selectInput(
+#   inputId = "year",
+#   label = "Year:",
+#   choices = c(2017,2018,2019,2020),
+#   selected = 2020
+# )
+
+checkboxGroupInput(
+  inputId = "year",
   label = "Year:",
-  choices = c(2017,2018,2019,2020), 
-  selected = 2020
+  choices = c(2017,2018,2019,2020),
+  selected = 2020,
 )
+
+selectInput(
+  inputId = "customerclass",
+  label = "Customer Class:",
+  choices = c("Elec- Residential","Elec- Commercial", "Gas- Residential", "Gas- Commercial"),
+  selected = "Elec- Residential",
+)
+
 ```
 
 Column
@@ -60,18 +75,19 @@ Column
 
 ### Monthly consumption
 
-```{r}
+```{r} 
 plotlyOutput("plot")
 ```
 
 ```{r, context = "server"}
-observeEvent(input$year, {
-  
+observeEvent({
+  input$year
+  input$customerclass
+  }, {
+
   chart <- pge_data %>% 
     filter(
-      CUSTOMERCLASS %in% c(
-        "Elec- Residential"
-      ),
+      CUSTOMERCLASS == input$CUSTOMERCLASS,
       YEAR == input$year
     ) %>% 
     ggplot(
