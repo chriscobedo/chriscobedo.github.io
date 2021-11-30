@@ -41,6 +41,10 @@ pge_data <-
         sep="-"
       ) %>% as.Date()
   )
+
+  class_names <- c("Residential Electricity","Commercial Electricity", "Residential Gas", "Commercial Gas") 
+
+
 ```
 
 Inputs {.sidebar}
@@ -85,6 +89,24 @@ observeEvent({
   input$customerclass
   }, {
 
+  class_current <- input$customerclass
+  
+  class_name_current <- 
+    if(input$customerclass == "Elec- Residential"){
+      class_names[1]
+    } else if(input$customerclass == "Elec- Commercial"){
+      class_names[2]
+    } else if(input$customerclass == "Gas- Residential"){
+      class_names[3]
+    } else {
+      class_names[4]
+    }  
+  
+  year_char_title <-
+    for(x in input$year){
+      paste0(", ",input$year[x])
+      }
+  
   chart <- pge_data %>% 
     filter(
       CUSTOMERCLASS == input$customerclass,
@@ -124,7 +146,14 @@ observeEvent({
     labs(
       x = "",
       y = "Total kBTUs (billions)",
-      title = paste0("Residential Energy Consumption in the Bay Area, ", input$year),
+      title = 
+        if(length(input$year) == 1){
+          paste0(class_name_current, " Consumption in the Bay Area, ", input$year)
+        } else if(length(input$year) == 0){
+          paste0(class_name_current, " Consumption in the Bay Area, 2020")
+        } else {
+          paste0(class_name_current, " Consumption in the Bay Area, ", paste(input$year, collapse = ', '))
+        },
       color = "Year"
     ) + 
     theme(legend.position = "none")
@@ -182,8 +211,6 @@ observeEvent({
     domain = 
       pge_class$TOTALKBTU
   )
-  
-  class_names <- c("Residential Electricity","Commercial Electricity", "Residential Gas", "Commercial Gas") 
   
   class_current <- input$customerclass
   
