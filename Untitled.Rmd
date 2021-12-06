@@ -1,0 +1,115 @@
+---
+title: "Class 10"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(mapview)
+library(sf)
+library(StatMatch)
+library(leaflet)
+library(tigris)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+```{r}
+point <- 
+  c(-122.4117, 37.6555) %>% 
+  st_point() %>% 
+  st_sfc() %>% 
+  st_set_crs(4326)
+
+
+
+
+  rbind(
+    c(-122.16642, 37.3839),
+    c(-122.2115, 37.4134),
+    c(-122.1901, 37.4314),
+    c(-122.15406, 37.4099),
+    c(-122.16642, 37.3839)
+  ) %>% 
+  list() %>% 
+  st_polygon() %>% 
+  st_sfc() %>% 
+  st_set_crs(4326)
+
+```
+
+
+```{r, warning = F}
+library(readxl)
+
+ces4 <- read_excel("calenviroscreen40resultsdatadictionary_F_2021_copy.xlsx")
+
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+ca_tracts <- tracts("CA", cb = T, progress_bar = F)
+
+ces4_bay_pm25 <-
+  ces4 %>% 
+  filter(`California County` %in% bay_county_names) %>% 
+  select(`Census Tract`, PM2.5, `Total Population`) %>% 
+  left_join(
+    ca_tracts %>% 
+      transmute(GEOID = as.numeric(GEOID)), 
+    by = c("Census Tract" = "GEOID")
+  ) %>% 
+  st_as_sf()
+
+smc_population <-
+  getCensus(
+    name = "acs/acs5",
+    vintage = 2019,
+    region = "tract:*", 
+    regionin = "state:06+county:081",
+    vars = "B01001_001E"
+  ) %>% 
+  mutate(
+    tract = paste0(state, county, tract) %>% as.numeric()
+  )
+
+ces4_pop <- ces4_bay_pm25 %>% 
+  left_join(
+    smc_population %>% 
+      select(`Census Tract` = tract, pop = B01001_001E)
+  )
+```
+
+spatial join
+```{r}
+smc_tracts <- ca_tracts %>% 
+  filter(COUNTYFP == "081")
+
+places <- places("CA")
+
+places_example <- places %>% 
+  filter(NAME %in% c("East Palo Alto", "Menlo Park"))
+
+smc_tracts_places_join <- smc_tracts %>% 
+  st_join(places_example)
+
+
+```
+
+
