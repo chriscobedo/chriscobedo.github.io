@@ -156,34 +156,6 @@ acs_vars_2019_1yr <-
     type = "variables"
   )
 
-# alameda_education_total <-
-#   getCensus(
-#     name = "acs/acs1",
-#     vintage = 2019,
-#     region = "county:001",
-#     regionin = "state:06",
-#     vars = "group(C15002)"
-#   ) %>%
-#   select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
-#   pivot_longer(
-#     ends_with("E"),
-#     names_to = "name",
-#     values_to = "estimate"
-#   ) %>%
-#   left_join(
-#     acs_vars_2019_1yr %>%
-#     select(name, label)
-#   ) %>%
-#   select(-name) %>%
-#   separate(
-#     label,
-#     into = c(NA,NA,"sex", "education"),
-#     sep = "!!"
-#   ) %>%
-#   filter(!is.na(education)) %>%
-#   mutate(ethnicity = "All") %>%
-#   group_by(education, ethnicity) %>%
-#   summarize(estimate = sum(estimate))
 
 total_alameda_education <- 
   alameda_education_race %>% 
@@ -245,5 +217,6 @@ alameda_education_all_ethnicity %>%
 
 #### Discussion
 
+Using this analysis that includes a breakdown of the latinx population, we can see new insights into the equity of education attainment. A disproportionate high amount of the latinx population has received less than a high school diploma. Furthermore, a disproportionately low amount of the latinx population has a bachelor's degree or higher. The trend is the exact reverse for the white population, which has less of the population with less than a high school diploma than expected and more of its population with a bachelor's degree of higher than expected. The "not white, not latinx" population as a whole does not see a lot of disproportionate representation in educational attainment.
 
-
+It is important to remember that this dataset includes only the population of thecounty that is older than 25 years.
