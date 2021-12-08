@@ -37,6 +37,14 @@ census_race_categories <-
     "Two or More Races"
   )
 
+white_education <- getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "county:001",
+      regionin = "state:06",
+      vars = paste0("group(C15002A)")
+    )
+
 alameda_education_race <-
   1:7 %>% 
   map_dfr(function(x){
@@ -155,7 +163,6 @@ acs_vars_2019_1yr <-
     name = "2019/acs/acs1",
     type = "variables"
   )
-
 
 total_alameda_education <- 
   alameda_education_race %>% 
