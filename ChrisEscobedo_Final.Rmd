@@ -21,63 +21,7 @@ library(censusapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r, include = F}
-acs_vars_2019_5yr <-
-  listCensusMetadata(
-    name = "2019/acs/acs5",
-    type = "variables"
-  )
-```
-
-```{r, include = F}
-census_race_categories <- 
-  c(
-    "White Alone",
-    "Black or African American",
-    "American Indian and Alaska Native Alone",
-    "Asian Alone",
-    "Native Hawaiian and Other Pacific Islander Alone",
-    "Some Other Race Alone",
-    "Two or More Races"
-  )
-
-income_race <-
-  1:7 %>% 
-  map_dfr(function(x){
-    getCensus(
-      name = "acs/acs5",
-      vintage = 2019,
-      region = "county:001",
-      regionin = "state:06",
-      vars = paste0("group(C15002",LETTERS[x],")")
-    ) %>%
-      select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
-      pivot_longer(
-        ends_with("E"),
-        names_to = "name",
-        values_to = "estimate"
-      ) %>%
-      left_join(
-        acs_vars_2019_5yr %>% 
-          select(name, label)
-      ) %>% 
-      select(-name) %>% 
-      separate(
-        label,
-        into = c(NA,NA,"sex", "education"),
-        sep = "!!"
-      ) %>% 
-      filter(!is.na(education)) %>% 
-      mutate(race = census_race_categories[x]) %>% 
-      group_by(education, race) %>% 
-      summarize(estimate = sum(estimate))
-  })
-
-
-
-```
-
-retry 
+tracts
 ```{r}
 bay_county_names <-
   c(
@@ -92,7 +36,21 @@ bay_county_names <-
     "Sonoma"
   )
 
-ca_tracts <- tracts("CA", bay_county_names[1:9], cb = T, progress_bar = F)
+bay_tracts <- tracts("CA", bay_county_names[1:9], cb = T, progress_bar = F) 
+
+urban_cities <- 
+  places("CA", cb = T, progress_bar = FALSE) %>% 
+  filter(NAME %in% c("Oakland", "San Francisco", "San Jose","Fremont", "Santa Rosa", "Hayward", "Sunnyvale", "Santa Clara", "Vallejo", "Concord", "Berkeley"))
+
+bay_city_tracts <-
+  bay_tracts %>% 
+  st_centroid() %>% 
+  .[urban_cities, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(bay_tracts %>% select(GEOID)) %>% 
+  st_as_sf()
+
+mapview(bay_city_tracts)
 
 bay_tract_race_income <- 
   getCensus(
@@ -119,28 +77,30 @@ bay_tract_race_income <-
     !is.na(perc_white)
   ) %>% 
   left_join(
-    ca_tracts %>% 
+    bay_city_tracts %>% 
       select(GEOID),
-    by = c("tract" = "GEOID")
+    by = c("tract" = "GEOID"),
   ) %>% 
   st_as_sf()
 
-ca_counties <- counties("CA", cb = T, progress_bar = F)
+bay_counties <- counties("CA", cb = T, progress_bar = F) %>% 
+  filter(NAME %in% bay_county_names)
 
-urban_counties <- counties("CA", cb = T, progress_bar = F) %>% 
-  filter(NAME %in% c("Alameda", "San Francisco"))
+mapview(bay_tract_race_income)
 
-urban_cities <- 
-  places("CA", cb = T, progress_bar = FALSE) %>% 
-  filter(NAME %in% c("Oakland", "San Francisco", "San Jose","Fremont", "Santa Rosa", "Hayward", "Sunnyvale", "Santa Clara", "Vallejo", "Concord", "Berkeley"))
-
-mapview(bay_tract_race_income) + mapview(urban_cities)
-
-
+## add counts of grocery stores and fast foods for buffers
 
 ```
 
+## Census Tract Maps of 11 Most Populated Cities in the Bay Area
 
+Below are three maps showing the census tracts for the 11 most populated cities in the Bay Area. These are the census tracts that will be used for the regression analysis to test correlation between access to healthy food, race, and income.
+
+Note: It is important to note the assumptions that were made to create these maps, and the potential issues with them. First, only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occured from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. 
+
+```{r}
+
+```
 
 
 
