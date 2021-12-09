@@ -147,6 +147,54 @@ The map below shows the number of fast food restaurants within a five mile radiu
 
 * Same disclaimers as above for spatial assumptions and choices.
 
+### Plot of Race, Income, and Access to Healthy Food
+
+Below are two plots. One plot shows the 
+
+```{r}
+ggplot() +
+  geom_point(
+    data = bay_tract_race_income,
+    aes(
+      x = perc_over100k,
+      y = count_grocery
+    )
+  )
+
+ggplot() +
+  geom_point(
+    data = bay_tract_race_income,
+    aes(
+      x = perc_white,
+      y = count_grocery
+    )
+  )
+```
+
+From the plots above, we can see that both race and income seem to be correlated in some way to access to healthy food. 
+
+The plot below will attempt to visualize the relationship of all three of these data sets.
+
+This is a correlation plot of the percentage of white population, the percentage of the population with household income greater than 100k USD, and the amount of grocery stores within a five mile radius of the center of the census tract for each census tract. The amount of grocery stores are demonstrated using lighter and darker colors for each census tract.
+
+```{r}
+ggplot(
+  data = bay_tract_race_income,
+  aes(
+      x = perc_white,
+      y = perc_over100k
+    )
+) +
+  geom_point(
+    aes(
+      color = count_grocery
+    )
+  )
+```
+
+
+
+
 
 
 
