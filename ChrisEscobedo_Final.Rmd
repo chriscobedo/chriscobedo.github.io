@@ -80,8 +80,8 @@ bay_tract_race_income <-
   ) %>% 
   st_as_sf()
 
-
 ## add counts of grocery stores and fast foods for buffers
+
 
 ```
 
