@@ -96,7 +96,9 @@ mapview(bay_tract_race_income)
 
 Below are three maps showing the census tracts for the 11 most populated cities in the Bay Area. These are the census tracts that will be used for the regression analysis to test correlation between access to healthy food, race, and income.
 
-Note: It is important to note the assumptions that were made to create these maps, and the potential issues with them. First, only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occured from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. 
+*Disclaimer*: It is important to note the assumptions that were made to create these maps, and the potential issues with them. 
+1. First, only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occurred from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. 
+2. 
 
 ```{r}
 
