@@ -171,7 +171,7 @@ ggplot() +
   )
 ```
 
-From the plots above, we can see that both race and income seem to be correlated in some way to access to healthy food. 
+From the plots above, we can see that both race and income (DO OR DON't) seem to be correlated in some way to access to healthy food. 
 
 The plot below will attempt to visualize the relationship of all three of these data sets.
 
@@ -192,6 +192,15 @@ ggplot(
   )
 ```
 
+### Linear Regression Analysis 
+
+
+
+```{r}
+food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_multiple_tract)
+
+summary(food_access_model)
+```
 
 
 
