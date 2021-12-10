@@ -83,11 +83,25 @@ bay_tract_race_income <-
 
 ## add counts of grocery stores and fast foods for buffers
 
+grocery_count_raw <- NULL
 
-count_grocery_raw_bay <- read_excel("GroceryStores_2021.xlsx")
+for(x in 1:3){
+  filename <- paste0("Grocery_Point_", x, ".xlsx")
+  
+  temp <- read_excel(filename)
+  
+  grocery_count_raw <- rbind(grocery_count_raw, temp)
+}
 
 
-mapview(bay_tract_race_income)
+grocery_count_points <- grocery_count_raw %>% 
+  mutate(
+    long = as.numeric(Longitude),
+    lat = as.numeric(Latitude)
+  ) %>% 
+  st_as_sf(coords = c("long", "lat"), crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0" )
+
+mapview(grocery_count_points) + mapview(bay_tract_race_income)
 ```
 
 ### Census Tract Maps of 11 Most Populated Cities in the Bay Area
@@ -126,7 +140,7 @@ The map below shows the percentage of each census tracts that have an annual hou
 
 #### Access to Healthy Food
 
-The map below shows the number of grocery stores within a half mile radius from the center of the census tract.
+The map below shows the number of grocery stores within a mile radius from the center of the census tract.
 
 ```{r}
 
@@ -135,21 +149,8 @@ The map below shows the number of grocery stores within a half mile radius from 
 *Disclaimer*
 
 * The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include some stores that do not typically provide healthy fresh food as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
-* The distance of a half mile radius from the center of the census tract was chosen to align with the accessibility metric defined in a 2008 study by the California Center for Public Health Advocacy and the UCLA Center for Health Policy Research. This analysis could have used a different length as an accessibility metric and the results would change.
+* The distance of a  mile radius from the center of the census tract was chosen to align with one of the accessibility metrics used by the USDA to measure low access to healthy food. This analysis could have used a different length as an accessibility metric and the results would change.
 * The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
-
-#### Access to Unhealthy Food 
-
-The map below shows the number of fast food restaurants within a five mile radius from the center of the census tract.
-
-```{r}
-
-```
-
-*Disclaimer*
-
-* This analysis assumes that fast food restaurants are providing unhealthy food, which is not always true.
-* Same disclaimers as above for spatial assumptions and choices.
 
 ### Plot of Race, Income, and Access to Healthy Food
 
