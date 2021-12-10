@@ -17,6 +17,7 @@ library(StatMatch)
 library(leaflet)
 library(tigris)
 library(censusapi)
+library(readxl)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -82,6 +83,10 @@ bay_tract_race_income <-
 
 ## add counts of grocery stores and fast foods for buffers
 
+
+count_grocery_raw_bay <- read_excel("GroceryStores_2021.xlsx")
+
+
 mapview(bay_tract_race_income)
 ```
 
@@ -92,7 +97,6 @@ Below are three maps showing the census tracts for the 11 most populated cities 
 *Disclaimer*: It is important to note the assumptions that were made to create these maps, and the potential issues with them. Each map will also include its own set of disclaimers that must be made about each piece of data.
 
 * Only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occurred from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. The number 11 was chosen arbitrarily.
-
 * The census tracts were joined to the spatial locations of the cities using the "centroid" of the census tract, thus some census tracts that were within the boundary of the city in some way may have been left out of the analysis if the center was not within it.
 
 
@@ -130,10 +134,8 @@ The map below shows the number of grocery stores within a half mile radius from 
 
 *Disclaimer*
 
-* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" which also includes convenience stores that likely do not provide as much fresh and healthy food as a typical grocery store. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be convenience stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
-
+* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include some stores that do not typically provide healthy fresh food as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
 * The distance of a half mile radius from the center of the census tract was chosen to align with the accessibility metric defined in a 2008 study by the California Center for Public Health Advocacy and the UCLA Center for Health Policy Research. This analysis could have used a different length as an accessibility metric and the results would change.
-
 * The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
 
 #### Access to Unhealthy Food 
@@ -147,12 +149,11 @@ The map below shows the number of fast food restaurants within a five mile radiu
 *Disclaimer*
 
 * This analysis assumes that fast food restaurants are providing unhealthy food, which is not always true.
-
 * Same disclaimers as above for spatial assumptions and choices.
 
 ### Plot of Race, Income, and Access to Healthy Food
 
-Below are two plots. One plot shows the 
+Below are two plots. The first plot shows the correlation between income and access to healthy food while the second plot shows the correlation between race and access to healthy food.
 
 ```{r}
 ggplot() +
