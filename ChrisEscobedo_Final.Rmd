@@ -124,8 +124,37 @@ Below are three maps showing the census tracts for the 11 most populated cities 
 
 The Map Below shows the percentage of the population that is white for each census tract.
 
-```{r}
 
+```{r, warning = F}
+food_pal <- colorNumeric(
+  palette = "Blues",
+  domain = bay_tract_race_income$perc_white
+)
+
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data = bay_tract_race_income,
+    fillColor = ~food_pal(perc_white),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = 1,
+    label = ~paste0(
+      perc_white, 
+      "% of population that is White Alone"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = bay_tract_race_income,
+    pal = food_pal,
+    values = ~perc_white,
+    title = "Percentage of the population<br> that is white alone"
+  )
 ```
 
 *Disclaimer*
@@ -149,23 +178,23 @@ The map below shows the percentage of each census tracts that have an annual hou
 Below are two plots. The first plot shows the correlation between income and access to healthy food while the second plot shows the correlation between race and access to healthy food.
 
 ```{r}
-ggplot() +
-  geom_point(
-    data = bay_tract_race_income,
-    aes(
-      x = perc_over100k,
-      y = count_grocery
-    )
-  )
-
-ggplot() +
-  geom_point(
-    data = bay_tract_race_income,
-    aes(
-      x = perc_white,
-      y = count_grocery
-    )
-  )
+# ggplot() +
+#   geom_point(
+#     data = bay_tract_race_income,
+#     aes(
+#       x = perc_over100k,
+#       y = count_grocery
+#     )
+#   )
+# 
+# ggplot() +
+#   geom_point(
+#     data = bay_tract_race_income,
+#     aes(
+#       x = perc_white,
+#       y = count_grocery
+#     )
+#   )
 ```
 
 From the plots above, we can see that both race and income (DO OR DON't) seem to be correlated in some way to access to healthy food. 
@@ -175,18 +204,18 @@ The plot below will attempt to visualize the relationship of all three of these 
 This is a correlation plot of the percentage of white population, the percentage of the population with household income greater than 100k USD, and the amount of grocery stores within a five mile radius of the center of the census tract for each census tract. The amount of grocery stores are demonstrated using lighter and darker colors for each census tract.
 
 ```{r}
-ggplot(
-  data = bay_tract_race_income,
-  aes(
-      x = perc_white,
-      y = perc_over100k
-    )
-) +
-  geom_point(
-    aes(
-      color = count_grocery
-    )
-  )
+# ggplot(
+#   data = bay_tract_race_income,
+#   aes(
+#       x = perc_white,
+#       y = perc_over100k
+#     )
+# ) +
+#   geom_point(
+#     aes(
+#       color = count_grocery
+#     )
+#   )
 ```
 
 ### Linear Regression Analysis 
@@ -194,9 +223,9 @@ ggplot(
 
 
 ```{r}
-food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_multiple_tract)
-
-summary(food_access_model)
+# food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_multiple_tract)
+# 
+# summary(food_access_model)
 ```
 
 
