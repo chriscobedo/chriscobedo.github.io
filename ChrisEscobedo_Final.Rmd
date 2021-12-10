@@ -101,7 +101,7 @@ grocery_count_points <- grocery_count_raw %>%
   ) %>% 
   st_as_sf(coords = c("long", "lat"), crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0" )
 
-mapview(grocery_count_points) + mapview(bay_tract_race_income)
+
 ```
 
 ### Census Tract Maps of 11 Most Populated Cities in the Bay Area
@@ -122,11 +122,11 @@ Below are three maps showing the census tracts for the 11 most populated cities 
 
 #### Race
 
-The Map Below shows the percentage of the population that is white for each census tract.
+The Map Below shows the percentage of the population that is white for each census tract, over the point data of the grocery stores in the bay area.
 
 
 ```{r, warning = F}
-food_pal <- colorNumeric(
+race_pal <- colorNumeric(
   palette = "Blues",
   domain = bay_tract_race_income$perc_white
 )
@@ -135,13 +135,13 @@ leaflet() %>%
   addTiles() %>% 
   addPolygons(
     data = bay_tract_race_income,
-    fillColor = ~food_pal(perc_white),
+    fillColor = ~race_pal(perc_white),
     color = "white",
     opacity = 0.5,
     fillOpacity = 0.8,
     weight = 1,
     label = ~paste0(
-      perc_white, 
+      round(perc_white * 100), 
       "% of population that is White Alone"
     ),
     highlightOptions = highlightOptions(
@@ -149,11 +149,20 @@ leaflet() %>%
       opacity = 1
     )
   ) %>% 
+  addCircleMarkers(
+    data = grocery_count_points,
+    label = "Grocery Store",
+    radius = 4,
+    fillColor = "goldenrod",
+    fillOpacity = .8,
+    stroke = F
+  ) %>%
+  addProviderTiles("CartoDB.Positron") %>% 
   addLegend(
     data = bay_tract_race_income,
-    pal = food_pal,
+    pal = race_pal,
     values = ~perc_white,
-    title = "Percentage of the population<br> that is white alone"
+    title = "Percentage of the population<br> that is White alone"
   )
 ```
 
@@ -163,11 +172,49 @@ leaflet() %>%
 
 #### Income
 
-The map below shows the percentage of each census tracts that have an annual household income that is above $100k USD. 
+The map below shows the percentage of each census tracts that have an annual household income that is above $100k USD, over the point data of the grocery stores in the bay area. 
 
-```{r}
+```{r, warning = F}
+income_pal <- colorNumeric(
+  palette = "Purples",
+  domain = bay_tract_race_income$perc_over100k
+)
 
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data = bay_tract_race_income,
+    fillColor = ~income_pal(perc_over100k),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = 1,
+    label = ~paste0(
+      round(perc_over100k * 100), 
+      "% of population that makes over 100k per household annually"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addCircleMarkers(
+    data = grocery_count_points,
+    label = "Grocery Store",
+    radius = 4,
+    fillColor = "goldenrod",
+    fillOpacity = .8,
+    stroke = F
+  ) %>%
+  addProviderTiles("CartoDB.Positron") %>% 
+  addLegend(
+    data = bay_tract_race_income,
+    pal = income_pal,
+    values = ~perc_over100k,
+    title = "Percentage of the population<br> that makes more than 100k USD<br>annualy per household"
+  )
 ```
+
 
 *Disclaimer*
 
