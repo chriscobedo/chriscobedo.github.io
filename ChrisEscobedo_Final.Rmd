@@ -129,6 +129,8 @@ The map below shows the number of grocery stores within a half mile radius from 
 
 *Disclaimer*
 
+* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it includes convenience stores which may not provide as much fresh and healthy food as a typical grocery store. To account for this, stores were filtered to only include those with squre footage above 2,500, but there may be convenience stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores.
+
 * The distance of a half mile radius from the center of the census tract was chosen to align with the accessibility metric defined in a 2008 study by the California Center for Public Health Advocacy and the UCLA Center for Health Policy Research. This analysis could have used a different length as an accessibility metric and the results would change.
 
 * The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
