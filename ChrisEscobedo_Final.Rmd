@@ -113,16 +113,9 @@ Below are three maps showing the census tracts for the 11 most populated cities 
 * Only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occurred from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. The number 11 was chosen arbitrarily.
 * The census tracts were joined to the spatial locations of the cities using the "centroid" of the census tract, thus some census tracts that were within the boundary of the city in some way may have been left out of the analysis if the center was not within it.
 
-*Food Access Disclaimers*
-
-* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include some stores that do not typically provide healthy fresh food as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
-* The distance of a  mile radius from the center of the census tract was chosen to align with one of the accessibility metrics used by the USDA to measure low access to healthy food. This analysis could have used a different length as an accessibility metric and the results would change.
-* The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
-
-
 #### Race
 
-The Map Below shows the percentage of the population that is white for each census tract, over the point data of the grocery stores in the bay area.
+The Map Below shows the percentage of the population that is white for each census tract in the 11 most populated cities in the Bay Area.
 
 
 ```{r, warning = F}
@@ -148,16 +141,7 @@ leaflet() %>%
       weight = 2,
       opacity = 1
     )
-  ) %>% 
-  addCircleMarkers(
-    data = grocery_count_points,
-    label = "Grocery Store",
-    radius = 4,
-    fillColor = "goldenrod",
-    fillOpacity = .8,
-    stroke = F
   ) %>%
-  addProviderTiles("CartoDB.Positron") %>% 
   addLegend(
     data = bay_tract_race_income,
     pal = race_pal,
@@ -198,15 +182,6 @@ leaflet() %>%
       opacity = 1
     )
   ) %>% 
-  addCircleMarkers(
-    data = grocery_count_points,
-    label = "Grocery Store",
-    radius = 4,
-    fillColor = "goldenrod",
-    fillOpacity = .8,
-    stroke = F
-  ) %>%
-  addProviderTiles("CartoDB.Positron") %>% 
   addLegend(
     data = bay_tract_race_income,
     pal = income_pal,
@@ -223,6 +198,14 @@ leaflet() %>%
 ### Plot of Race, Income, and Access to Healthy Food
 
 Below are two plots. The first plot shows the correlation between income and access to healthy food while the second plot shows the correlation between race and access to healthy food.
+
+The index of access to Healthy food was created ...
+
+*Disclaimers*
+
+* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and 100% accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include some stores that do not typically provide healthy fresh food as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
+* The distance of a  mile radius from the center of the census tract was chosen to align with one of the accessibility metrics used by the USDA to measure low access to healthy food. This analysis could have used a different length as an accessibility metric and the results would change.
+* The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
 
 ```{r}
 # ggplot() +
