@@ -198,7 +198,7 @@ leaflet() %>%
 
 * The decision to use 100k as the cutoff for higher income was a subjective choice chosen to be most representative of median income for the bay area. This number could have been different and the median income is certainly different for every census tract and representative of a different reality for different sized households.
 
-### Plot of Race, Income, and Access to Healthy Food
+### Plots of Race, Income, and Access to Healthy Food
 
 Below are two plots. The first plot shows the correlation between income and access to healthy food while the second plot shows the correlation between race and access to healthy food.
 
