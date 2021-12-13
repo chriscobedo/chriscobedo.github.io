@@ -136,10 +136,6 @@ bay_tract_race_income_grocery <- bay_tract_race_income %>%
   )
 
 bay_tract_race_income_grocery[is.na(bay_tract_race_income_grocery)] = 0
-
-mapview(bay_tract_buffer) + mapview(grocery_count_points)
-mapview(bay_tract_grocery_with_buffer)
-
 ```
 
 ### Census Tract Maps of 11 Most Populated Cities in the Bay Area
