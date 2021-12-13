@@ -246,23 +246,25 @@ The index of access to Healthy food was created ...
 * The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
 
 ```{r}
-ggplot() +
-  geom_point(
-    data = bay_tract_race_income_grocery,
-    aes(
-      x = perc_over100k,
-      y = count_grocery
-    )
+ggplot(
+  data = bay_tract_race_income_grocery,
+  aes(
+    x = perc_over100k,
+    y = count_grocery
   )
+) +
+  geom_point() +
+  geom_smooth(method = "lm")
 
-ggplot() +
-  geom_point(
-    data = bay_tract_race_income_grocery,
-    aes(
-      x = perc_white,
-      y = count_grocery
-    )
+ggplot(
+  data = bay_tract_race_income_grocery,
+  aes(
+    x = perc_white,
+    y = count_grocery
   )
+) +
+  geom_point() +
+  geom_smooth(method = "lm")
 ```
 
 From the plots above, we can see that both race and income (DO OR DON't) seem to be correlated in some way to access to healthy food. 
@@ -272,18 +274,18 @@ The plot below will attempt to visualize the relationship of all three of these 
 This is a correlation plot of the percentage of white population, the percentage of the population with household income greater than 100k USD, and the amount of grocery stores within a five mile radius of the center of the census tract for each census tract. The amount of grocery stores are demonstrated using lighter and darker colors for each census tract.
 
 ```{r}
-# ggplot(
-#   data = bay_tract_race_income,
-#   aes(
-#       x = perc_white,
-#       y = perc_over100k
-#     )
-# ) +
-#   geom_point(
-#     aes(
-#       color = count_grocery
-#     )
-#   )
+ggplot(
+  data = bay_tract_race_income_grocery,
+  aes(
+      x = perc_white,
+      y = perc_over100k
+    )
+) +
+  geom_point(
+    aes(
+      color = count_grocery
+    )
+  )
 ```
 
 ### Linear Regression Analysis 
@@ -291,9 +293,9 @@ This is a correlation plot of the percentage of white population, the percentage
 
 
 ```{r}
-# food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_multiple_tract)
-# 
-# summary(food_access_model)
+food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_tract_race_income_grocery)
+
+summary(food_access_model)
 ```
 
 
