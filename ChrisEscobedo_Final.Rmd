@@ -118,17 +118,24 @@ for(x in num_bay_tracts){
     st_transform(26910) %>% 
     .[bay_tract_buffer[x,],] %>% 
     mutate(
-      Total = nrow(.)
+      count_grocery = nrow(.)
     ) %>% 
-    group_by(Total) %>% 
+    group_by(count_grocery) %>% 
     summarize() %>% 
     mutate(
-      census_tract = bay_tract_buffer[x,1] %>% st_drop_geometry()
-    )
+      census_tract = bay_tract_buffer[x,1] %>% st_drop_geometry(),
+      tract = census_tract$tract
+    ) %>% st_drop_geometry()
   
   bay_tract_grocery_counts <- rbind(bay_tract_grocery_counts, bay_tract_buffer_with_grocery)
 }
 
+bay_tract_race_income_grocery <- bay_tract_race_income %>% 
+  left_join(
+    bay_tract_grocery_counts %>% select(tract, count_grocery)
+  )
+
+bay_tract_race_income_grocery[is.na(bay_tract_race_income_grocery)] = 0
 
 mapview(bay_tract_buffer) + mapview(grocery_count_points)
 mapview(bay_tract_grocery_with_buffer)
@@ -239,23 +246,23 @@ The index of access to Healthy food was created ...
 * The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
 
 ```{r}
-# ggplot() +
-#   geom_point(
-#     data = bay_tract_race_income,
-#     aes(
-#       x = perc_over100k,
-#       y = count_grocery
-#     )
-#   )
-# 
-# ggplot() +
-#   geom_point(
-#     data = bay_tract_race_income,
-#     aes(
-#       x = perc_white,
-#       y = count_grocery
-#     )
-#   )
+ggplot() +
+  geom_point(
+    data = bay_tract_race_income_grocery,
+    aes(
+      x = perc_over100k,
+      y = count_grocery
+    )
+  )
+
+ggplot() +
+  geom_point(
+    data = bay_tract_race_income_grocery,
+    aes(
+      x = perc_white,
+      y = count_grocery
+    )
+  )
 ```
 
 From the plots above, we can see that both race and income (DO OR DON't) seem to be correlated in some way to access to healthy food. 
