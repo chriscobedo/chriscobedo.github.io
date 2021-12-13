@@ -109,21 +109,25 @@ bay_tract_buffer <- bay_tract_race_income %>%
   st_transform(26910) %>% 
   st_buffer(1600)
 
-bay_tract_grocery_with_buffer <- grocery_count_points %>% 
-  st_transform(26910) %>% 
-  .[bay_tract_buffer,]
-  
-## create for loop for every row of bay tract buffer
-bay_tract_buffer_with_grocery <- grocery_count_points %>% 
-  st_transform(26910) %>% 
-  .[bay_tract_buffer[396,],] %>% 
-  mutate(
-    Total = nrow(.)
-  ) %>% 
-  group_by(Total) %>% 
-  summarize()
+bay_tract_grocery_counts <- NULL
 
-## rbind to some data frame with just census tract buffers to now include count 
+num_bay_tracts <- 1:nrow(bay_tract_buffer)
+
+for(x in num_bay_tracts){
+  bay_tract_buffer_with_grocery <- grocery_count_points %>% 
+    st_transform(26910) %>% 
+    .[bay_tract_buffer[x,],] %>% 
+    mutate(
+      Total = nrow(.)
+    ) %>% 
+    group_by(Total) %>% 
+    summarize() %>% 
+    mutate(
+      census_tract = bay_tract_buffer[x,1] %>% st_drop_geometry()
+    )
+  
+  bay_tract_grocery_counts <- rbind(bay_tract_grocery_counts, bay_tract_buffer_with_grocery)
+}
 
 
 mapview(bay_tract_buffer) + mapview(grocery_count_points)
