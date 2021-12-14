@@ -147,16 +147,10 @@ observeEvent({
       x = "",
       y = "Total kBTUs (billions)",
       title = 
-        if(length(input$year) == 1){
-          paste0(class_name_current, " Consumption in the Bay Area, ", input$year)
-        } else if(length(input$year) == 0){
-          paste0(class_name_current, " Consumption in the Bay Area, 2020")
-        } else {
-          paste0(class_name_current, " Consumption in the Bay Area, ", paste(input$year, collapse = ', '))
-        },
+        paste0(class_name_current, " Consumption in the Bay Area"),
       color = "Year"
     ) + 
-    theme(legend.position = "none")
+    theme(legend.position = "bottom")
   
   output$plot <- renderPlotly({
     chart %>% 
