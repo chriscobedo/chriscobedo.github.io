@@ -306,6 +306,10 @@ income_model <- lm(count_grocery ~ perc_over100k, bay_tract_race_income_grocery)
 summary(income_model)
 ```
 
+The results from this linear regression are not significant. The coefficient does suggest that there is actually a slightly negative correlation between income and access to healthy food, however, since the standard error is very high and the results are not statistically significant, we cannot scientifically claim a correlation relationship.
+
+#### Race
+
 modeling race - make sure there is correlation
 
 ```{r}
@@ -323,6 +327,12 @@ summary(full_model)
 ```
 
 
+
+#### Discussion
+
+It is important to note that all of the metrics we chose were subjectively created and could have changed the results of the models. The decision to use the count of grocery stores as the dependent variable was also a subjective choice that would provide different results than if we treated it as an independent variable.
+
+Still
 
 
 
