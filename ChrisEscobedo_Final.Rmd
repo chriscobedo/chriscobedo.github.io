@@ -340,7 +340,7 @@ We can also see that the regression coefficient for race is 3.4265 and that this
 
 It is important to note that all of the metrics we chose were subjectively created and could have changed the results of the models. The decision to use the count of grocery stores as the dependent variable was also a subjective choice that would provide different results than if we treated it as an independent variable. There are many other potential factors that impact these metrics, so it is impossible to perfectly represent them all in a study of correlation.
 
-Still, there are interesting relationships that emerged that give us insight into the correlation of these factors with food access. To be clear, we cannot assign any causality
+Still, there are interesting relationships that emerged that give us insight into the correlation of these factors with food access. To be clear, we cannot assign any causality to these results, since we are only studying potential correlation. We can see that, using our metrics as defined, there seems to be a large positive correlation between race and access to healthy food. That correlation becomes even stronger when controlling for income. That is to say, when a census tract has a higher percentage of 
 
 
 
