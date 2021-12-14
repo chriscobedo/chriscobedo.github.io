@@ -230,6 +230,8 @@ leaflet() %>%
 
 *Disclaimer*
 
+* The decision to use percentage of the population that is white was arbitrary, and could have used percentage of the population that is non-white, or any other race, and given different results.
+
 * Since ethnicity is a separate question than race for the Census, any of the races may include the latinx population.
 
 ## Analysis 
@@ -249,7 +251,7 @@ The metrics used for race and income are the same as for the maps above. Those m
 * The "access to healthy food" metric assumes that all grocery stores provide access to healthy foods. 
 * The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include complete and fully accurate data. Furthermore, it was filtered for the data of businesses that are categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include stores that do not typically provide healthy fresh food, as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
 * The distance of a  mile radius from the center of the census tract was chosen to align with one of the accessibility metrics used by the USDA to measure low access to healthy food. This analysis could have used a different length as an accessibility metric and the results would change.
-* The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the population of entire census tract, which may not be true for some areas.
+* The center of the census tract was chosen as the focal point because the total count of stores in a census tract would not be easy to compare, as all census tracts have various shapes, areas, and populations. This assumes that the center of the census tract should give a accurate representation of the population of entire census tract, which may not be true for some areas.
 
 ## Plots of Race, Income, and Access to Healthy Food
 
@@ -312,7 +314,7 @@ income_model <- lm(count_grocery ~ perc_over100k, bay_tract_race_income_grocery)
 summary(income_model)
 ```
 
-The results from this linear regression are not significant. The coefficient does suggest that there is actually a slightly negative correlation between income and access to healthy food, however, since the standard error is very high and the results are not statistically significant, we cannot scientifically claim a correlation relationship.
+The results from this linear regression are not significant. The coefficient does suggest that there is actually a slightly negative correlation between income and access to healthy food, however, since the standard error is very high and the results are not statistically significant, we cannot scientifically claim a correlation relationship. 
 
 #### Race
 
@@ -342,7 +344,7 @@ In this model, we can see that the regression coefficient for income is -1.786 a
 
 We can also see that the regression coefficient for race is 3.4265 and that this is also a statistically significant result. This tells us that when we "control for income", whiteness of a census tract seems to be strongly positively correlated with access to healthy foods. In fact, it is even more strongly correlated to access to healthy foods than we see in the singular regression model, without controlling for income. 
 
-This model ... is good?
+The correlation coefficient for the model is positive and low, at .04128. which tells you that the residual errors may be high. This could be expected with such variance in census tracts and grocery store counts. Still, the model is very useful and provides statistically significant results which allow us to examine the correlation between our metrics.
 
 #### Discussion
 
