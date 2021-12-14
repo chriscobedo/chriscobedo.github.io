@@ -26,9 +26,6 @@ Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
 
 
-#### Data and Metrics
-
-
 
 ```{r, warning = F}
 bay_county_names <-
@@ -142,55 +139,14 @@ bay_tract_race_income_grocery <- bay_tract_race_income %>%
 bay_tract_race_income_grocery[is.na(bay_tract_race_income_grocery)] = 0
 ```
 
-### Census Tract Maps of 11 Most Populated Cities in the Bay Area
+## Maps of 11 Most Populated Cities
 
-Below are three maps showing the census tracts for the 11 most populated cities in the Bay Area. These are the census tracts that will be used for the regression analysis to test correlation between access to healthy food, race, and income.
+Below are two maps showing information for all census tracts for the 11 most populated cities in the Bay Area. These are the census tracts that will be used for the regression analysis to test correlation between access to healthy food, race, and income.
 
 *Disclaimer*: It is important to note the assumptions that were made to create these maps and the potential issues with them. Each map also include its own set of disclaimers.
 
 * Only the top most populated cities were chosen, perhaps leaving out valuable information from other cities. This was done to minimize the distortion that may have occurred from applying the same spatial analysis technique in an urban area and a rural area to determine access to healthy food. The number 11 was chosen arbitrarily.
 * The census tracts were joined to the spatial locations of the cities using the "centroid" of the census tract, thus some census tracts that were within the boundary of the city in some way may have been left out of the analysis if the center was not within it.
-
-#### Race
-
-The Map Below shows the percentage of the population that is white for each census tract in the 11 most populated cities in the Bay Area.
-
-
-```{r, warning = F}
-race_pal <- colorNumeric(
-  palette = "Blues",
-  domain = bay_tract_race_income$perc_white
-)
-
-leaflet() %>%
-  addTiles() %>% 
-  addPolygons(
-    data = bay_tract_race_income,
-    fillColor = ~race_pal(perc_white),
-    color = "white",
-    opacity = 0.5,
-    fillOpacity = 0.8,
-    weight = 1,
-    label = ~paste0(
-      round(perc_white * 100), 
-      "% of population that is White Alone"
-    ),
-    highlightOptions = highlightOptions(
-      weight = 2,
-      opacity = 1
-    )
-  ) %>%
-  addLegend(
-    data = bay_tract_race_income,
-    pal = race_pal,
-    values = ~perc_white,
-    title = "Percentage of the population<br> that is White alone"
-  )
-```
-
-*Disclaimer*
-
-* Since ethnicity is a separate question than race for the Census, any of the races may include the latinx population.
 
 #### Income
 
@@ -228,16 +184,55 @@ leaflet() %>%
   )
 ```
 
-
 *Disclaimer*
 
 * The decision to use 100k as the cutoff for higher income was a subjective choice chosen to be most representative of median income for the bay area. This number could have been different and the median income is certainly different for every census tract and representative of a different reality for different sized households.
 
-### Plots of Race, Income, and Access to Healthy Food
+#### Race
+
+The Map Below shows the percentage of the population that is white for each census tract in the 11 most populated cities in the Bay Area.
+
+```{r, warning = F}
+race_pal <- colorNumeric(
+  palette = "Blues",
+  domain = bay_tract_race_income$perc_white
+)
+
+leaflet() %>%
+  addTiles() %>% 
+  addPolygons(
+    data = bay_tract_race_income,
+    fillColor = ~race_pal(perc_white),
+    color = "white",
+    opacity = 0.5,
+    fillOpacity = 0.8,
+    weight = 1,
+    label = ~paste0(
+      round(perc_white * 100), 
+      "% of population that is White Alone"
+    ),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>%
+  addLegend(
+    data = bay_tract_race_income,
+    pal = race_pal,
+    values = ~perc_white,
+    title = "Percentage of the population<br> that is White alone"
+  )
+```
+
+*Disclaimer*
+
+* Since ethnicity is a separate question than race for the Census, any of the races may include the latinx population.
+
+## Plots of Race, Income, and Access to Healthy Food
 
 Below are two plots. The first plot shows the correlation between our chosen metric for income and access to healthy food while the second plot shows the correlation between our chosen metric for race and access to healthy food.
 
-#### Metrics
+### Metrics
 
 The metrics for race and income are the same as for the maps above. Those metrics use data from the American Communities Survey 5 year estimates. The plots also include a new metric which we created to measure access to healthy food. The explanations of these metrics are below.
 
@@ -245,13 +240,14 @@ The metrics for race and income are the same as for the maps above. Those metric
 
 * The metric for race is the percentage of the population that identifies as "White Alone" for their race for each census tract. Thus, as the percentage increases, the more white a census tract is.
 
-* The index of access to Healthy food was created ...
+* The metric for access to Healthy food is the total number of grocery stores found within a 1 mile radius from the center of the census tract, for each census tract. Thus, a higher number would likely indicate better access to healthy food.
 
 *Disclaimers*
 
-* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include a complete and fully accurate data set. Furthermore, it filters for business data that is categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include stores that do not typically provide healthy fresh food as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
+* The "access to healthy food" metric assumes that all grocery stores provide access to healthy foods. 
+* The data for "grocery stores" in the bay area in 2019 came from "referenceusa.com" which may not include complete and fully accurate data. Furthermore, it was filtered for the data of businesses that are categorized as "5411 Grocery Stores" for the primary SIC prefix code, with "541103 - Convenience Stores" omitted. The 5411 categories includes different types of food retailers, which may include stores that do not typically provide healthy fresh food, as a typical grocery store would. To account for this, the store data were filtered to only include those with square footage above 5,000. According to "Convenience Store News", the average square footage for convenience stores in 2019 was 3,225 https://issuu.com/ensembleiq/docs/csn-0620?fr=sMjM1NjgwODQ2MQ). Still, there may be other food stores larger than this or grocery stores smaller than this, so it is not a perfect representation of grocery stores. 
 * The distance of a  mile radius from the center of the census tract was chosen to align with one of the accessibility metrics used by the USDA to measure low access to healthy food. This analysis could have used a different length as an accessibility metric and the results would change.
-* The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the entire census tract, which may not be true for some areas.
+* The center of the census tract was chosen as the focal point because total count would not be easy to compare, as all census tracts have various shapes and areas. This assumes that the center of the census tract should give a accurate representation of the population of entire census tract, which may not be true for some areas.
 
 ```{r}
 ggplot(
@@ -275,11 +271,11 @@ ggplot(
   geom_smooth(method = "lm")
 ```
 
-From the plots above, we can clearly see that race is positively correlated with our metric for access to healthy food. 
+From the plots above, we can clearly see that race is positively correlated with our metric for access to healthy food. On the other hand, there is no immediately visible correlation between income and access to healthy food.
 
-The plot below will attempt to visualize the relationship of all three of these data sets.
+The plot below attempts to visualize the relationship of all three of these data sets.
 
-This is a correlation plot of the percentage of white population, the percentage of the population with household income greater than 100k USD, and the amount of grocery stores within a five mile radius of the center of the census tract for each census tract. The amount of grocery stores are demonstrated using lighter and darker colors for each census tract.
+This is a correlation plot of the percentage of white population, the percentage of the population with household income greater than 100k USD, and the amount of grocery stores within a mile radius of the center of the census tract for each census tract. The number of grocery stores are demonstrated using lighter and darker colors for each census tract.
 
 ```{r}
 ggplot(
@@ -296,18 +292,35 @@ ggplot(
   )
 ```
 
-### Linear Regression Analysis 
+## Linear Regression Analysis 
 
+We will now more closely inspect these relationships with linear regression models. We will start by inspecting race and income separately in their relationship with access to healthy food. We will then perform multiple regression to inspect the relationship of both of them together.
 
+#### Income
+
+Below is the linear regression model for income and healthy food access. This model provides more insight into the trend that we could see in the correlation plot that appeared to show no apparent correlation between income levels and food access.
 
 ```{r}
-food_access_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_tract_race_income_grocery)
+income_model <- lm(count_grocery ~ perc_over100k, bay_tract_race_income_grocery)
 
-summary(food_access_model)
+summary(income_model)
 ```
 
+modeling race - make sure there is correlation
 
+```{r}
+race_model <- lm(count_grocery ~ perc_white, bay_tract_race_income_grocery)
 
+summary(race_model)
+```
+
+Finally, below is the multiple regression model that shows the correlation of both race and income with access to healthy food.
+
+```{r}
+full_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_tract_race_income_grocery)
+
+summary(full_model)
+```
 
 
 
