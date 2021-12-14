@@ -310,13 +310,17 @@ The results from this linear regression are not significant. The coefficient doe
 
 #### Race
 
-modeling race - make sure there is correlation
+Below is the linear regression model for race and healthy food access. This model provides more insight into the trend that we could see in the correlation plot that showed a positive correlation between "whiteness" of a census tract and food access.
 
 ```{r}
 race_model <- lm(count_grocery ~ perc_white, bay_tract_race_income_grocery)
 
 summary(race_model)
 ```
+
+
+
+#### Income and Race
 
 Finally, below is the multiple regression model that shows the correlation of both race and income with access to healthy food.
 
@@ -326,13 +330,17 @@ full_model <- lm(count_grocery ~ perc_over100k + perc_white, bay_tract_race_inco
 summary(full_model)
 ```
 
+This model includes statistically significant results for the correlation of both race and income with access to healthy food. 
 
+In this model, we can see that the regression coefficient for income is -1.786 and that it is a significant result. This gives us the information that when we "control for race," income seems to be negatively correlated with access to healthy food. This is in line with the results from the single linear regression model, though that result was not statistically significant and this correlation is much stronger.
+
+We can also see that the regression coefficient for race is 3.4265 and that this is also a statistically significant result. This tells us that when we "control for income", whiteness of a census tract seems to be strongly positively correlated with access to healthy foods. In fact, it is even more strongly correlated to access to healthy foods than we see in the singular regression model, without controlling for income. 
 
 #### Discussion
 
-It is important to note that all of the metrics we chose were subjectively created and could have changed the results of the models. The decision to use the count of grocery stores as the dependent variable was also a subjective choice that would provide different results than if we treated it as an independent variable.
+It is important to note that all of the metrics we chose were subjectively created and could have changed the results of the models. The decision to use the count of grocery stores as the dependent variable was also a subjective choice that would provide different results than if we treated it as an independent variable. There are many other potential factors that impact these metrics, so it is impossible to perfectly represent them all in a study of correlation.
 
-Still
+Still, there are interesting relationships that emerged that give us insight into the correlation of these factors with food access. To be clear, we cannot assign any causality
 
 
 
