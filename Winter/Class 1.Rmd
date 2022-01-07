@@ -1,0 +1,59 @@
+---
+title: "Class 1"
+author: "Chris"
+---
+title: "Final Assignment"
+author: "Chris Escobedo"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document  
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(tigris)
+library(sf)
+library(leaflet)
+library(tidycensus)
+library(esri2sf)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+```{r}
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+bay_counties <-
+  counties("CA", cb = T, progress_bar = F) %>%
+  filter(NAME %in% bay_county_names)
+
+ca_pumas <-
+  pumas("CA", cb = T, progress_bar = F)
+
+bay_pumas <-
+  ca_pumas %>% 
+  st_centroid() %>% 
+  .[bay_counties, ] %>% 
+  st_set_geometry(NULL) %>% 
+  left_join(ca_pumas %>% select(GEOID10)) %>% 
+  st_as_sf()
+
+pums_vars_2019 <- 
+  pums_variables %>%
+  filter(year == 2019, survey == "acs5")
+```
+
