@@ -11,19 +11,35 @@ knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 
 ```{r}
 library(tidyverse)
+library(mapview)
 library(tigris)
 library(sf)
 library(leaflet)
 library(esri2sf)
 library(tidycensus)
+library(censusapi)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+
+census_api_key("c8aa67e4086b4b5ce3a8717f59faa9a28f611dab")
+
+acs_vars_2019_5yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs5",
+    type = "variables"
+  )
 ```
 
 ACS 5 Data
 
 ```{r}
+EPA_boundary <- 
+  places("CA", cb = T, progress_bar = FALSE) %>% 
+  filter(NAME == "East Palo Alto")
 
+getCensu
+
+mapview(EPA_boundary)
 ```
 
 Parcel Data
