@@ -37,7 +37,15 @@ EPA_boundary <-
   places("CA", cb = T, progress_bar = FALSE) %>% 
   filter(NAME == "East Palo Alto")
 
-getCensu
+EPA_housing_burden <- getCensus(
+  name = "acs/acs5",
+  vintage = 2019,
+  region = "place:20956",
+  regionin = "state:06",
+  vars = "group(B25104)"
+)
+
+
 
 mapview(EPA_boundary)
 ```
