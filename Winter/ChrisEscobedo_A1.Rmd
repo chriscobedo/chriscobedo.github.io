@@ -42,8 +42,8 @@ EPA_housing_burden <- getCensus(
   vintage = 2019,
   region = "place:20956",
   regionin = "state:06",
-  vars = "group(B25104)"
-)
+  vars = "group(B25106)"
+) 
 
 
 
