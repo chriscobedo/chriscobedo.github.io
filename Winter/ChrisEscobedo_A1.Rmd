@@ -14,16 +14,25 @@ library(tidyverse)
 library(tigris)
 library(sf)
 library(leaflet)
-library(tidyverse)
 library(esri2sf)
+library(tidycensus)
 
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+ACS 5 Data
+
+```{r}
+
+```
+
+Parcel Data
+
+```{r}
 epa_zoning <- esri2sf("https://services8.arcgis.com/0IC8hha3hgQkmGoa/arcgis/rest/services/EastPaloAltoZoning_2021_WFL1/FeatureServer/1")
 
 smc_exemption <- read_csv("https://datahub.smcgov.org/api/views/pmvw-bs84/rows.csv?accessType=DOWNLOAD")
-```
 
-
-```{r}
 epa_exemption <- smc_exemption %>% 
   mutate(
     APN = `Parcel Number` %>% 
