@@ -45,10 +45,20 @@ EPA_housing_burden <- getCensus(
   vars = "group(B25106)"
 ) 
 
+EPA_housing_burden_location <- EPA_housing_burden %>% 
+  left_join(
+    EPA_boundary,
+      select(PUMACE10),
+    by = c("place" = "PLACEFP")
+  ) %>% 
+  st_as_sf()
 
 
+mapview(EPA_housing_burden_location)
 mapview(EPA_boundary)
 ```
+
+
 
 Parcel Data
 
