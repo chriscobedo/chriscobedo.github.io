@@ -79,8 +79,13 @@ housing_burden_neighboring_counties <- getCensus(
     sep = "!!"
   ) %>% 
   filter(!is.na(burden)) %>% 
-    group_by(income, occupation, burden) %>% 
-    summarize(estimate = sum(estimate))
+  mutate(
+    burden = if_else(burden == "20 to 29 percent" | burden == "Less than 20 percent", 
+              "less than 30 percent", 
+              burden)
+  ) %>% 
+  group_by(income, occupation, burden) %>% 
+  summarize(estimate = sum(estimate))
 
 housing_burden_epa <- getCensus(
   name = "acs/acs5/subject",
@@ -105,26 +110,26 @@ housing_burden_epa <- getCensus(
   select(-name) %>% 
   separate(
     label,
-    into = c(NA,"Occupation",NA, NA,"Income", "Burden"),
+    into = c(NA,"occupation",NA, NA,"income", "burden"),
     sep = "!!"
-  )
-
-
-## vars = "group(B25106)"
-
-
-
-
-EPA_housing_burden_location <- EPA_housing_burden %>% 
-  left_join(
-    EPA_boundary,
-    by = c("place" = "PLACEFP")
   ) %>% 
-  st_as_sf()
+  filter(!is.na(burden)) %>% 
+  mutate(
+    burden = if_else(burden == "20 to 29 percent" | burden == "Less than 20 percent", 
+              "less than 30 percent", 
+              burden)
+  ) %>% 
+  group_by(income, occupation, burden) %>% 
+  summarize(estimate = sum(estimate))
 
 
-mapview(EPA_housing_burden_location)
-mapview(neighboring_places) + mapview(EPA_boundary)
+```
+
+plotting ACS data
+```{r}
+
+
+
 ```
 
 
