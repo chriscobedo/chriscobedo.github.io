@@ -25,7 +25,7 @@ census_api_key("c8aa67e4086b4b5ce3a8717f59faa9a28f611dab")
 
 acs_vars_2019_5yr <-
   listCensusMetadata(
-    name = "2019/acs/acs5",
+    name = "2019/acs/acs5/subject",
     type = "variables"
   )
 ```
@@ -33,29 +33,98 @@ acs_vars_2019_5yr <-
 ACS 5 Data
 
 ```{r}
+neighboring_counties <- 
+  counties("CA", cb = T, progress_bar = F) %>% 
+  filter(NAME %in% c("San Mateo","Santa Clara"))
+
+ca_places <- 
+  places("CA", cb = T, progress_bar = FALSE) 
+
+neighboring_places <- 
+  ca_places %>% 
+  st_centroid() %>% 
+  .[neighboring_counties, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(ca_places %>% select(GEOID)) %>% 
+  st_as_sf() 
+
 EPA_boundary <- 
   places("CA", cb = T, progress_bar = FALSE) %>% 
   filter(NAME == "East Palo Alto")
 
-EPA_housing_burden <- getCensus(
-  name = "acs/acs5",
+housing_burden_neighboring_counties <- getCensus(
+  name = "acs/acs5/subject",
+  vintage = 2019,
+  region = "place:*",
+  regionin = "state:06",
+  vars = paste0("S2503_C0", c(
+  "3_025E","3_026E", "3_027E", "3_028E", "3_029E","3_030E", "3_031E", "3_032E", "3_033E", "3_034E", "3_035E", "3_036E", "3_037E", "3_038E", "3_039E", "3_040E", "3_041E", "3_042E", "3_043E", "3_044E", "3_045E", "3_046E", "5_025E","5_026E", "5_027E", "5_028E", "5_029E","5_030E", "5_031E", "5_032E", "5_033E", "5_034E", "5_035E", "5_036E", "5_037E", "5_038E", "5_039E", "5_040E", "5_041E", "5_042E", "5_043E", "5_044E", "5_045E", "5_046E")
+  )
+) %>% 
+  filter(place %in% neighboring_places$PLACEFP) %>%
+  select(!c(state,place) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label)
+    ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,"occupation",NA, NA,"income", "burden"),
+    sep = "!!"
+  ) %>% 
+  filter(!is.na(burden)) %>% 
+    group_by(income, occupation, burden) %>% 
+    summarize(estimate = sum(estimate))
+
+housing_burden_epa <- getCensus(
+  name = "acs/acs5/subject",
   vintage = 2019,
   region = "place:20956",
   regionin = "state:06",
-  vars = "group(B25106)"
-) 
+  vars = paste0("S2503_C0", c(
+  "3_025E","3_026E", "3_027E", "3_028E", "3_029E","3_030E", "3_031E", "3_032E", "3_033E", "3_034E", "3_035E", "3_036E", "3_037E", "3_038E", "3_039E", "3_040E", "3_041E", "3_042E", "3_043E", "3_044E", "3_045E", "3_046E", "5_025E","5_026E", "5_027E", "5_028E", "5_029E","5_030E", "5_031E", "5_032E", "5_033E", "5_034E", "5_035E", "5_036E", "5_037E", "5_038E", "5_039E", "5_040E", "5_041E", "5_042E", "5_043E", "5_044E", "5_045E", "5_046E")
+  )
+) %>% 
+  filter(place %in% neighboring_places$PLACEFP) %>%
+  select(!c(state,place) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label)
+    ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,"Occupation",NA, NA,"Income", "Burden"),
+    sep = "!!"
+  )
+
+
+## vars = "group(B25106)"
+
+
+
 
 EPA_housing_burden_location <- EPA_housing_burden %>% 
   left_join(
     EPA_boundary,
-      select(PUMACE10),
     by = c("place" = "PLACEFP")
   ) %>% 
   st_as_sf()
 
 
 mapview(EPA_housing_burden_location)
-mapview(EPA_boundary)
+mapview(neighboring_places) + mapview(EPA_boundary)
 ```
 
 
