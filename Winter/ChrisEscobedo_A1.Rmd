@@ -31,11 +31,15 @@ acs_vars_2019_5yr <-
   )
 ```
 
-Intro
+## Brief Introduction
+
+This report assumes familiarity with the OPA and its motives for the city of East Palo Alto.
+
+This report will attempt to analyze the current housing situation, particularly for those who the OPA will attempt to impact the most, to gain an understanding of its merits and the concerns of its opposition. To do that, the report will look at the housing burden of East Palo Alto, the changes in home ownership and occupation status, as well as general housing demographics.
 
 #### Housing Burden
 
-For the purpose of this assesment, housing burden has been defined as using by a threshold of 30% of one's household income. Those who spend more than 30% of income on housing are considered to be housing burdened, while those spend less are considered to not be housing burdened. Although this is an arbitrarily chosen cutoff, it is useful to use to get a quick understanding of those who may struggle to pay for housing in the area.
+For the purpose of this assessment, housing burden has been defined as using by a threshold of 30% of one's household income. Those who spend more than 30% of income on housing are considered to be housing burdened, while those spend less are considered to not be housing burdened. Although this is an arbitrarily chosen cutoff, it is useful to use to get a quick understanding of those who may struggle to pay for housing in the area.
 
 That being said, it is important to note there may be times when this makes the findings less accurate. For extremely high income earners, using more than 30% on housing may not matter to their living situation if they have plenty of disposable income leftover. Furthermore, some families that use 29% of their income on housing may be struggling financially, but will not be counted in this measure of housing burden because of the arbitrary cutoff. 
 
@@ -252,7 +256,13 @@ leaflet() %>%
       filter(`Fiscal Year` == "2018/2019"),
     fillColor = "yellow",
     color = "black",
-    weight = 0.5
+    weight = 0.5,
+    label = ~
+      "renter-occupied",
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
   ) %>% 
   addPolygons(
     data = epa_exemption %>% 
@@ -260,9 +270,43 @@ leaflet() %>%
     fillColor = "blue",
     color = "black",
     weight = 0.5,
-    fillOpacity = 1
+    fillOpacity = 1,
+    label = ~
+      "owner-occupied",
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = epa_exemption,
+    colors =c("yellow", "blue"),
+    labels= c("renter-occupied", "owner-occupied"),
+    title = "Occupation status of parcel"
   )
 
 ```
+
+From this map, we can see that there is a fairly heterogeneous mix of renter and owner occupation of single family homes in East Palo Alto, with mixed geographical diversity and fairly even distribution. 
+
+Now let's look deeper at the changes that have occured to see if any of these groups have become more prevelant. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
+
+
+
+#### Conclusion
+
+Going through this analysis, it seems clear to me that the most burdened popeulation in East Palo Alto are the renters. Furthermore, the increase in homes occupied by renters might indicate a lack of community wealth-building and stability for the long time community members, as they are out-competed by those investment interests who purchase properties to rent them out.
+
+The opposition to the OPA believes this may harm single family home owners, but given the exemption to owners who occupy the house, I believe that impact will be fairly small. Furthermore, it is clear that the OPA will be helping a much larger group and a much more burdened group in getting a better chance to increase home ownership levels. 
+
+For these reasons I am in support of the OPA as I see it. Of course there are other complexities that I am not able to analyze through this report, such as what financial costs there may be to those who wish to invest in the community but are now disincentivized to do so. I believe that the good this may do outweighs the potential negatives, but remain open to learning more about it. 
+
+
+
+
+
+
+
+
 
 
