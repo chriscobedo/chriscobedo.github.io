@@ -18,6 +18,7 @@ library(leaflet)
 library(esri2sf)
 library(tidycensus)
 library(censusapi)
+library(readxl)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
@@ -220,6 +221,14 @@ Given that information, we have a better understanding of the housing situation 
 Still, we can look closer at parcel level data in East Palo Alto to uncover more patterns in housing in the area. Specifically, we may be interested in how home ownership is changing. The OPA looks to increase home ownership of community members, those living in the area, to stabilize prices and community. By looking at the change in home ownership with the occupation status, we can see what is currently happening with home ownership. 
 
 #### Using Parcel Data to uncover home ownership trends
+
+To get started, lets look at the landscape of East Palo Alto in relation to owner and renter occupation. Those who oppose the OPA worry about the additional eligibility of "single family homes", whereas other cities have foused on multifamily units. This understanding of parcel data will help us to understand the makeup of those single-family homes and see what changes have occurred that might warrant external support in the form on an OPA or not.
+
+The map below uses the report of a tax exemption for owner occupied houses to determine the occupation status of single family homes. 
+
+*Although this is helpful, it may not be fully accurate, as there may be owners who forget to apply for the exemption. There also may be buildings that have a zero value for the exemption but are not currently used for residential purposes, and thus the houses that do not file for the exemption are not necessarily renter-occupied, as the map below assumes. 
+
+Furthermore, the map uses parcels that are zoned for "low density residential" (R-LD), which should get us to single-family properties in the city, but of course, zoning is not actual property use and there may be parcels that are not single family homes.*
 
 ```{r}
 epa_zoning <- esri2sf("https://services8.arcgis.com/0IC8hha3hgQkmGoa/arcgis/rest/services/EastPaloAltoZoning_2021_WFL1/FeatureServer/1")
