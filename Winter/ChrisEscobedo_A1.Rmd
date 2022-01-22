@@ -124,7 +124,10 @@ housing_burden_epa <- getCensus(
   mutate(
     burden = if_else(burden == "20 to 29 percent" | burden == "Less than 20 percent", 
               "less than 30 percent", 
-              burden)
+              burden),
+    occupation = if_else(occupation == "Owner-occupied housing units", 
+              "Owner", 
+              "Renter"),
   ) %>% 
   group_by(income, occupation, burden) %>% 
   summarize(estimate = sum(estimate))
@@ -155,7 +158,7 @@ burden_plot_epa <- housing_burden_epa_reordered %>%
   labs(
     x = "Household Income",
     y = "Number of Households",
-    title = "East Palo Alto housing burden by income and renter/owner status",
+    title = "East Palo Alto housing burden",
     fill = "% of Income spent on housing"
   ) +
   coord_flip() +
