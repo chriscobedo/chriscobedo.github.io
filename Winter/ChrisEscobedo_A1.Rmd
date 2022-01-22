@@ -176,14 +176,43 @@ We can also see that there are more renters in total when looking in the lower i
 
 (% of renter-occupied units, and what % of severely burdened households are renter households.)
 
-The OPA hopes to give renters more opportunity to purchase housing and thus stabilize communities. To gain a deeper understanding of the renting and burden situation, lets  see how many housing units are renter occupied and then look at what percent of burdened households are renter households. 
+The OPA hopes to give renters more opportunity to purchase housing and thus stabilize communities. To gain a deeper understanding of the renting and burden situation, lets see how many housing units are renter occupied and then look at what percent of burdened households are renter households. 
 
-First, let's look at the percentage of housing units that are renter-occupied in East Palo Alto.
+First, let's look at the breakdown of housing burden to determine just how much housing burden the renting population of Est Palo Alto faces. This will help us to see how valid the OPA's goal of assisting the renting population is, by showing how much more likely they are to be housing burdened. 
+
+Below is the percentage of housing burdened families there are in East Palo Alto that are renters.
+
+```{r, warning = F}
+percent_housing_burden <- housing_burden_epa_reordered %>% 
+  group_by(occupation, burden) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  filter(burden == "30 percent or more") %>% 
+  mutate(
+    percentage = estimate / sum(percent_housing_burden$estimate)
+  )
+
+percent_housing_burden[2,4]
+```
+
+It's clear that most of the housing burdened population for East Palo Alto are renters, with about 66% of the housing burdened being renters. This shows us that the OPA does at least have a valid concern in attempting to relieve housing burden by targeting the renters of the area if there focus is to help those most impacted.
+
+Now, let's look at how many of the housing units are actually renter-occupied, to see how many people the OPA would be trying to impact. Knowing how many renters there are in East Palo Alto to begin with will help us understand if the impact is large enough to be warranted.
+
+Below is the percentage of housing units that are renter-occupied in East Palo Alto. 
 
 ```{r, warning = F}
 percent_renter_EPA <- housing_burden_epa_reordered %>% 
-  
+  group_by(occupation) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(
+    percentage = estimate / sum(estimate)
+  )
+
+percent_renter_EPA[2,3]
 ```
+
+The percentage of renter-occupied housing units in East Palo Alto is about 59.3%, which means the majority of housing is occupied by the renters that the OPA is looking to help. 
+
 
 
 Parcel Data
