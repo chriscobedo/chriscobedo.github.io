@@ -292,6 +292,40 @@ From this map, we can see that there is a fairly heterogeneous mix of renter and
 Now let's look deeper at the changes that have occurred to see if any of these groups have become more prevelant. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
 
 
+```{r, warning = F}
+
+expanded_epa_exemption <- epa_exemption %>% 
+  filter(`Fiscal Year` == "2018/2019") %>% 
+  left_join(epa_exemption %>% st_drop_geometry() %>% 
+              filter(`Fiscal Year` == "2015/2016"),
+            by = "APN", 
+  ) %>% 
+  mutate(
+    owner_change = if_else(`Assessed Value.x` / `Assessed Value.y` <= 1.02^4, "same owner", "changing owner"),
+    occupation_change = case_when(
+      Exemption.y == c(5600,7000) & Exemption.x == c(5600,7000) ~ "owner-occupied",
+      Exemption.y != c(5600,7000) & Exemption.x != c(5600,7000) ~ "renter-occupied",
+      Exemption.y == c(5600,7000) & Exemption.x != c(5600,7000) ~ "renter to owner",
+      Exemption.y != c(5600,7000) & Exemption.x == c(5600,7000) ~ "owner to renter"
+    )
+  )
+
+combined_epa_exemption <- epa_exemption %>% 
+  left_join(
+    expanded_epa_exemption %>% st_drop_geometry() %>%  select(occupation_change, owner_change, APN)
+  )
+
+ownership_plot_epa <- epa_exemption %>% 
+  ggplot(
+    aes(
+      x = `Fiscal Year`,
+      y = `Assessed Value`
+    )
+  ) +
+  geom_line()
+```
+
+There were many asumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^4, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
 
 #### Conclusion
 
