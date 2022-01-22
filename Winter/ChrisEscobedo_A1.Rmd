@@ -30,6 +30,13 @@ acs_vars_2019_5yr <-
   )
 ```
 
+Intro
+
+### Housing Burden
+
+For the purpose of this assesment, housing burden has been defined as using by a threshold of 30% of one's household income. Those who spend more than 30% of income on housing are considered to be housing burdened, while those spend less are considered to not be housing burdened. Although this is an arbitrarily chosen cutoff, it is useful to use to get a quick understanding of those who may struggle to pay for housing in the area.
+
+That being said, it is important to note there may be times when this makes the findings less accurate. For extremely high income earners, using more than 30% on housing may not matter to their living situation if they have plenty of disposable income leftover. Furthermore, some families that use 29% of their income on housing may be struggling financially, but will not be counted in this measure of housing burden because of the arbitrary cutoff. 
 
 
 ```{r}
@@ -148,7 +155,7 @@ burden_plot_epa <- housing_burden_epa_reordered %>%
     x = "Household Income",
     y = "Number of Households",
     title = "East Palo Alto housing burden by income and renter/owner status",
-    fill = "Housing Burden"
+    fill = "% of Income spent on housing"
   ) +
   coord_flip() +
   facet_grid(. ~ occupation)
