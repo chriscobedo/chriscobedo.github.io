@@ -143,6 +143,8 @@ housing_burden_epa_reordered <- housing_burden_epa %>%
 
 ### Housing Burden in East Palo Alto 
 
+Below are two plots that represent general housing burden in East Palo Alto. The plots are separated by occupational status as either a "renter" or "owner" of the house. Since the OPA is interested in assisting the renter-occupied families who are renting housing in building wealth and preventing their displacement, it is helpful to gain this general understanding of the renting and housing burden landscape.
+
 ```{r, warning = F}
 burden_plot_epa <- housing_burden_epa_reordered %>% 
   ggplot() +
@@ -168,6 +170,20 @@ burden_plot_epa
 
 ```
 
+The two plots above further illuminated the situation in East Palo Alto. We can see at a glance that the majority of people in the area earn more than $75,000, and the proportion of the population that is housing burdened in that income tier is relatively similar. Still, 
+
+We can also see that there are more renters in total when looking in the lower income tiers. Furthermore, there is a much higher proportion and total number of renters that are housing burdened then owners for these income teirs. Let's explore this intuitive understanding by looking closer at the data of renter-occupied units and housing burden. 
+
+(% of renter-occupied units, and what % of severely burdened households are renter households.)
+
+The OPA hopes to give renters more opportunity to purchase housing and thus stabilize communities. To gain a deeper understanding of the renting and burden situation, lets  see how many housing units are renter occupied and then look at what percent of burdened households are renter households. 
+
+First, let's look at the percentage of housing units that are renter-occupied in East Palo Alto.
+
+```{r, warning = F}
+percent_renter_EPA <- housing_burden_epa_reordered %>% 
+  
+```
 
 
 Parcel Data
