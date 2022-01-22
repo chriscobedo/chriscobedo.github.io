@@ -289,7 +289,7 @@ leaflet() %>%
 
 From this map, we can see that there is a fairly heterogeneous mix of renter and owner occupation of single family homes in East Palo Alto, with mixed geographical diversity and fairly even distribution. 
 
-Now let's look deeper at the changes that have occured to see if any of these groups have become more prevelant. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
+Now let's look deeper at the changes that have occurred to see if any of these groups have become more prevelant. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
 
 
 
