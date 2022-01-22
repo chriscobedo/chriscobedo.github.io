@@ -213,7 +213,7 @@ percent_renter_EPA <- housing_burden_epa_reordered %>%
 percent_renter_EPA[2,3]
 ```
 
-The percentage of renter-occupied housing units in East Palo Alto is about 59.3%, which means the majority of housing is occupied by the renters that the OPA is looking to help. 
+The percentage of renter-occupied housing units in East Palo Alto is about 59.3%, which means the majority of housing is occupied by the renters. Thus, since the OPA would be looking to help renters, it would be helping the majority of the families living in East Palo Alto.
 
 ...
 
