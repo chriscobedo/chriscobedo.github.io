@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-```{r}
+```{r, warning = F}
 library(tidyverse)
 library(mapview)
 library(tigris)
@@ -39,7 +39,7 @@ For the purpose of this assesment, housing burden has been defined as using by a
 That being said, it is important to note there may be times when this makes the findings less accurate. For extremely high income earners, using more than 30% on housing may not matter to their living situation if they have plenty of disposable income leftover. Furthermore, some families that use 29% of their income on housing may be struggling financially, but will not be counted in this measure of housing burden because of the arbitrary cutoff. 
 
 
-```{r}
+```{r, warning = F}
 neighboring_counties <- 
   counties("CA", cb = T, progress_bar = F) %>% 
   filter(NAME %in% c("San Mateo","Santa Clara"))
@@ -138,8 +138,9 @@ housing_burden_epa_reordered <- housing_burden_epa %>%
 
 ```
 
-plotting ACS data
-```{r}
+### Housing Burden in East Palo Alto 
+
+```{r, warning = F}
 burden_plot_epa <- housing_burden_epa_reordered %>% 
   ggplot() +
   geom_bar(
