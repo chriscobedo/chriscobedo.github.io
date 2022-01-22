@@ -187,11 +187,13 @@ percent_housing_burden <- housing_burden_epa_reordered %>%
   group_by(occupation, burden) %>% 
   summarize(estimate = sum(estimate)) %>% 
   filter(burden == "30 percent or more") %>% 
+  group_by(occupation) %>% 
+  summarize(estimate = sum(estimate)) %>% 
   mutate(
-    percentage = estimate / sum(percent_housing_burden$estimate)
+    percentage = estimate / sum(estimate)
   )
 
-percent_housing_burden[2,4]
+percent_housing_burden[2,3]
 ```
 
 It's clear that most of the housing burdened population for East Palo Alto are renters, with about 66% of the housing burdened being renters. This shows us that the OPA does at least have a valid concern in attempting to relieve housing burden by targeting the renters of the area if there focus is to help those most impacted.
