@@ -32,7 +32,7 @@ acs_vars_2019_5yr <-
 
 Intro
 
-### Housing Burden
+#### Housing Burden
 
 For the purpose of this assesment, housing burden has been defined as using by a threshold of 30% of one's household income. Those who spend more than 30% of income on housing are considered to be housing burdened, while those spend less are considered to not be housing burdened. Although this is an arbitrarily chosen cutoff, it is useful to use to get a quick understanding of those who may struggle to pay for housing in the area.
 
@@ -215,9 +215,11 @@ percent_renter_EPA[2,3]
 
 The percentage of renter-occupied housing units in East Palo Alto is about 59.3%, which means the majority of housing is occupied by the renters. Thus, since the OPA would be looking to help renters, it would be helping the majority of the families living in East Palo Alto.
 
-...
+Given that information, we have a better understanding of the housing situation in Est Palo Alto. Most of the houses are renter owned. Most of the housing burden falls upon those renters. So there may be merit to the claim of OPA supporters that renters are more housing burdened and that they should be helped first.
 
-Parcel Data
+Still, we can look closer at parcel level data in East Palo Alto to uncover more patterns in housing in the area. Specifically, we may be interested in how home ownership is changing. The OPA looks to increase home ownership of community members, those living in the area, to stabilize prices and community. By looking at the change in home ownership with the occupation status, we can see what is currently happening with home ownership. 
+
+#### Using Parcel Data to uncover home ownership trends
 
 ```{r}
 epa_zoning <- esri2sf("https://services8.arcgis.com/0IC8hha3hgQkmGoa/arcgis/rest/services/EastPaloAltoZoning_2021_WFL1/FeatureServer/1")
