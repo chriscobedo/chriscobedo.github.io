@@ -315,17 +315,20 @@ combined_epa_exemption <- epa_exemption %>%
     expanded_epa_exemption %>% st_drop_geometry() %>%  select(occupation_change, owner_change, APN)
   )
 
-ownership_plot_epa <- epa_exemption %>% 
+ownership_plot_epa <- combined_epa_exemption %>% 
   ggplot(
     aes(
-      x = `Fiscal Year`,
-      y = `Assessed Value`
+      x = `Fiscal Year` %>% factor(levels = unique(combined_epa_exemption$`Fiscal Year`)),
+      y = `Assessed Value` %>% factor(levels = unique(combined_epa_exemption$`Assessed Value`))
     )
-  ) +
-  geom_line()
+  ) 
+
+ownership_plot_epa
 ```
 
-There were many asumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^4, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
+This chart seems to show that the property values increase much more dramatically when the property changes from an owner occupied house to a renter occupied house. What this might imply is that outside investors are out-competing community members in purchasing single family properties in East Palo Alto. If this is the case, then this is what the OPA is attempting to protect against, so it could support community members purchasing these properties and increase the amount of owner-occupied housing. The OPA's goal is not to stop property value from increasing, but to make it less dramatic and more in line with the changes seen from renter to owner sales property sales..
+
+There were many assumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^4, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
 
 #### Conclusion
 
