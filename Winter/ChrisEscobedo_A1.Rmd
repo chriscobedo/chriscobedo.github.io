@@ -289,8 +289,9 @@ leaflet() %>%
 
 From this map, we can see that there is a fairly heterogeneous mix of renter and owner occupation of single family homes in East Palo Alto, with mixed geographical diversity and fairly even distribution. 
 
-Now let's look deeper at the changes that have occurred to see if any of these groups have become more prevelant. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
+Now let's look deeper at the changes that have occurred to see if any of these groups have become more prevalent. Specifically, we want to see if there is an increasing number of renter-occupied parcels to determine if the parcels are vulnerable to being bought by those outside of the community and rented at higher prices at the expense of the community members. We won't be able to see changes in rent prices, but we can look at the change in occupation status to get a sense of what might be happening. 
 
+The graph below shows the change in property values over four years, specifically four each different tenure status.
 
 ```{r, warning = F}
 
@@ -315,26 +316,35 @@ combined_epa_exemption <- epa_exemption %>%
     expanded_epa_exemption %>% st_drop_geometry() %>%  select(occupation_change, owner_change, APN)
   ) %>%
   mutate(
-    tenure = paste0(owner_change, ", ", occupation_change)
+    Tenure = paste0(owner_change, ", ", occupation_change)
   ) %>% 
-  filter(!is.na(occupation_change)) %>% 
-  group_by(`Fiscal Year`, tenure) %>%
-  summarize(mean_val = mean(`Assessed Value`))
+  filter(!is.na(occupation_change)
+  ) %>% 
+  select(`Fiscal Year`, `Assessed Value`, Tenure) %>% 
+  st_drop_geometry() %>% 
+  group_by(`Fiscal Year`, Tenure) %>% 
+  summarize(mean = mean(`Assessed Value`))
 
 ggplot(
   combined_epa_exemption,
   aes(
     x = `Fiscal Year` %>% factor(levels = unique(`Fiscal Year`)),
-    y = `Assessed Value`, ## %>% factor(levels = unique(`Assessed Value`)),
-##    color = tenure %>% factor(levels = unique(`tenure`))
-    group = tenure
+    y = mean,
+    color = Tenure,
+    group = Tenure
     )
   ) +
-  geom_line()
+  geom_line() +
+  labs(
+    title = "Property Value by Tenure",
+    x = "Fiscal Year",
+    y = "Property Value",
+    fill = "Tenure"
+  )
  
 ```
 
-This chart seems to show that the property values increase much more dramatically when the property changes from an owner occupied house to a renter occupied house. What this might imply is that outside investors are out-competing community members in purchasing single family properties in East Palo Alto. If this is the case, then this is what the OPA is attempting to protect against, so it could support community members purchasing these properties and increase the amount of owner-occupied housing. The OPA's goal is not to stop property value from increasing, but to make it less dramatic and more in line with the changes seen from renter to owner sales property sales..
+This chart seems to show that the property values increase much more dramatically when the property changes from an owner occupied house to a renter occupied house. What this might imply is that outside investors are out-competing community members in purchasing single family properties in East Palo Alto. If this is the case, then this is what the OPA is attempting to protect against, so it could support community members purchasing these properties and increase the amount of owner-occupied housing. The OPA's goal is not to stop property value from increasing, but to make it less dramatic and more in line with the rate seen from renter to owner sales property sales. 
 
 There were many assumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^3, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
 
