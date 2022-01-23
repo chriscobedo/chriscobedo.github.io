@@ -301,34 +301,39 @@ expanded_epa_exemption <- epa_exemption %>%
             by = "APN", 
   ) %>% 
   mutate(
-    owner_change = if_else(`Assessed Value.x` / `Assessed Value.y` <= 1.02^4, "same owner", "changing owner"),
+    owner_change = if_else(`Assessed Value.y` * 1.02^3 <= `Assessed Value.x`, "changing owner", "same owner"),
     occupation_change = case_when(
       Exemption.y == c(5600,7000) & Exemption.x == c(5600,7000) ~ "owner-occupied",
       Exemption.y != c(5600,7000) & Exemption.x != c(5600,7000) ~ "renter-occupied",
-      Exemption.y == c(5600,7000) & Exemption.x != c(5600,7000) ~ "renter to owner",
-      Exemption.y != c(5600,7000) & Exemption.x == c(5600,7000) ~ "owner to renter"
+      Exemption.y == c(5600,7000) & Exemption.x != c(5600,7000) ~ "owner to renter",
+      Exemption.y != c(5600,7000) & Exemption.x == c(5600,7000) ~ "renter to owner"
     )
-  )
+  ) 
 
 combined_epa_exemption <- epa_exemption %>% 
   left_join(
     expanded_epa_exemption %>% st_drop_geometry() %>%  select(occupation_change, owner_change, APN)
-  )
+  ) %>%
+  mutate(
+    tenure = paste0(owner_change, ", ", occupation_change)
+  ) %>% 
+  filter(!is.na(occupation_change))
 
-ownership_plot_epa <- combined_epa_exemption %>% 
-  ggplot(
-    aes(
-      x = `Fiscal Year` %>% factor(levels = unique(combined_epa_exemption$`Fiscal Year`)),
-      y = `Assessed Value` %>% factor(levels = unique(combined_epa_exemption$`Assessed Value`))
+ggplot(
+  combined_epa_exemption,
+  aes(
+    x = `Fiscal Year` %>% factor(levels = unique(`Fiscal Year`)),
+    y = `Assessed Value` %>% factor(levels = unique(`Assessed Value`)),
+    color = tenure %>% factor(levels = unique(`tenure`))
     )
-  ) 
-
-ownership_plot_epa
+  ) +
+  geom_line()
+ 
 ```
 
 This chart seems to show that the property values increase much more dramatically when the property changes from an owner occupied house to a renter occupied house. What this might imply is that outside investors are out-competing community members in purchasing single family properties in East Palo Alto. If this is the case, then this is what the OPA is attempting to protect against, so it could support community members purchasing these properties and increase the amount of owner-occupied housing. The OPA's goal is not to stop property value from increasing, but to make it less dramatic and more in line with the changes seen from renter to owner sales property sales..
 
-There were many assumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^4, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
+There were many assumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^3, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
 
 #### Conclusion
 
