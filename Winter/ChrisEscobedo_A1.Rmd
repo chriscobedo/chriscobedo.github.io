@@ -31,7 +31,7 @@ acs_vars_2019_5yr <-
   )
 ```
 
-## Brief Introduction
+### Introduction
 
 This report assumes familiarity with the OPA and its motives for the city of East Palo Alto.
 
@@ -224,7 +224,7 @@ Given that information, we have a better understanding of the housing situation 
 
 Still, we can look closer at parcel level data in East Palo Alto to uncover more patterns in housing in the area. Specifically, we may be interested in how home ownership is changing. The OPA looks to increase home ownership of community members, those living in the area, to stabilize prices and community. By looking at the change in home ownership with the occupation status, we can see what is currently happening with home ownership. 
 
-#### Using Parcel Data to uncover home ownership trends
+### Using Parcel Data to Uncover Home Ownership Trends
 
 To get started, lets look at the landscape of East Palo Alto in relation to owner and renter occupation. Those who oppose the OPA worry about the additional eligibility of "single family homes", whereas other cities have foused on multifamily units. This understanding of parcel data will help us to understand the makeup of those single-family homes and see what changes have occurred that might warrant external support in the form on an OPA or not.
 
@@ -348,7 +348,7 @@ This chart seems to show that the property values increase much more dramaticall
 
 There were many assumptions in creating this data that should be addressed. The "change in ownership" category was created by assessing whether the property value rose by a ratio of greater than 1.02^3, assuming that with prop 13, which only allows property value to raise at most 2% a year, property values that rose in an amount smaller than that would have not been sold as they would be raising by only the allowed amount. The owner and renter occupation status was determined by the same exemption values as earlier.
 
-#### Conclusion
+### Conclusion
 
 Going through this analysis, it seems clear to me that the most burdened popeulation in East Palo Alto are the renters. Furthermore, the increase in homes occupied by renters and increase in property value might indicate a lack of community wealth-building and stability for the long time community members, as they are out-competed by those investment interests who purchase properties to rent them out.
 
