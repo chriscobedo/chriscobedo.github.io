@@ -317,14 +317,17 @@ combined_epa_exemption <- epa_exemption %>%
   mutate(
     tenure = paste0(owner_change, ", ", occupation_change)
   ) %>% 
-  filter(!is.na(occupation_change))
+  filter(!is.na(occupation_change)) %>% 
+  group_by(`Fiscal Year`, tenure) %>%
+  summarize(mean_val = mean(`Assessed Value`))
 
 ggplot(
   combined_epa_exemption,
   aes(
     x = `Fiscal Year` %>% factor(levels = unique(`Fiscal Year`)),
-    y = `Assessed Value` %>% factor(levels = unique(`Assessed Value`)),
-    color = tenure %>% factor(levels = unique(`tenure`))
+    y = `Assessed Value`, ## %>% factor(levels = unique(`Assessed Value`)),
+##    color = tenure %>% factor(levels = unique(`tenure`))
+    group = tenure
     )
   ) +
   geom_line()
