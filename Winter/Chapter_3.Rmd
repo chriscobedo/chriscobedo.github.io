@@ -61,6 +61,48 @@ smc_pois_filter <- smc_pois %>%
   ))
 
 mapview(smc_pois_filter, zcol = "amenity")
+
+## get block groups
+smc_cbgs <- block_groups("CA","San Mateo")
+
+## get North Fair Oaks
+nfo_boundary <- places("CA") %>% 
+  filter(NAME == "North Fair Oaks")
+
+## filter block group datat to NFO
+nfo_cbgs <- smc_cbgs %>% 
+  st_centroid() %>% 
+  .[nfo_boundary, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(smc_cbgs %>% select(GEOID)) %>% 
+  st_as_sf()
+
+mapview(nfo_cbgs)
+
+isochrone <- mb_isochrone(
+  nfo_cbgs,
+  profile = "walking",
+  time = c(5,10,15)
+)
+
+## getting isochrones
+isochrone <- mb_isochrone(
+  nfo_cbgs,
+  profile = "walking",
+  time = c(5,10,15)
+)
+
+isochrone[1:3,] %>% mapview()
+
+## important to save so you dont rerun this and use up credits
+saveRDS(isochrone, "saveSomewhere.RDS")
+
+## create master data sheet- all isochrones 
+access_raw <- isochrone %>% 
+  st_make_valid() %>% 
+  st_join(smc_pois_filter) %>% 
+  st_drop_geometry() %>% 
+  filter(!is.na(osm_id))
 ```
 
 
