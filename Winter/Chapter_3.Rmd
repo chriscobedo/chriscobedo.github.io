@@ -106,6 +106,30 @@ access_raw <- isochrone %>%
   filter(!is.na(osm_id))
 ```
 
+next step -> making ranks
+
+```{r}
+amenity_preference <- data.frame(
+  amenity = c("park", "convenience", "restaurant", "supermarket", "library"),
+  amenity_value = c(
+    0.8,
+    0.6,
+    0.25,
+    1,
+    0.7
+  ),
+  amenity_quantity = c(
+    2,
+    5,
+    30,
+    1,
+    1
+  )
+) %>% 
+  mutate(
+    amenity_decay = -log(0.5)/amenity_quantity
+  )
+```
 
 
 
