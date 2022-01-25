@@ -38,7 +38,7 @@ pois_summary <- pois %>%
   count() %>% 
   arrange(desc(n))
 
-## Getting geograhpy - transforming to pois coordinate
+## Getting geography - transforming to pois coordinate
 smc_boundary <- counties("CA") %>% 
   filter(NAME == "San Mateo") %>% 
   st_transform(st_crs(pois))
@@ -51,7 +51,8 @@ smc_pois <- pois %>%
 mapview(smc_pois, zcol = "amenity")
 
 ## filter to important amenities
-smc_pois_filter <- smc_pois %>% 
+pois_filter <- pois %>% 
+  rename(amenity = fclass) %>% 
   filter(amenity %in% c(
     "park",
     "convenience",
@@ -69,7 +70,7 @@ smc_cbgs <- block_groups("CA","San Mateo")
 nfo_boundary <- places("CA") %>% 
   filter(NAME == "North Fair Oaks")
 
-## filter block group datat to NFO
+## filter block group data to NFO
 nfo_cbgs <- smc_cbgs %>% 
   st_centroid() %>% 
   .[nfo_boundary, ] %>% 
