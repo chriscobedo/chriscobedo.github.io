@@ -48,6 +48,19 @@ smc_pois <- pois %>%
   .[smc_boundary, ] %>% 
   rename(amenity = fclass)
 
+mapview(smc_pois, zcol = "amenity")
+
+## filter to important amenities
+smc_pois_filter <- smc_pois %>% 
+  filter(amenity %in% c(
+    "park",
+    "convenience",
+    "restaurant",
+    "supermarket",
+    "library"
+  ))
+
+mapview(smc_pois_filter, zcol = "amenity")
 ```
 
 
