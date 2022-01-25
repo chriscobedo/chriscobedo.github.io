@@ -19,20 +19,34 @@ library(leaflet)
 library(mapboxapi)
 library(readxl)
 
-
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
-path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
+mb_access_token("pk.eyJ1IjoiY2hyaXNjb2JlZG8iLCJhIjoiY2t5dWpuOWQwMW5yeTJ1bzdkb2xwNDhzdCJ9.bvKU0wmr5ZptXvmo6vxRkQ", install = T)
 
-pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
+path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
 ```
 
 Class:
 
 ```{r}
-mb_access_token("pk.eyJ1IjoiY2hyaXNjb2JlZG8iLCJhIjoiY2t5dWpuOWQwMW5yeTJ1bzdkb2xwNDhzdCJ9.bvKU0wmr5ZptXvmo6vxRkQ", install = T)
+pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
 
+## get counts
+pois_summary <- pois %>% 
+  st_drop_geometry() %>% 
+  group_by(fclass) %>% 
+  count() %>% 
+  arrange(desc(n))
 
+## Getting geograhpy - transforming to pois coordinate
+smc_boundary <- counties("CA") %>% 
+  filter(NAME == "San Mateo") %>% 
+  st_transform(st_crs(pois))
+
+## filtering to geography
+smc_pois <- pois %>% 
+  .[smc_boundary, ] %>% 
+  rename(amenity = fclass)
 
 ```
 
