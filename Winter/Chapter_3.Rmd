@@ -135,6 +135,7 @@ amenity_preference <- data.frame(
 
 textbook: 
 
+3.1
 ```{r}
 survey_household <- read_csv(paste0(path,"survey_household.csv"))
 
