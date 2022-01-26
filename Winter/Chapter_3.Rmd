@@ -576,7 +576,40 @@ scc_covid_income <-
 ## estimated percent of population in Santa Clara County within 10 minutes walk of COVID-19 testing.
 sum(scc_covid_income$estimate)/
   sum(scc_income$estimate)
+
+## equity analysis pie chart
+rbind(scc_income,scc_covid_income) %>% 
+  ggplot(
+    aes(
+      x = "", 
+      y = perc, 
+      fill = reorder(income,desc(income))
+    )
+  ) + 
+  geom_bar(
+    stat = "identity", 
+    position = position_fill()
+  ) +
+  geom_text(
+    aes(label = paste0(round(perc*100),"%")), 
+    position = position_fill(vjust = 0.5)
+  ) +
+  coord_polar(theta = "y") +
+  facet_wrap(~ group)  +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = 'bottom'
+  ) + 
+  guides(
+    fill = guide_legend(nrow=3, byrow=TRUE)
+  ) +
+  labs(
+    fill = "Household\nIncome"
+  )
 ```
+
+3.2
 
 ```{r}
 
