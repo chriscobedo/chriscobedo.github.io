@@ -317,8 +317,12 @@ bay_trips_summary_wide <-
   ) %>% 
   column_to_rownames("purpose_label")
 
-## plot
+## plot with refinements 
 bay_trips_summary %>% 
+  filter(
+    trips > 1e6/2,
+    !purpose_label %in% c("1. Regular home activities (chores, sleep)", "2. Work from home (paid)")
+  ) %>% 
   ggplot(
     aes(
       x = purpose_label,
@@ -342,11 +346,88 @@ bay_trips_summary %>%
     x = "Trip Purpose",
     y = "Trip Mode",
     title = "Bay Area travel patterns, 2017",
-    subtitle = "Values are millions of trips per year. Trips are allocated based on 50/50 split\nof origin/destination purpose."
+    subtitle = "Values are millions of trips per year. Trips are allocated based on 50/50 split\nof origin/destination purpose. Home-allocated trips removed."
+  )
+
+## percent plot
+bay_trips_summary %>% 
+  filter(
+    !purpose_label %in% c("1. Regular home activities (chores, sleep)", "2. Work from home (paid)")
+  ) %>% 
+  mutate(
+    trips_perc = trips/sum(trips)
+  ) %>% 
+  filter(
+    trips_perc > 0.005
+  ) %>% 
+  ggplot(
+    aes(
+      x = purpose_label,
+      y = reorder(mode_label, desc(mode_label))
+    )
+  ) +
+  geom_tile(
+    aes(fill = trips_perc)
+  ) + 
+  geom_text(
+    aes(label = (trips_perc*100) %>% round()), 
+    color = "white"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(angle = 45, hjust = 1)
+  ) + 
+  labs(
+    x = "Trip Purpose",
+    y = "Trip Mode",
+    title = "Bay Area travel patterns, 2017",
+    subtitle = "Values are percent of trips per year. Trips are allocated based on 50/50 split\nof origin/destination purpose. Home-allocated trips removed."
+  )
+
+## trip miles plot - planes filtered out
+bay_trips_summary %>% 
+  filter(
+    mode_label != "Airplane",
+    !purpose_label %in% c("1. Regular home activities (chores, sleep)", "2. Work from home (paid)")
+  ) %>% 
+  mutate(
+    tripmiles_perc = tripmiles_wt/sum(tripmiles_wt)
+  ) %>%
+  filter(
+    tripmiles_perc > 0.005
+  ) %>%
+  ggplot(
+    aes(
+      x = purpose_label,
+      y = reorder(mode_label, desc(mode_label))
+    )
+  ) +
+  geom_tile(
+    aes(fill = tripmiles_perc)
+  ) + 
+  geom_text(
+    aes(label = (tripmiles_perc*100) %>% round()), 
+    color = "white"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(angle = 45, hjust = 1)
+  ) + 
+  labs(
+    x = "Trip Destination",
+    y = "Trip Mode",
+    title = "Bay Area travel patterns, 2017",
+    subtitle = "Values are percent of trip miles per year. Trips are allocated based on 50/50 split\nof origin/destination purpose. Home-allocated trips removed."
   )
 ```
 
+3.4
 
+```{r}
+
+```
 
 
 
