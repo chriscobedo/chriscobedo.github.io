@@ -149,8 +149,100 @@ nhts_lookup <- read_excel(
   paste0(path,"data_elements.xlsx"), 
   sheet = "Value Lookup"
 )
+
+## link weights to survey_person
+person_weights <-
+  survey_person %>% 
+  left_join(
+    survey_person_weights_7day %>% 
+      select(
+        sampno,
+        perno,
+        wttrdfin
+      ),
+    by = c("sampno","perno")
+  )
+
+## get geographies for bay area of CBSA's
+bay_county_names <-
+  c(
+    "Alameda",
+    "Contra Costa",
+    "Marin",
+    "Napa",
+    "San Francisco",
+    "San Mateo",
+    "Santa Clara",
+    "Solano",
+    "Sonoma"
+  )
+
+bay_counties <-
+  counties("CA", cb = T, progress_bar = F) %>%
+  filter(NAME %in% bay_county_names)
+
+cbsas <- core_based_statistical_areas(cb = T, progress_bar = F)
+
+bay_cbsas <-
+  cbsas %>%
+  .[bay_counties %>% st_centroid(), ]
+
+## map
+leaflet(bay_cbsas) %>% 
+  addTiles() %>% 
+  addPolygons(
+    label = ~paste0(GEOID,": ",NAME)
+  )
 ```
 
+fully combined dataset
+```{r}
+bay_trips <-
+  survey_trip %>% 
+  left_join(
+    survey_person,
+    by = c("sampno","perno")
+  ) %>% 
+  left_join(
+    survey_person_weights_7day %>% 
+      select(
+        sampno,
+        perno,
+        wttrdfin
+      ),
+    by = c("sampno","perno")
+  ) %>% 
+  left_join(
+    survey_household %>% select(
+      sampno,
+      hh_cbsa
+    )
+  ) %>% 
+  filter(hh_cbsa %in% bay_cbsas$GEOID)
+
+## look at trip purpose
+purpose_lookup <-
+  nhts_lookup %>% 
+  filter(NAME == "WHYTO") %>% 
+  select(VALUE, LABEL) %>% 
+  mutate(
+    VALUE = as.numeric(VALUE),
+    LABEL = factor(LABEL, levels = LABEL)
+  )
+
+## look at mode
+mode_lookup <-
+  nhts_lookup %>% 
+  filter(NAME == "TRPTRANS") %>% 
+  select(VALUE, LABEL) %>% 
+  mutate(
+    VALUE = as.numeric(VALUE),
+    LABEL = factor(LABEL, levels = LABEL)
+  )
+
+
+
+```
 
 
 
