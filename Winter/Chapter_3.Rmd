@@ -239,11 +239,112 @@ mode_lookup <-
     VALUE = as.numeric(VALUE),
     LABEL = factor(LABEL, levels = LABEL)
   )
-
-
-
 ```
 
+combining trip data
+```{r}
+bay_trips_summary_whyto <-
+  bay_trips %>% 
+  left_join(
+    purpose_lookup,
+    by = c("whyto" = "VALUE")
+  ) %>% 
+  rename(purpose_label = LABEL) %>% 
+  left_join(
+    mode_lookup,
+    by = c("trptrans" = "VALUE")
+  ) %>% 
+  rename(mode_label = LABEL) %>% 
+  mutate(
+    tripmiles_wt =
+      trpmiles * wttrdfin
+  ) %>% 
+  group_by(
+    purpose_label,
+    mode_label
+  ) %>% 
+  summarize(
+    tripmiles_wt = sum(tripmiles_wt),
+    trips = sum(wttrdfin)
+  ) %>% 
+  ungroup()
+
+bay_trips_summary_whyfrom <-
+  bay_trips %>% 
+  left_join(
+    purpose_lookup,
+    by = c("whyfrom" = "VALUE")
+  ) %>% 
+  rename(purpose_label = LABEL) %>% 
+  left_join(
+    mode_lookup,
+    by = c("trptrans" = "VALUE")
+  ) %>% 
+  rename(mode_label = LABEL) %>% 
+  mutate(
+    tripmiles_wt =
+      trpmiles * wttrdfin
+  ) %>% 
+  group_by(
+    purpose_label,
+    mode_label
+  ) %>% 
+  summarize(
+    tripmiles_wt = sum(tripmiles_wt),
+    trips = sum(wttrdfin)
+  ) %>% 
+  ungroup()
+
+bay_trips_summary <-
+  rbind(
+    bay_trips_summary_whyto,
+    bay_trips_summary_whyfrom
+  ) %>% 
+  group_by(purpose_label, mode_label) %>% 
+  summarize(
+    tripmiles_wt = mean(tripmiles_wt, na.rm = T),
+    trips = mean(trips, na.rm = T)
+  ) %>% 
+  ungroup()
+
+## if you wanted data wide
+bay_trips_summary_wide <-
+  bay_trips_summary %>% 
+  pivot_wider(
+    -tripmiles_wt,
+    names_from = mode_label,
+    values_from = trips
+  ) %>% 
+  column_to_rownames("purpose_label")
+
+## plot
+bay_trips_summary %>% 
+  ggplot(
+    aes(
+      x = purpose_label,
+      y = reorder(mode_label, desc(mode_label))
+    )
+  ) +
+  geom_tile(
+    aes(fill = trips)
+  ) + 
+  geom_text(
+    aes(label = (trips/1e6) %>% round()), 
+    color = "white",
+    size = 2
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(angle = 45, hjust = 1)
+  ) + 
+  labs(
+    x = "Trip Purpose",
+    y = "Trip Mode",
+    title = "Bay Area travel patterns, 2017",
+    subtitle = "Values are millions of trips per year. Trips are allocated based on 50/50 split\nof origin/destination purpose."
+  )
+```
 
 
 
