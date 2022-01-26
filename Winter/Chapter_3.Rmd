@@ -426,7 +426,36 @@ bay_trips_summary %>%
 3.4
 
 ```{r}
+acs_vars_2019_5yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs5",
+    type = "variables"
+  )
+```
 
+
+```{r}
+covid_testing <-
+  st_read("https://opendata.arcgis.com/datasets/d7d10caf1cec43e0985cc90fbbcf91cb_0.geojson")
+
+bay_counties <-
+  counties("CA", cb = T, progress_bar = F) %>%
+  filter(NAME %in% bay_county_names) %>% 
+  st_transform(st_crs(covid_testing))
+
+bay_covid_testing <-
+  covid_testing %>% 
+  .[bay_counties, ] %>% 
+  filter(status == "Open")
+
+## map of covid test sites
+leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(
+    data = bay_covid_testing,
+    radius = 1,
+    label = ~name
+  )
 ```
 
 
