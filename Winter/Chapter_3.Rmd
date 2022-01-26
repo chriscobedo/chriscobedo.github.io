@@ -456,8 +456,131 @@ leaflet() %>%
     radius = 1,
     label = ~name
   )
+
+## filter to santa clara county
+scc_covid_testing <-
+  bay_covid_testing %>% 
+  .[bay_counties %>% filter(NAME == "Santa Clara"), ]
+
+## isochrone
+walk_10min <- mb_isochrone(
+  scc_covid_testing,
+  profile = "walking",
+  time = 10
+)
+
+## bind to info
+scc_covid_testing_walk_10min <-
+  scc_covid_testing %>% 
+  st_drop_geometry() %>% 
+  cbind(walk_10min$geometry) %>% 
+  st_as_sf()
+
+leaflet() %>% 
+  addMapboxTiles(
+    style_id = "streets-v11",
+    username = "mapbox"
+  ) %>%
+  addPolygons(
+    data = scc_covid_testing_walk_10min,
+    label = ~name
+  )
+
+## santa clara county block groups
+scc_bgs <- 
+  block_groups("CA","085", cb = T, progress_bar = F) %>% 
+  st_transform(26910) %>% 
+  mutate(original_area = st_area(.))
+
+## intersecting isochrones (that are now combined to one geometry) with block groups
+scc_bg_isochrone_intersect <-
+  scc_bgs %>% 
+  st_intersection(
+    scc_covid_testing_walk_10min %>% 
+      st_union() %>% 
+      st_transform(26910)
+  ) %>% 
+  mutate(
+    leftover_area = st_area(.),
+    perc_area = leftover_area / original_area
+  )
+
+## income data for santa clara block groups
+scc_bg_income <-
+  getCensus(
+    name = "acs/acs5",
+    vintage = 2019,
+    region = "block group:*", 
+    regionin = "state:06+county:085",
+    vars = "group(B19001)"
+  ) %>% 
+  mutate(cbg = paste0(state,county,tract,block_group)) %>% 
+  select(!c(GEO_ID,state,county,tract,block_group,NAME) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "variable",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label), 
+    by = c("variable" = "name")
+  ) %>% 
+  select(-variable) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"income"),
+    sep = "!!"
+  ) %>% 
+  filter(!is.na(income)) %>% 
+  mutate(
+    income = case_when(
+      income %in% c("Less than $10,000","$10,000 to $14,999","$15,000 to $19,999","$20,000 to $24,999") ~ "Less than $25,000",
+      income %in% c("$25,000 to $29,999","$30,000 to $34,999","$35,000 to $39,999","$40,000 to $44,999","$45,000 to $49,999") ~ "$25,000 to $49,999",
+      income %in% c("$50,000 to $59,999","$60,000 to $74,999") ~ "$50,000 to $74,999",
+      TRUE ~ income
+    )
+  )
+
+## block group info stats on income for all of Santa Clara
+scc_income <-
+  scc_bg_income %>% 
+  mutate(income = factor(income, levels = unique(scc_bg_income$income))) %>% 
+  group_by(income) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(
+    perc = estimate/sum(estimate),
+    group = "Full Population"
+  )
+  
+## block group info stats for covid interections of isochrones in Santa Clara
+scc_covid_income <-
+  scc_bg_income %>% 
+  mutate(income = factor(income, levels = unique(scc_bg_income$income))) %>% 
+  left_join(
+    scc_bg_isochrone_intersect %>% 
+      select(cbg = GEOID, perc_area) %>% 
+      st_drop_geometry()
+  ) %>% 
+  filter(!is.na(perc_area)) %>% 
+  mutate(
+    estimate = estimate * perc_area
+  ) %>% 
+  group_by(income) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(
+    perc = estimate/sum(estimate),
+    group = "Population within 10 min. walk of COVID-19 testing"
+  )
+
+## estimated percent of population in Santa Clara County within 10 minutes walk of COVID-19 testing.
+sum(scc_covid_income$estimate)/
+  sum(scc_income$estimate)
 ```
 
+```{r}
+
+```
 
 
 
