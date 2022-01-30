@@ -41,10 +41,8 @@ richmond_blocks <- cc_blocks %>%
   left_join(cc_blocks %>% select(GEOID10)) %>% 
   st_as_sf() %>% 
   filter(
-    !(BLOCKCE10 %in% c("0008", "0011", "0013", "0016", "0017", "0018","0020", "0021", "0022"))
+    !(ALAND10 == 0)
   )
-
-
 
 mapview(richmond_blocks)
 ```
