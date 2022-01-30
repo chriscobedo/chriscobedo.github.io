@@ -1,0 +1,27 @@
+---
+title: "ChrisEscobedo_A2"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document  
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(sf)
+library(tigris)
+library(censusapi)
+library(mapview)
+library(leaflet)
+library(mapboxapi)
+library(readxl)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+
+mb_access_token("pk.eyJ1IjoiY2hyaXNjb2JlZG8iLCJhIjoiY2t5dWpuOWQwMW5yeTJ1bzdkb2xwNDhzdCJ9.bvKU0wmr5ZptXvmo6vxRkQ", install = T)
+
+path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
+```
