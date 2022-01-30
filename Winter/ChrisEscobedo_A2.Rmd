@@ -25,3 +25,53 @@ mb_access_token("pk.eyJ1IjoiY2hyaXNjb2JlZG8iLCJhIjoiY2t5dWpuOWQwMW5yeTJ1bzdkb2xw
 
 path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
 ```
+
+
+
+```{r}
+cc_blocks <- blocks("CA","Contra Costa")
+
+richmond_boundary <- places("CA") %>% 
+  filter(NAME == "Richmond")
+
+richmond_blocks <- cc_blocks %>% 
+  st_centroid() %>% 
+  .[richmond_boundary, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(cc_blocks %>% select(GEOID10)) %>% 
+  st_as_sf() %>% 
+  filter(
+    !(BLOCKCE10 %in% c("0008", "0011", "0013", "0016", "0017", "0018","0020", "0021", "0022"))
+  )
+
+
+
+mapview(richmond_blocks)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
