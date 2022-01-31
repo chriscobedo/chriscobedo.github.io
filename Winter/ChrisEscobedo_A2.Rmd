@@ -26,7 +26,9 @@ mb_access_token("pk.eyJ1IjoiY2hyaXNjb2JlZG8iLCJhIjoiY2t5dWpuOWQwMW5yeTJ1bzdkb2xw
 path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
 ```
 
+## Location
 
+I choose North Richmond as a place to perform the equity analysis on the city completeness score becasue North Richmond is a particularly diverse area of one of the most diverse cities. It was also designated as an opportunity zone, which means that there is likely to be a need for investment in the area.
 
 ```{r}
 cc_blocks <- blocks("CA","Contra Costa")
@@ -47,67 +49,52 @@ richmond_blocks <- cc_blocks %>%
 mapview(richmond_blocks)
 
 ## getting isochrones
-isochrones <- NULL
+# isochrones <- mb_isochrone(
+#   richmond_blocks,
+#   profile = "walking",
+#   time = c(5,10,15)
+# )  %>% 
+#   mutate(
+#     mode = "walking"
+#   )
+# 
+# isochrones_cycling <- mb_isochrone(
+#     richmond_blocks,
+#     profile = "cycling",
+#     time = c(5,10,15)
+# )  %>% 
+#   mutate(
+#     mode = "biking"
+#   )
+# 
+# isochrones_driving <- mb_isochrone(
+#     richmond_blocks,
+#     profile = "driving",
+#     time = c(5,10,15)
+# ) %>% 
+#   mutate(
+#     mode = "driving"
+#   )
+# 
+# isochrones <- isochrones %>% 
+#   rbind(isochrones_cycling) %>% 
+#   rbind(isochrones_driving)
+#
+# saveRDS(isochrones, "richmond_isochrones.rds")
 
-for(x in c("walking","cycling", "driving")){
-    
-  for(y in c(5,10,15)){
-    
-    for(z in 1:nrow(richmond_blocks)){
-      
-      print(paste(x,y,z, sep = ","))
-      
-      temp <- mb_isochrone(
-        richmond_blocks[z,],
-        profile = x,
-        time = y
-      ) %>% 
-        mutate(mode = x)
-      
-      isochrones <- isochrones %>% 
-        rbind(temp)
-      
-      if(z == 10) saveRDS(isochrones, "draft_isochrones.rds")
-      
-    }
-  }
-}
+isochrones <- readRDS("richmond_isochrones.rds")
 
-isochrones <- mb_isochrone(
-  richmond_blocks,
-  profile = "walking",
-  time = c(5,10,15)
-)  %>% 
+isochrones <- richmond_blocks %>% 
   mutate(
-    mode = "walking"
-  )
+    id = 1:n()
+  ) %>% 
+  st_drop_geometry() %>% 
+  select(id, GEOID10) %>% 
+  left_join(isochrones)
 
-isochrones_cycling <- mb_isochrone(
-    richmond_blocks,
-    profile = "cycling",
-    time = c(5,10,15)
-)  %>% 
-  mutate(
-    mode = "biking"
-  )
+isochrones <- readRDS("richmond_isochrones.rds")
 
-isochrones_driving <- mb_isochrone(
-    richmond_blocks,
-    profile = "driving",
-    time = c(5,10,15)
-) %>% 
-  mutate(
-    mode = "driving"
-  )
-
-isochrones <- isochrones %>% 
-  rbind(isochrones_cycling) %>% 
-  rbind(isochrones_driving)
-
-mapview(isochrones)
-
-saveRDS(isochrone, "richmond_isochrones.rds")
-isochrone <- readRDS("richmond_isochrones.rds")
+mapview(isochrones) + mapview(richmond_blocks)
 ```
 
 
