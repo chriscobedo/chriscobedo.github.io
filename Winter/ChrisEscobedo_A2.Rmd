@@ -32,7 +32,7 @@ path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltra
 cc_blocks <- blocks("CA","Contra Costa")
 
 richmond_boundary <- places("CA") %>% 
-  filter(NAME == "Richmond")
+  filter(NAME == "North Richmond")
 
 richmond_blocks <- cc_blocks %>% 
   st_centroid() %>% 
@@ -45,6 +45,69 @@ richmond_blocks <- cc_blocks %>%
   )
 
 mapview(richmond_blocks)
+
+## getting isochrones
+isochrones <- NULL
+
+for(x in c("walking","cycling", "driving")){
+    
+  for(y in c(5,10,15)){
+    
+    for(z in 1:nrow(richmond_blocks)){
+      
+      print(paste(x,y,z, sep = ","))
+      
+      temp <- mb_isochrone(
+        richmond_blocks[z,],
+        profile = x,
+        time = y
+      ) %>% 
+        mutate(mode = x)
+      
+      isochrones <- isochrones %>% 
+        rbind(temp)
+      
+      if(z == 10) saveRDS(isochrones, "draft_isochrones.rds")
+      
+    }
+  }
+}
+
+isochrones <- mb_isochrone(
+  richmond_blocks,
+  profile = "walking",
+  time = c(5,10,15)
+)  %>% 
+  mutate(
+    mode = "walking"
+  )
+
+isochrones_cycling <- mb_isochrone(
+    richmond_blocks,
+    profile = "cycling",
+    time = c(5,10,15)
+)  %>% 
+  mutate(
+    mode = "biking"
+  )
+
+isochrones_driving <- mb_isochrone(
+    richmond_blocks,
+    profile = "driving",
+    time = c(5,10,15)
+) %>% 
+  mutate(
+    mode = "driving"
+  )
+
+isochrones <- isochrones %>% 
+  rbind(isochrones_cycling) %>% 
+  rbind(isochrones_driving)
+
+mapview(isochrones)
+
+saveRDS(isochrone, "richmond_isochrones.rds")
+isochrone <- readRDS("richmond_isochrones.rds")
 ```
 
 
