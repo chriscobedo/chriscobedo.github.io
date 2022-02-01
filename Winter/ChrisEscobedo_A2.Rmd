@@ -106,13 +106,13 @@ Hospital was added as it is a critical part of health infrastructure and should 
 
 "School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Research has shown... 
 
+Community Centers are an important part of civil life, as they give space for deliberation, gathering, and community building. It is not always considered critical infrastructure, but its potential benefit for psychological wellbeing are important.
+
 #### Omissions 
 
 I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
 
 *"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
-
-## negative? fast food? 
 
 
 ```{r}
@@ -195,19 +195,17 @@ mode_preference <- data.frame(
     1,
     0.6,
     0.5
-  ),
-  mode_reasonable = c(
-    12,
-    10,
-    15
   )
 ) %>% 
+  left_join(
+    richmond_trips_summary %>% select(mean, mode)
+) %>% 
   mutate(
+    mode_reasonable = mean,
     mode_decay = -log(0.5)/mode_reasonable
   )
 ```
 
-Creating mode Data
 
 ```{r}
 path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
@@ -342,13 +340,23 @@ richmond_trips_summary <-
   group_by(
     mode_label
   ) %>% 
-  summarize(mean = mean(mean))
+  summarize(mean = mean(mean)
+  ) %>% 
+  mutate(
+    mode = case_when(
+      mode_label == "Walk" ~ "walking",
+      mode_label == "Bicycle" ~ "biking",
+      mode_label == "Car" ~ "driving"
+    )
+  )
 
 richmond_trips_summary
 ```
 
 
+## Baseline Hypothetical Completeness 
 
+The following table shows the scores for each amenity in a hypothetical "complete city". This data will be used to measure against the reality of North Richmond.
 
 
 
