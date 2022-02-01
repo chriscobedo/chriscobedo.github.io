@@ -100,6 +100,14 @@ mapview(isochrones) + mapview(richmond_blocks)
 
 ## creating data with POIS
 
+The POI data was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
+
+Hospital was added as it is a critical part of health infrastructure and should be accessible to everyone in the community to improve equitable health outcomes. Pharmacies follow a similar line of reasoning, where they provide an important health resource for a community.
+
+"School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Research has shown... 
+
+#### Omissions 
+
 I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
 
 *"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
