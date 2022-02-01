@@ -112,6 +112,8 @@ I initially included several more POIS, but these were removed as there were non
 
 *"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
 
+## negative? fast food? 
+
 
 ```{r}
 ## Getting POI data
@@ -141,6 +143,50 @@ access_raw <- isochrones %>%
   st_join(pois_filter) %>% 
   st_drop_geometry() %>% 
   filter(!is.na(osm_id))
+
+amenity_preference <- data.frame(
+  amenity = c(
+    "convenience",
+    "restaurant",
+    "supermarket",
+    "hospital",
+    "pharmacy",
+    "school",
+    "library",
+    "community_centre",
+    "arts_centre",
+    "park"),
+  amenity_value = c(
+    
+  ),
+  amenity_quantity = c(
+    
+  )
+) %>% 
+  mutate(
+    amenity_decay = -log(0.5)/amenity_quantity
+  )
+
+mode_preference <- data.frame(
+  mode = c(
+    "walking",
+    "biking",
+    "driving"
+  ),
+  mode_value = c(
+    1,
+    0.6,
+    0.5
+  ),
+  mode_reasonable = c(
+    12,
+    10,
+    15
+  )
+) %>% 
+  mutate(
+    mode_decay = -log(0.5)/mode_reasonable
+  )
 ```
 
 
