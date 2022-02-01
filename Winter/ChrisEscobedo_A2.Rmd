@@ -90,14 +90,50 @@ isochrones <- richmond_blocks %>%
   ) %>% 
   st_drop_geometry() %>% 
   select(id, GEOID10) %>% 
-  left_join(isochrones)
+  left_join(isochrones) %>% 
+  st_as_sf()
 
 isochrones <- readRDS("richmond_isochrones.rds")
 
 mapview(isochrones) + mapview(richmond_blocks)
 ```
 
+## creating data with POIS
 
+I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
+
+*"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
+
+
+```{r}
+## Getting POI data
+# pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
+# 
+# pois_filter <- pois %>%
+#   rename(amenity = fclass) %>%
+#   filter(amenity %in% c(
+#     "convenience",
+#     "restaurant",
+#     "supermarket",
+#     "hospital",
+#     "pharmacy",
+#     "school",
+#     "library",
+#     "community_centre",
+#     "arts_centre",
+#     "park"
+#    ))
+# 
+# saveRDS(pois_filter, "pois_filter.rds")
+
+pois_filter <- readRDS("pois_filter.rds")
+
+access_raw <- isochrones %>% 
+  st_make_valid() %>% 
+  st_join(pois_filter) %>% 
+  st_drop_geometry() %>% 
+  filter(!is.na(osm_id))
+```
 
 
 
