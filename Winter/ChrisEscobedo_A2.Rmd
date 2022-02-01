@@ -157,10 +157,28 @@ amenity_preference <- data.frame(
     "arts_centre",
     "park"),
   amenity_value = c(
-    
+    0.1,
+    0.8,
+    1,
+    1,
+    0.6,
+    0.9,
+    0.3,
+    0.6,
+    0.4,
+    0.9
   ),
   amenity_quantity = c(
-    
+    1,
+    40,
+    4,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    2
   )
 ) %>% 
   mutate(
