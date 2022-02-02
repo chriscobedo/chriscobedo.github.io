@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-```{r, warning = FALSE}
+```{r, include = F, warning = FALSE}
 library(tidyverse)
 library(sf)
 library(tigris)
@@ -24,7 +24,7 @@ library(readxl)
 
 I choose North Richmond as a place to perform the equity analysis on the city completeness score becasue North Richmond is a particularly diverse area of one of the most diverse cities. It was also designated as an opportunity zone, which means that there is likely to be a need for investment in the area.
 
-```{r, warning = FALSE}
+```{r, include = F, warning = FALSE}
 cc_blocks <- blocks("CA","Contra Costa")
 
 richmond_boundary <- places("CA") %>% 
@@ -90,7 +90,7 @@ isochrones <- richmond_blocks %>%
 isochrones <- readRDS("richmond_isochrones.rds")
 ```
 
-```{r, warning = FALSE}
+```{r, include = F, warning = FALSE}
 path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
 
 survey_household <- read_csv(paste0(path,"survey_household.csv"))
