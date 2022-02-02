@@ -92,6 +92,153 @@ isochrones <- readRDS("richmond_isochrones.rds")
 mapview(isochrones) + mapview(richmond_blocks)
 ```
 
+```{r, warning = FALSE}
+path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
+
+survey_household <- read_csv(paste0(path,"survey_household.csv"))
+
+survey_person <- read.csv(paste0(path,"survey_person.csv")) 
+
+survey_trip <- read_csv(paste0(path,"survey_trip.csv"))
+
+survey_person_weights_7day <- read_csv(paste0(path,"survey_person_weights_7day.csv"))
+
+nhts_lookup <- read_excel(
+  paste0(path,"data_elements.xlsx"), 
+  sheet = "Value Lookup"
+)
+
+## link weights to survey_person
+person_weights <-
+  survey_person %>% 
+  left_join(
+    survey_person_weights_7day %>% 
+      select(
+        sampno,
+        perno,
+        wttrdfin
+      ),
+    by = c("sampno","perno")
+  )
+
+## get geographies for bay area of CBSA's
+cc_county <-
+  counties("CA", cb = T, progress_bar = F) %>%
+  filter(NAME %in% "Contra Costa")
+
+cbsas <- core_based_statistical_areas(cb = T, progress_bar = F)
+
+richmond_cbsas <-
+  cbsas %>%
+  .[cc_county %>% st_centroid(), ]
+```
+
+To build the score for the preference of mode of travel, I used the median length of trips using each mode to create a score for the "reasonable travel distance" for each mode. This will then be used to create the "decay" of value for POIs around North Richmond. Below is a map of the CBSA that was used to collect this trip data.
+
+```{r, warning = F}
+## map
+leaflet(Richmond_cbsas) %>% 
+  addTiles() %>% 
+  addPolygons(
+    label = ~paste0(GEOID,": ",NAME)
+  )
+```
+
+```{r, include = F}
+## combine dataset
+richmond_trips <-
+  survey_trip %>% 
+  left_join(
+    survey_person,
+    by = c("sampno","perno")
+  ) %>% 
+  left_join(
+    survey_person_weights_7day %>% 
+      select(
+        sampno,
+        perno,
+        wttrdfin
+      ),
+    by = c("sampno","perno")
+  ) %>% 
+  left_join(
+    survey_household %>% select(
+      sampno,
+      hh_cbsa
+    )
+  ) %>% 
+  filter(hh_cbsa %in% richmond_cbsas$GEOID)
+
+## look at trip purpose
+purpose_lookup <-
+  nhts_lookup %>% 
+  filter(NAME == "WHYTO") %>% 
+  select(VALUE, LABEL) %>% 
+  mutate(
+    VALUE = as.numeric(VALUE),
+    LABEL = factor(LABEL, levels = LABEL)
+  )
+
+## look at mode
+mode_lookup <-
+  nhts_lookup %>% 
+  filter(NAME == "TRPTRANS") %>% 
+  select(VALUE, LABEL) %>% 
+  mutate(
+    VALUE = as.numeric(VALUE),
+    LABEL = factor(LABEL, levels = LABEL)
+  )
+```
+
+Below is the final mean of each mode trip taken from the CBSA used to determine a "reasonable travel distance"
+
+```{r, warning = F}
+richmond_trips_summary <-
+  richmond_trips %>% 
+  left_join(
+    purpose_lookup,
+    by = c("whyto" = "VALUE")
+  ) %>% 
+  rename(purpose_label = LABEL) %>% 
+  left_join(
+    mode_lookup,
+    by = c("trptrans" = "VALUE")
+  ) %>% 
+  rename(mode_label = LABEL) %>% 
+  mutate(
+    tripmiles_wt =
+      trpmiles * wttrdfin
+  ) %>% 
+  group_by(
+    purpose_label,
+    mode_label
+  ) %>% 
+  summarize(
+    tripmiles_wt = sum(tripmiles_wt),
+    trips = sum(wttrdfin)
+  ) %>% 
+  mutate(
+    mean = tripmiles_wt/trips
+  ) %>% 
+  ungroup() %>% 
+  filter(mode_label == c("Car", "Walk", "Bicycle")) %>% 
+  group_by(
+    mode_label
+  ) %>% 
+  summarize(mean = mean(mean)
+  ) %>% 
+  mutate(
+    mode = case_when(
+      mode_label == "Walk" ~ "walking",
+      mode_label == "Bicycle" ~ "biking",
+      mode_label == "Car" ~ "driving"
+    )
+  )
+
+richmond_trips_summary
+```
+
+
 ## creating data with POIS
 
 The POI data was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
@@ -198,153 +345,6 @@ mode_preference <- data.frame(
     mode_reasonable = mean,
     mode_decay = -log(0.5)/mode_reasonable
   )
-```
-
-
-```{r, warning = FALSE}
-path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
-
-survey_household <- read_csv(paste0(path,"survey_household.csv"))
-
-survey_person <- read.csv(paste0(path,"survey_person.csv")) 
-
-survey_trip <- read_csv(paste0(path,"survey_trip.csv"))
-
-survey_person_weights_7day <- read_csv(paste0(path,"survey_person_weights_7day.csv"))
-
-nhts_lookup <- read_excel(
-  paste0(path,"data_elements.xlsx"), 
-  sheet = "Value Lookup"
-)
-
-## link weights to survey_person
-person_weights <-
-  survey_person %>% 
-  left_join(
-    survey_person_weights_7day %>% 
-      select(
-        sampno,
-        perno,
-        wttrdfin
-      ),
-    by = c("sampno","perno")
-  )
-
-## get geographies for bay area of CBSA's
-cc_county <-
-  counties("CA", cb = T, progress_bar = F) %>%
-  filter(NAME %in% "Contra Costa")
-
-cbsas <- core_based_statistical_areas(cb = T, progress_bar = F)
-
-richmond_cbsas <-
-  cbsas %>%
-  .[cc_county %>% st_centroid(), ]
-```
-
-To augment the score for the preference of mode of travel, I used the median length of trips using each mode to create a score for the "reasonable travel distance" for each mode. This will then be used to create the "decay" of value for POIs around North Richmond. Below is a map of the CBSA that was used to collect this trip data.
-
-```{r, warning = F}
-## map
-leaflet(Richmond_cbsas) %>% 
-  addTiles() %>% 
-  addPolygons(
-    label = ~paste0(GEOID,": ",NAME)
-  )
-```
-
-```{r, include = F}
-## combine dataset
-richmond_trips <-
-  survey_trip %>% 
-  left_join(
-    survey_person,
-    by = c("sampno","perno")
-  ) %>% 
-  left_join(
-    survey_person_weights_7day %>% 
-      select(
-        sampno,
-        perno,
-        wttrdfin
-      ),
-    by = c("sampno","perno")
-  ) %>% 
-  left_join(
-    survey_household %>% select(
-      sampno,
-      hh_cbsa
-    )
-  ) %>% 
-  filter(hh_cbsa %in% richmond_cbsas$GEOID)
-
-## look at trip purpose
-purpose_lookup <-
-  nhts_lookup %>% 
-  filter(NAME == "WHYTO") %>% 
-  select(VALUE, LABEL) %>% 
-  mutate(
-    VALUE = as.numeric(VALUE),
-    LABEL = factor(LABEL, levels = LABEL)
-  )
-
-## look at mode
-mode_lookup <-
-  nhts_lookup %>% 
-  filter(NAME == "TRPTRANS") %>% 
-  select(VALUE, LABEL) %>% 
-  mutate(
-    VALUE = as.numeric(VALUE),
-    LABEL = factor(LABEL, levels = LABEL)
-  )
-```
-
-Below is the final mean of each mode trip taken from the CBSA used to determine a "reasonable travel distance"
-
-```{r, warning = F}
-richmond_trips_summary <-
-  richmond_trips %>% 
-  left_join(
-    purpose_lookup,
-    by = c("whyto" = "VALUE")
-  ) %>% 
-  rename(purpose_label = LABEL) %>% 
-  left_join(
-    mode_lookup,
-    by = c("trptrans" = "VALUE")
-  ) %>% 
-  rename(mode_label = LABEL) %>% 
-  mutate(
-    tripmiles_wt =
-      trpmiles * wttrdfin
-  ) %>% 
-  group_by(
-    purpose_label,
-    mode_label
-  ) %>% 
-  summarize(
-    tripmiles_wt = sum(tripmiles_wt),
-    trips = sum(wttrdfin)
-  ) %>% 
-  mutate(
-    mean = tripmiles_wt/trips
-  ) %>% 
-  ungroup() %>% 
-  filter(mode_label == c("Car", "Walk", "Bicycle")) %>% 
-  group_by(
-    mode_label
-  ) %>% 
-  summarize(mean = mean(mean)
-  ) %>% 
-  mutate(
-    mode = case_when(
-      mode_label == "Walk" ~ "walking",
-      mode_label == "Bicycle" ~ "biking",
-      mode_label == "Car" ~ "driving"
-    )
-  )
-
-richmond_trips_summary
 ```
 
 
