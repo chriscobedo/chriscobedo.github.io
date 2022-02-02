@@ -381,7 +381,7 @@ complete_baseline <- data.frame(
 complete_baseline
 ```
 
-```{r, warning=F}}
+```{r, warning=F}
 complete_temp <- access_raw %>% 
   left_join(
     amenity_preference,
