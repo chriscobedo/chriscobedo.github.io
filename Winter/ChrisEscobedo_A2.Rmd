@@ -88,8 +88,6 @@ isochrones <- richmond_blocks %>%
   st_as_sf()
 
 isochrones <- readRDS("richmond_isochrones.rds")
-
-mapview(isochrones) + mapview(richmond_blocks)
 ```
 
 ```{r, warning = FALSE}
@@ -133,7 +131,9 @@ richmond_cbsas <-
   .[cc_county %>% st_centroid(), ]
 ```
 
-To build the score for the preference of mode of travel, I used the median length of trips using each mode to create a score for the "reasonable travel distance" for each mode. This will then be used to create the "decay" of value for POIs around North Richmond. Below is a map of the CBSA that was used to collect this trip data.
+## Building a "Completeness Score"
+
+To begin building the score for the preference of mode of travel, I used the median length of trips using each mode to create a score for the "reasonable travel distance" for each mode. This will then be used to create the "decay" of value for POIs around North Richmond. Below is a map of the CBSA that was used to collect this trip data.
 
 ```{r, warning = F}
 ## map
@@ -239,9 +239,19 @@ richmond_trips_summary
 ```
 
 
-## creating data with POIS
+## Building amenity scores 
 
-The POI data was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
+The scores for each type of amenity in a city were given subjectively. It uses a ranking system, from 0 to 1, for each type of amenity. It also uses a ranking system for the quantity of that amenity. This number ranges from 1 to 35, meant to represent how much of a certain type of amenity would be valued and beyond which number would that amenity no longer hold much value. 
+
+Below is a table outlining the amenity score components.
+
+
+
+## Applying subjective scores to POIS 
+
+The amenity and mode scores are then used to obtain a value for each POI, which allows us to give a score to each census block in North Richmond based on its "completeness".
+
+The POI data for the region was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
 
 Hospital was added as it is a critical part of health infrastructure and should be accessible to everyone in the community to improve equitable health outcomes. Pharmacies follow a similar line of reasoning, where they provide an important health resource for a community.
 
