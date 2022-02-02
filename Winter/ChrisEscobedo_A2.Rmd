@@ -271,7 +271,7 @@ The scores for each type of amenity in a city were given subjectively. It uses a
 
 Below is a table outlining the amenity score components.
 
-```{r, warning = F}}
+```{r, warning = F}
 amenity_preference <- data.frame(
   amenity = c(
     "convenience",
