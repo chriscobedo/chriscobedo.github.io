@@ -358,6 +358,28 @@ richmond_trips_summary
 
 The following table shows the scores for each amenity in a hypothetical "complete city". This data will be used to measure against the reality of North Richmond.
 
+```{r}
+## making a baseline hypothetical
+complete_baseline <- data.frame(
+  amenity = amenity_preference$amenity %>% 
+    rep(amenity_preference$amenity_quantity)
+) %>% 
+  left_join(
+    amenity_preference,
+    by = "amenity"
+  ) %>% 
+  group_by(amenity) %>% 
+  mutate(
+    amenity_rank = row_number() - 1
+  ) %>% 
+  ungroup() %>% 
+  mutate(
+    score = amenity_value * exp(-amenity_rank * amenity_decay) * 0.5
+  )
+
+## baseline score
+sum(complete_baseline$score)
+```
 
 
 
