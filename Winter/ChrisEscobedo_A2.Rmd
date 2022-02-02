@@ -24,7 +24,7 @@ library(readxl)
 
 I choose North Richmond as a place to perform the equity analysis on the city completeness score becasue North Richmond is a particularly diverse area of one of the most diverse cities. It was also designated as an opportunity zone, which means that there is likely to be a need for investment in the area.
 
-```{r}
+```{r, warning = FALSE}
 cc_blocks <- blocks("CA","Contra Costa")
 
 richmond_boundary <- places("CA") %>% 
@@ -109,7 +109,7 @@ I initially included several more POIS, but these were removed as there were non
 *"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
 
 
-```{r}
+```{r, warning = FALSE}
 ## Getting POI data
 # pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
 # 
@@ -201,7 +201,7 @@ mode_preference <- data.frame(
 ```
 
 
-```{r}
+```{r, warning = FALSE}
 path <- "/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/NHTS/nhts17-caltrans-tsdc-download/"
 
 survey_household <- read_csv(paste0(path,"survey_household.csv"))
