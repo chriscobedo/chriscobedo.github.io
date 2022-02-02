@@ -190,7 +190,7 @@ mode_lookup <-
   )
 ```
 
-Below is the final mean of each mode trip taken from the CBSA used to determine a "reasonable travel distance"
+Below is a table with the mean of trip distance for each "mode" of travel, taken from the CBSA used to determine a "reasonable travel distance".
 
 ```{r, warning = F}
 richmond_trips_summary <-
@@ -238,6 +238,32 @@ richmond_trips_summary <-
 richmond_trips_summary
 ```
 
+This mean, along with a subjective value given to each mode of travel, was used to create the mode scores seen in the following table.
+
+```{r, warning = False}
+mode_preference <- data.frame(
+  mode = c(
+    "walking",
+    "biking",
+    "driving"
+  ),
+  mode_value = c(
+    1,
+    0.6,
+    0.5
+  )
+) %>% 
+  left_join(
+    richmond_trips_summary %>% select(mean, mode)
+) %>% 
+  mutate(
+    mode_reasonable = mean,
+    mode_decay = -log(0.5)/mode_reasonable
+  )
+
+mode_preference
+```
+
 
 ## Building amenity scores 
 
@@ -245,56 +271,7 @@ The scores for each type of amenity in a city were given subjectively. It uses a
 
 Below is a table outlining the amenity score components.
 
-
-
-## Applying subjective scores to POIS 
-
-The amenity and mode scores are then used to obtain a value for each POI, which allows us to give a score to each census block in North Richmond based on its "completeness".
-
-The POI data for the region was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
-
-Hospital was added as it is a critical part of health infrastructure and should be accessible to everyone in the community to improve equitable health outcomes. Pharmacies follow a similar line of reasoning, where they provide an important health resource for a community.
-
-"School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Research has shown... 
-
-Community Centers are an important part of civil life, as they give space for deliberation, gathering, and community building. It is not always considered critical infrastructure, but its potential benefit for psychological wellbeing are important.
-
-#### Omissions 
-
-I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
-
-*"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
-
-
-```{r, warning = FALSE}
-## Getting POI data
-# pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
-# 
-# pois_filter <- pois %>%
-#   rename(amenity = fclass) %>%
-#   filter(amenity %in% c(
-#     "convenience",
-#     "restaurant",
-#     "supermarket",
-#     "hospital",
-#     "pharmacy",
-#     "school",
-#     "library",
-#     "community_centre",
-#     "arts_centre",
-#     "park"
-#    ))
-# 
-# saveRDS(pois_filter, "pois_filter.rds")
-
-pois_filter <- readRDS("pois_filter.rds")
-
-access_raw <- isochrones %>% 
-  st_make_valid() %>% 
-  st_join(pois_filter) %>% 
-  st_drop_geometry() %>% 
-  filter(!is.na(osm_id))
-
+```{r, warning = F}}
 amenity_preference <- data.frame(
   amenity = c(
     "convenience",
@@ -355,6 +332,58 @@ mode_preference <- data.frame(
     mode_reasonable = mean,
     mode_decay = -log(0.5)/mode_reasonable
   )
+
+amenity_preference
+```
+
+
+## Applying subjective scores to POIS 
+
+The amenity and mode scores are then used to obtain a value for each POI, which allows us to give a score to each census block in North Richmond based on its "completeness".
+
+The POI data for the region was filtered to only include those points of interest that were tagged as the following amenity types: "convenience", "restaurant", "supermarket", "hospital", "pharmacy", "school", "library", "community_centre", "arts_centre", "park".
+
+Hospital was added as it is a critical part of health infrastructure and should be accessible to everyone in the community to improve equitable health outcomes. Pharmacies follow a similar line of reasoning, where they provide an important health resource for a community.
+
+"School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Research has shown... 
+
+Community Centers are an important part of civil life, as they give space for deliberation, gathering, and community building. It is not always considered critical infrastructure, but its potential benefit for psychological wellbeing are important.
+
+#### Omissions 
+
+I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
+
+*"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
+
+
+```{r, warning = FALSE}
+## Getting POI data
+# pois <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_pois_a_free_1.shp")
+# 
+# pois_filter <- pois %>%
+#   rename(amenity = fclass) %>%
+#   filter(amenity %in% c(
+#     "convenience",
+#     "restaurant",
+#     "supermarket",
+#     "hospital",
+#     "pharmacy",
+#     "school",
+#     "library",
+#     "community_centre",
+#     "arts_centre",
+#     "park"
+#    ))
+# 
+# saveRDS(pois_filter, "pois_filter.rds")
+
+pois_filter <- readRDS("pois_filter.rds")
+
+access_raw <- isochrones %>% 
+  st_make_valid() %>% 
+  st_join(pois_filter) %>% 
+  st_drop_geometry() %>% 
+  filter(!is.na(osm_id))
 ```
 
 
