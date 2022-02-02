@@ -240,7 +240,7 @@ richmond_trips_summary
 
 This mean, along with a subjective value given to each mode of travel, was used to create the mode scores seen in the following table.
 
-```{r, warning = False}
+```{r, warning = F}
 mode_preference <- data.frame(
   mode = c(
     "walking",
@@ -473,6 +473,32 @@ complete_map <- complete %>%
   st_as_sf
 
 mapview(complete_map, zcol = "total")
+
+complete_pal <- colorNumeric(
+  palette = "Purples",
+  domain = complete_map$total
+)
+
+leaflet() %>% 
+  addProviderTiles(provider = providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = complete_map,
+    fillColor = ~complete_pal(total),
+    color = "black",
+    weight = 0.5,
+    label = ~paste0("GEOID: ",GEOID10,", Score: ", round(total, digits = 3)),
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
+    )
+  ) %>% 
+  addLegend(
+    data = complete_map,
+    pal = complete_pal,
+    values = ~total,
+    title = "Completeness Score for<br>census blocks in North Richmond"
+  )
+
 ```
 
 
