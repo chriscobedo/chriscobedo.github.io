@@ -170,7 +170,7 @@ amenity_preference <- data.frame(
   ),
   amenity_quantity = c(
     1,
-    40,
+    35,
     4,
     1,
     1,
@@ -356,9 +356,9 @@ richmond_trips_summary
 
 ## Baseline Hypothetical Completeness 
 
-The following table shows the scores for each amenity in a hypothetical "complete city". This data will be used to measure against the reality of North Richmond.
+The following table shows the scores for each amenity in a hypothetical "complete city". It shows what the decay and score would be for each amenity if a city had the exact amount of each amenity that was determined to make it "complete" in the subjective valuation. This data will be used to measure against the reality of North Richmond.
 
-```{r}
+```{r, warning=F}
 ## making a baseline hypothetical
 complete_baseline <- data.frame(
   amenity = amenity_preference$amenity %>% 
@@ -378,9 +378,69 @@ complete_baseline <- data.frame(
   )
 
 ## baseline score
-sum(complete_baseline$score)
+complete_baseline
 ```
 
+```{r, warning=F}}
+complete_temp <- access_raw %>% 
+  left_join(
+    amenity_preference,
+    by = "amenity"
+  ) %>% 
+  left_join(
+    mode_preference,
+    by = "mode"
+  ) %>% 
+  group_by(id, mode, amenity) %>% 
+  arrange(time) %>% 
+  mutate(
+    amenity_rank = row_number() - 1
+  ) %>% 
+  ungroup()
+
+## making complete modes
+complete_modes <- complete_temp %>% 
+  mutate(
+    score = amenity_value * exp(-amenity_rank * amenity_decay) * exp(-time * mode_decay)
+  ) %>% 
+  group_by(id, mode) %>% 
+  arrange(desc(score)) %>% 
+  filter(!duplicated(osm_id)) %>% 
+  summarize(
+    score = sum(score, na.rm = T) / sum(complete_baseline$score)
+  )
+
+## make a score
+complete_total <- complete_temp %>% 
+  mutate(
+    score = amenity_value * exp(-amenity_rank * amenity_decay) * mode_value * exp(-time * mode_decay)
+  ) %>% 
+  group_by(id) %>% 
+  arrange(desc(score)) %>% 
+  filter(!duplicated(osm_id)) %>% 
+  summarize(
+    score = sum(score, na.rm = T) / sum(complete_baseline$score)
+  ) %>% 
+  mutate(
+    mode = "total"
+  )
+
+## make complete data frame
+complete <- rbind(
+  complete_modes,
+  complete_total
+) 
+
+complete_map <- complete %>% 
+  pivot_wider(
+    names_from = "mode",
+    values_from = "score"
+  ) %>% 
+  cbind(richmond_blocks %>% select(GEOID10)) %>% 
+  st_as_sf
+
+mapview(complete_map, zcol = "total")
+```
 
 
 
