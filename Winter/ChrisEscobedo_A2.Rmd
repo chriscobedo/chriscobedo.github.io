@@ -137,7 +137,7 @@ To begin building the score for the preference of mode of travel, I used the med
 
 ```{r, warning = F}
 ## map
-leaflet(Richmond_cbsas) %>% 
+leaflet(richmond_cbsas) %>% 
   addTiles() %>% 
   addPolygons(
     label = ~paste0(GEOID,": ",NAME)
