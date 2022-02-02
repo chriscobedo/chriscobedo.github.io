@@ -250,7 +250,7 @@ richmond_cbsas <-
 
 To augment the score for the preference of mode of travel, I used the median length of trips using each mode to create a score for the "reasonable travel distance" for each mode. This will then be used to create the "decay" of value for POIs around North Richmond. Below is a map of the CBSA that was used to collect this trip data.
 
-```{r, warning=F}
+```{r, warning = F}
 ## map
 leaflet(Richmond_cbsas) %>% 
   addTiles() %>% 
@@ -259,7 +259,7 @@ leaflet(Richmond_cbsas) %>%
   )
 ```
 
-```{r, include=F}
+```{r, include = F}
 ## combine dataset
 richmond_trips <-
   survey_trip %>% 
@@ -307,7 +307,7 @@ mode_lookup <-
 
 Below is the final mean of each mode trip taken from the CBSA used to determine a "reasonable travel distance"
 
-```{r, warning=F}
+```{r, warning = F}
 richmond_trips_summary <-
   richmond_trips %>% 
   left_join(
@@ -358,7 +358,7 @@ richmond_trips_summary
 
 The following table shows the scores for each amenity in a hypothetical "complete city". It shows what the decay and score would be for each amenity if a city had the exact amount of each amenity that was determined to make it "complete" in the subjective valuation. This data will be used to measure against the reality of North Richmond.
 
-```{r, warning=F}
+```{r, warning = F}
 ## making a baseline hypothetical
 complete_baseline <- data.frame(
   amenity = amenity_preference$amenity %>% 
