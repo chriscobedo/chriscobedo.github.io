@@ -411,6 +411,7 @@ complete_baseline <- data.frame(
   )
 
 ## baseline score
+sum(complete_baseline$score)
 complete_baseline
 ```
 
@@ -475,7 +476,7 @@ complete_map <- complete %>%
 mapview(complete_map, zcol = "total")
 
 complete_pal <- colorNumeric(
-  palette = "Purples",
+  palette = "RdYlGn",
   domain = complete_map$total
 )
 
@@ -486,6 +487,8 @@ leaflet() %>%
     fillColor = ~complete_pal(total),
     color = "black",
     weight = 0.5,
+    opacity = 0.5,
+    fillOpacity = 0.8,
     label = ~paste0("GEOID: ",GEOID10,", Score: ", round(total, digits = 3)),
     highlightOptions = highlightOptions(
       weight = 2,
@@ -500,6 +503,96 @@ leaflet() %>%
   )
 
 ```
+
+## Equity Analysis
+
+Now we will look at the income and racial breakdowns of North Richmond as a whole and for each score.
+
+```{r}
+dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
+
+names(dec_vars_2020) <- dec_vars_2020[1,]
+
+dec_vars_2020 <- dec_vars_2020 [2:10,] %>% 
+   mutate(
+    name = NAME,
+    label = `Geographic Area Name`
+   )
+
+census_race_categories <- 
+  c(
+    "White Alone",
+    "Black or African American",
+    "American Indian and Alaska Native Alone",
+    "Asian Alone",
+    "Native Hawaiian and Other Pacific Islander Alone",
+    "Some Other Race Alone",
+    "Two or More Races"
+  )
+
+richmond_race <- read_csv("DECENNIALPL2020.csv") %>% 
+  .[-1,] %>% 
+  select(!c(NAME)) %>%
+  pivot_longer(
+    ends_with("N"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>% 
+  left_join(
+    dec_vars_2020 %>% 
+    select(name, label)
+  ) %>% 
+  filter(!is.na(label)) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"income"),
+    sep = "!!"
+  )
+
+mapview(richmond_income_race)
+
+richmond_race_total <-
+  richmond_income_race %>% 
+  group_by(race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  mutate(income = "Total")
+
+richmond_score_race %>% 
+  group_by(income, race) %>% 
+  summarize(estimate = sum(estimate)) %>% 
+  rbind(bay_race_total) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = income %>% factor(levels = rev(c("Total",unique(bay_income_race$income)))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(unique(bay_income_race$race)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Household income",
+    y = "Proportion of households",
+    title = "Bay Area household income by race",
+    fill = "Race of householder"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+```
+
+
+
+
 
 
 
