@@ -264,7 +264,6 @@ mode_preference <- data.frame(
 mode_preference
 ```
 
-
 ## Building amenity scores 
 
 The scores for each type of amenity in a city were given subjectively. It uses a ranking system, from 0 to 1, for each type of amenity. It also uses a ranking system for the quantity of that amenity. This number ranges from 1 to 35, meant to represent how much of a certain type of amenity would be valued and beyond which number would that amenity no longer hold much value. 
@@ -335,7 +334,6 @@ mode_preference <- data.frame(
 
 amenity_preference
 ```
-
 
 ## Applying subjective scores to POIs 
 
