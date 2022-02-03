@@ -37,13 +37,33 @@ zip <- zctas %>%
 blocks <- blocks("CA")
 
 zip_blocks <- blocks %>% 
-  centroid() %>% 
-  .[zip,] 
+  st_centroid() %>% 
+  .[zip, ]
   
 zip_od <- ca_od_read %>% 
   filter(
     h_geocode %in% zip_blocks$GEOID10 |
       w_geocode %in% zip_blocks$GEOID10
   )
+
+full_zip_od <- 2013:2019 %>% 
+  map_dfr(function(year){
+    
+    print(year)
+    
+    temp <- read_csv(paste0("G:/Shared drives/SFBI/Data Library/LODES/ca_od_main_JT01_", year, ".csv.gz")) %>% 
+      filter(
+        h_geocode %in% zip_blocks$GEOID10 |
+          w_geocode %in% zip_blocks$GEOID10
+      ) %>% 
+      mutate(year = year)
+    
+    saveRDS(temp, paste0("temp_od_", year, ".rds"))
+    
+    return(temp)
+    
+  })
+
+readRDS("full_zip_od.rds")
 ```
 
