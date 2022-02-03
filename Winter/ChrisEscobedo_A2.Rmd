@@ -367,7 +367,8 @@ access_raw <- isochrones %>%
 
 ## Baseline Hypothetical Completeness 
 
-The following table shows the scores for each amenity in a hypothetical "complete city". It shows what the decay and score would be for each amenity if a city had the exact amount of each amenity that was determined to make it "complete" in the subjective valuation. This data will be used to measure against the reality of North Richmond.
+
+The following table shows a preview of the scores for each amenity in a hypothetical "complete city". It shows what the decay and score would be for each amenity if a city had the exact amount of each amenity that was determined to make it "complete" in the subjective valuation. This data will be used to measure against the reality of North Richmond.
 
 ```{r, warning = F}
 ## making a baseline hypothetical
@@ -388,9 +389,13 @@ complete_baseline <- data.frame(
     score = amenity_value * exp(-amenity_rank * amenity_decay) * 0.5
   )
 
-## baseline score
-sum(complete_baseline$score)
+
 complete_baseline
+```
+Below is the complete score for a 100% complete hypothetical city. This would be if a city had every amenity in the exact quantity listed in the subjective score table. 
+
+```{r, warning = F}
+sum(complete_baseline$score)
 ```
 
 ```{r, warning=F}
@@ -597,6 +602,7 @@ Interestingly, ta very large proportion of the population of North Richmond iden
 
 In conclusion, the equity analysis showed different outcomes for several race categories in North Richmond. Given what the score represents, this indicates that some populations have less access to what this report deemed as critical to being a complete community. Thus, those with over-representation in the higher scores, such as the white population, would have more access to a larger number of amenities, like schools, restaurants, grocery stores, etc. This preliminary report could then be used to increase access to critical infrastructure in more targeted areas of this communtiy and especially to those people of color in this community that are seeing worse outcomes.
 
+Furthermore, the scores of .26-.34 are much lower than the hypothetical perfect score of 14.8. This is expected, but the lowness does indicate that North Richmond may be lacking in access to some critical amenities. Further research to compare this to other cities and communities would be interesting to illuminate the meaning of this score for the North Richmond community.
 
 
 
