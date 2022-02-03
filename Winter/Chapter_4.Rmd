@@ -46,6 +46,8 @@ zip_od <- ca_od_read %>%
       w_geocode %in% zip_blocks$GEOID10
   )
 
+remove(ca_od_read)
+
 full_zip_od <- 2013:2019 %>% 
   map_dfr(function(year){
     
