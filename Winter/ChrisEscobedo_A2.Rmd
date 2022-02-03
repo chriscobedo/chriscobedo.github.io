@@ -546,9 +546,20 @@ richmond_race <- read_csv("DECENNIALPL2020.csv") %>%
   select(-name) %>% 
   separate(
     label,
-    into = c(NA,NA,"income"),
+    into = c(NA,NA,"multiple","race"),
     sep = "!!"
-  )
+  ) %>% 
+  mutate(
+    race = if_else(is.na(race) & multiple == 'Population of two or more races:',
+      'two or more races',
+      race
+    )
+  ) %>% 
+  filter(!is.na(race)) %>% 
+  mutate(
+    GEOID = str_remove_all(GEO_ID, "1000000US")
+  ) %>% 
+  select(-c(GEO_ID, multiple))
 
 mapview(richmond_income_race)
 
