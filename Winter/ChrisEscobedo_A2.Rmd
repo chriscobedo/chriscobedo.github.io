@@ -473,8 +473,6 @@ complete_map <- complete %>%
   cbind(richmond_blocks %>% select(GEOID10)) %>% 
   st_as_sf
 
-mapview(complete_map, zcol = "total")
-
 complete_pal <- colorNumeric(
   palette = "RdYlGn",
   domain = complete_map$total
