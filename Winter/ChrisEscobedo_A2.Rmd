@@ -530,7 +530,7 @@ census_race_categories <-
     "Two or More Races"
   )
 
-richmond_race <- read_csv("DECENNIALPL2020.csv") %>% 
+richmond_score_race <- read_csv("DECENNIALPL2020.csv") %>% 
   .[-1,] %>% 
   select(!c(NAME)) %>%
   pivot_longer(
@@ -557,37 +557,42 @@ richmond_race <- read_csv("DECENNIALPL2020.csv") %>%
   ) %>% 
   filter(!is.na(race)) %>% 
   mutate(
-    GEOID = str_remove_all(GEO_ID, "1000000US")
+    GEOID10 = str_remove_all(GEO_ID, "1000000US")
+  ) %>%
+  select(-c(GEO_ID, multiple)) %>%
+  filter(GEOID10 %in% richmond_blocks$GEOID10) %>% 
+  left_join(complete_map %>% 
+    select(GEOID10, total)
   ) %>% 
-  select(-c(GEO_ID, multiple))
-
-mapview(richmond_income_race)
+  mutate(
+    bucket = as.character(round(total, 2))
+  )
 
 richmond_race_total <-
-  richmond_income_race %>% 
+  richmond_score_race %>% 
   group_by(race) %>% 
-  summarize(estimate = sum(estimate)) %>% 
-  mutate(income = "Total")
+  summarize(estimate = sum(as.numeric(estimate))) %>%
+  mutate(bucket = "Total")
 
 richmond_score_race %>% 
-  group_by(income, race) %>% 
-  summarize(estimate = sum(estimate)) %>% 
-  rbind(bay_race_total) %>% 
+  group_by(bucket, race) %>% 
+  summarize(estimate = sum(as.numeric(estimate))) %>% 
+  rbind(richmond_race_total) %>% 
   ggplot() +
   geom_bar(
     aes(
-      x = income %>% factor(levels = rev(c("Total",unique(bay_income_race$income)))),
+      x = bucket %>% factor(levels = rev(c("Total","0.26", "0.27","0.28","0.29","0.3","0.31","0.32","0.33","0.34"))),
       y = estimate,
-      fill = race %>% factor(levels = rev(unique(bay_income_race$race)))
+      fill = race %>% factor(levels = rev(unique(richmond_score_race$race)))
     ),
     stat = "identity",
     position = "fill"
   ) +
   labs(
-    x = "Household income",
-    y = "Proportion of households",
-    title = "Bay Area household income by race",
-    fill = "Race of householder"
+    x = "Rounded Score Buckets",
+    y = "Proportion of Households",
+    title = "North Richmond Block Scores by Race",
+    fill = "Race Makeup of Score Bucket"
   ) +
   coord_flip() +
   theme(
