@@ -343,13 +343,13 @@ The POI data for the region was filtered to only include those points of interes
 
 Hospital was added as it is a critical part of health infrastructure and should be accessible to everyone in the community to improve equitable health outcomes. Pharmacies follow a similar line of reasoning, where they provide an important health resource for a community.
 
-"School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Research has shown... 
+"School" was included because schools are an important piece of education and amount of schools and access to those schools in a community can directly impact education outcomes. Although the amount of schools does not determind wether they will be resourced appropriately and whether they will have too many students, it can serve as a proxy for that for this analysis, where we assume more schools means more resources and less overcrowding.
 
-Community Centers are an important part of civil life, as they give space for deliberation, gathering, and community building. It is not always considered critical infrastructure, but its potential benefit for psychological wellbeing are important.
+Community Centers and Ats Centers are an important part of civil life, as they give space for deliberation, gathering, and community building. It is not always considered critical infrastructure, but its potential benefit for psychological well being are important.
 
 #### Omissions 
 
-I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. OF course, this data could have been missing from the data set. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data.
+I initially included several more POIS, but these were removed as there were none within the area for the North Richmond community, given this specific data set. This data may have been missing from an incomplete data set, but their absence altogether may point to other important possible conclusions, such as North Richmond being excluded from public transport. For the purpose of this analysis, the following amenities were deemed important but were ultimately removed as they had no relevant data in the North Richmond area.
 
 *"doctors", "dentist", "shelter", "bus_stop", "tram_stop"*
 
