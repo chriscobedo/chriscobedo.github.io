@@ -512,7 +512,7 @@ I then combined the race data into a range of "buckets" of completeness scores. 
 
 The plot below thus provides a rough break down of racial equity for "completeness" for North Richmond. 
 
-```{r}
+```{r, warning=F}
 dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
 
 names(dec_vars_2020) <- dec_vars_2020[1,]
