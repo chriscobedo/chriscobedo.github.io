@@ -66,6 +66,22 @@ full_zip_od <- 2013:2019 %>%
     
   })
 
-readRDS("full_zip_od.rds")
+full_zip_od <- readRDS("full_zip_od.rds")
+
+## cleaning it by removing "negligble trips" - e.g. trips that went from one zip code to the same zip code - when blocks 
+## are rounded to being center of zip code
+full_zip_od_clean <- full_zip_od %>% 
+  select(-createdate) %>% 
+  filter(!(
+    h_geocode %in% zip_blocks$GEOID10 &
+      w_geocode %in% zip_blocks$GEOID10
+  )) %>% 
+  mutate(
+    direction = ifelse(
+      h_geocode %in% zip_blocks$GEOID10,
+      "outbound",
+      "inbound"
+    )
+  )
 ```
 
