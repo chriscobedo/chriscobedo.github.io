@@ -398,6 +398,8 @@ Below is the complete score for a 100% complete hypothetical city. This would be
 sum(complete_baseline$score)
 ```
 
+Below is a map for North Richmond which depicts the subjective "completeness" score for each census block. As expected, the numbers are much lower than the hypothetical perfect city.
+
 ```{r, warning=F}
 complete_temp <- access_raw %>% 
   left_join(
