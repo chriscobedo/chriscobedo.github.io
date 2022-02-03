@@ -1,0 +1,49 @@
+---
+title: "Chapter4_Class"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(lehdr)
+library(tidyverse)
+library(tigris)
+library(sf)
+library(leaflet)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+## class:
+
+```{r}
+ca_od_read <- read_csv("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/LODES/ca_od_main_JT01_2019.csv.gz")
+
+saveRDS(ca_od_read, "ca_od_main_2019.csv")
+
+ca_od_read <- readRDS("ca_od_main_2019.csv")
+
+zctas <- zctas()
+
+zip <- zctas %>% 
+  filter(GEOID10 == 94303)
+
+blocks <- blocks("CA")
+
+zip_blocks <- blocks %>% 
+  centroid() %>% 
+  .[zip,] 
+  
+zip_od <- ca_od_read %>% 
+  filter(
+    h_geocode %in% zip_blocks$GEOID10 |
+      w_geocode %in% zip_blocks$GEOID10
+  )
+```
+
