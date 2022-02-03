@@ -506,7 +506,11 @@ leaflet() %>%
 
 ## Equity Analysis
 
-Now we will look at the income and racial breakdowns of North Richmond as a whole and for each score.
+Now we will look at the income and racial breakdowns of North Richmond as a whole and for each score. To do this, I first rounded the completeness scores to the hundredth place to create more analyzable buckets of scores. I then used 2020 decennial census data to get race and population data for each North Richmond census block.
+
+I then combined the race data into a range of "buckets" of completeness scores. These buckets were created using the rounded scores of each block group. The buckets ranged from scores of 0.26 to 0.34., creating 9 total buckets. Then, for each bucket, the plot below provides a breakdown of the racial demographics for census blocks that match that score. 
+
+The plot below thus provides a rough break down of racial equity for "completeness" for North Richmond. 
 
 ```{r}
 dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
@@ -605,9 +609,11 @@ richmond_score_race %>%
     )
   )
 ```
+### Discussion
 
+Clearly, there is an outlier in the 0.33 bucket, where white is vastly over represented. This is likely one very segregated block in North Richmond which skews the representation of the whole community. It is important data, as segregation is a large factor in equity, but given the method of data collection, where a small number of blocks are being siphoned into a smaller number of buckets, this may be the case where one bucket does not have a large sample size, so one block skews the representation dramatically. On a similar note, it is important to remember that for all of these buckets, the sample size may vary and so over representation of certain blocks may be present. 
 
-
+Still, the equity analysis does provide useful insights.
 
 
 
