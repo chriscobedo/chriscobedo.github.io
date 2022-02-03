@@ -337,7 +337,7 @@ amenity_preference
 ```
 
 
-## Applying subjective scores to POIS 
+## Applying subjective scores to POIs 
 
 The amenity and mode scores are then used to obtain a value for each POI, which allows us to give a score to each census block in North Richmond based on its "completeness".
 
