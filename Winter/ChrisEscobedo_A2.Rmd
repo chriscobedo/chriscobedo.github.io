@@ -312,25 +312,6 @@ amenity_preference <- data.frame(
     amenity_decay = -log(0.5)/amenity_quantity
   )
 
-mode_preference <- data.frame(
-  mode = c(
-    "walking",
-    "biking",
-    "driving"
-  ),
-  mode_value = c(
-    1,
-    0.6,
-    0.5
-  )
-) %>% 
-  left_join(
-    richmond_trips_summary %>% select(mean, mode)
-) %>% 
-  mutate(
-    mode_reasonable = mean,
-    mode_decay = -log(0.5)/mode_reasonable
-  )
 
 amenity_preference
 ```
@@ -383,7 +364,6 @@ access_raw <- isochrones %>%
   st_drop_geometry() %>% 
   filter(!is.na(osm_id))
 ```
-
 
 ## Baseline Hypothetical Completeness 
 
@@ -609,7 +589,13 @@ richmond_score_race %>%
 
 Clearly, there is an outlier in the 0.33 bucket, where white is vastly over represented. This is likely one very segregated block in North Richmond which skews the representation of the whole community. It is important data, as segregation is a large factor in equity, but given the method of data collection, where a small number of blocks are being siphoned into a smaller number of buckets, this may be the case where one bucket does not have a large sample size, so one block skews the representation dramatically. On a similar note, it is important to remember that for all of these buckets, the sample size may vary and so over representation of certain blocks may be present. 
 
-Still, the equity analysis does provide useful insights.
+Still, the equity analysis does provide useful insights. There seems to be under-representation of the white population in the lower half of the scores, those below 0.3. The proportions of white population above 0.3 are on average higher than the total proportions of the white populations. This implies that the white population are over represented in blocks with higher score, or that the outcomes for city "completeness" are better for the white population in North Richmond. 
+
+Another clear pattern is that the population that is Native American and Native Hawaiian are both largely over represented in the lower score buckets. This indicates that those populations have some of the most negative and least equitable outcomes for city "completeness" in North Richmond.
+
+Interestingly, ta very large proportion of the population of North Richmond identifies as "some other race alone". Although being hispanic/latinx is considered an ethnicity and not a race, it is possible that this number is so high because the latinx population identified as "some other race alone". This would make sense to partially explain this large proportion, given the fact that Richmond has a very large latinx population. 
+
+In conclusion, 
 
 
 
