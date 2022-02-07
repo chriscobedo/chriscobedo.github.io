@@ -28,7 +28,7 @@ This analysis will focus on the zip code area of 94804, which is in the South of
 
 To create the analysis of vehicle emissions, this report uses data from LODES for trip data. It uses data from 2013 to 2019 to calculate commute emissions for the zip code area in the south of Richmond as an origin and as a destination.
 
-```{r}
+```{r, warning = FALSE}
 zctas <- zctas()
 
 zip <- zctas %>% 
