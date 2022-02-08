@@ -108,8 +108,8 @@ zip_od_origin <-
   st_centroid() %>% 
   st_coordinates()
 
-zip_od_route <-
-  1:nrow(zip_od_origin) %>% 
+zip_od_route <- 
+  1:nrow(zip_od_origin) %>%
   map_dfr(function(x){
     
     tryCatch(
@@ -118,13 +118,15 @@ zip_od_route <-
         destination = zip_od_destination,
         profile = "driving-traffic"
       ) %>% 
-      mutate(id = x),
-      error = funtion(e){
-        
+        mutate(id = x),
+      error = function(e){
+        data.frame(id = x)
       }
     )
     
-  })
+    
+  }) %>% 
+  st_as_sf()
 ```
 
 
