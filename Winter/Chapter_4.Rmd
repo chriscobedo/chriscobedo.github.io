@@ -85,6 +85,49 @@ full_zip_od_clean <- full_zip_od %>%
   )
 ```
 
+```{r}
+full_zip_od_routing <- full_zip_od_clean %>% 
+  mutate(
+    origin = ifelse(
+      direction == "inbound",
+      h_geocode,
+      w_geocode
+    ),
+    cbg = origin %>% substr(1,12),
+    tract = origin %>% substr(1,11)
+  ) %>% 
+  filter(!duplicated(tract))
+
+ca_tracts <- tracts("CA")
+
+zip_od_origin <- 
+  full_zip_od_routing %>% 
+  select(tract) %>% 
+  left_join(ca_tracts %>% select(tract = GEOID)) %>% 
+  st_as_sf() %>% 
+  st_centroid() %>% 
+  st_coordinates()
+
+zip_od_route <-
+  1:nrow(zip_od_origin) %>% 
+  map_dfr(function(x){
+    
+    tryCatch(
+      mb_directions(
+        origin = zip_od_origin[x, ],
+        destination = zip_od_destination,
+        profile = "driving-traffic"
+      ) %>% 
+      mutate(id = x),
+      error = funtion(e){
+        
+      }
+    )
+    
+  })
+```
+
+
 
 # Textbook:
 
