@@ -79,9 +79,13 @@ full_zip_od_clean <- full_zip_od %>%
   )
 ```
 
-*This analysis assumes that commute data originating and ending in the same zip code would be negligible, especially when compared to trips crossing boundaries of zip codes. Because this analysis groups trip origin and destination points by zip code, the commute data that is within a single zipd code is disregarded and treated as zero. Of course, this will remove a non-zero number of trips and emissions from the final analysis. The assumption is that this omission will not likely constitute a large enough amount of emissions that the advantages of grouping by the zip code to simplify the analysis will outweigh the disadvantages.*
+*This analysis assumes that commute data originating and ending in the same census block would be negligible, especially when compared to trips crossing boundaries of census block boundaries. Because this analysis groups trip origin and destination points by census block, the commute data that is within a single census block is disregarded and treated as zero. Of course, this will remove a non-zero number of trips and emissions from the final analysis. The assumption is that this omission will not likely constitute a large enough amount of emissions that the advantages of grouping by the census block to simplify the analysis will outweigh the disadvantages.*
 
 
+
+```{r}
+
+```
 
 
 
