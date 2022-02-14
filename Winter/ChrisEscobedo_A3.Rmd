@@ -117,26 +117,32 @@ zip_od_destination <-
   st_coordinates()
   
 zip_od_route <- 
-  1:nrow(zip_od_origin) %>%
-  map_dfr(function(x){
+  1:ceiling(nrow(zip_od_origin)/1000) %>% 
+  map_dfr(function(y){
     
-    if(x%%100 == 0) print(x)
+    print(y)
     
-    tryCatch(
-      mb_directions(
-        origin = zip_od_origin[x, ],
-        destination = zip_od_destination,
-        profile = "driving-traffic"
-      ) %>% 
-        mutate(id = x),
-      error = function(e){
-        data.frame(id = x)
-      }
-    )
+    temp <- (y * 1000 - 999) : pmin(y * 1000, nrow(zip_od_origin)) %>% 
+      map_dfr(function(x){
+        tryCatch(
+          mb_directions(
+            origin = zip_od_origin[x, ],
+            destination = zip_od_destination,
+            profile = "driving-traffic"
+          ) %>% 
+            mutate(id = x),
+          error = function(e){
+            data.frame(id = x)
+          }
+        )
+      }) %>% 
+      st_as_sf()
+      
+      saveRDS(temp, paste0("temp",y,".rds"))
+      
+      return(temp)
     
-    
-  }) %>% 
-  st_as_sf()
+  })
 
 
 ```
