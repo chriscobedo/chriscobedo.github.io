@@ -88,66 +88,90 @@ full_zip_od_clean <- full_zip_od %>%
 
 
 
+```{r, warning = False}
+# full_zip_od_routing <- full_zip_od_clean %>% 
+#   mutate(
+#     origin = ifelse(
+#       direction == "inbound",
+#       h_geocode,
+#       w_geocode
+#     ),
+#     cbg = origin %>% substr(1,12),
+#     tract = origin %>% substr(1,11)
+#   ) %>% 
+#   filter(!duplicated(cbg))
+# 
+# ca_tracts <- tracts("CA")
+# 
+# zip_od_origin <-
+#   full_zip_od_routing %>% 
+#   select(tract) %>% 
+#   left_join(ca_tracts %>% select(tract = GEOID)) %>% 
+#   st_as_sf() %>% 
+#   st_centroid() %>% 
+#   st_coordinates()
+# 
+# zip_od_destination <-
+#   zip %>% 
+#   st_centroid() %>% 
+#   st_coordinates()
+#   
+# zip_od_route <- 
+#   1:ceiling(nrow(zip_od_origin)/1000) %>% 
+#   map_dfr(function(y){
+#     
+#     print(y)
+#     
+#     temp <- (y * 1000 - 999) : pmin(y * 1000, nrow(zip_od_origin)) %>% 
+#       map_dfr(function(x){
+#         tryCatch(
+#           mb_directions(
+#             origin = zip_od_origin[x, ],
+#             destination = zip_od_destination,
+#             profile = "driving-traffic"
+#           ) %>% 
+#             mutate(id = x),
+#           error = function(e){
+#             data.frame(id = x)
+#           }
+#         )
+#       }) %>% 
+#       st_as_sf()
+#       
+#       saveRDS(temp, paste0("temp",y,".rds"))
+#       
+#       return(temp)
+#     
+#   })
+# 
+# saveRDS(zip_od_route, "zip_od_route.rds")
+
+zip_od_route <- readRDS("zip_od_route.rds")
+
+```
+
+
 ```{r}
-full_zip_od_routing <- full_zip_od_clean %>% 
+full_zip_od_routed <- full_zip_od_routing %>% 
+  cbind(zip_od_route)
+
+full_zip_od_final <- full_zip_od_clean %>% 
   mutate(
     origin = ifelse(
       direction == "inbound",
       h_geocode,
       w_geocode
     ),
-    cbg = origin %>% substr(1,12),
-    tract = origin %>% substr(1,11)
+    cbg = substr(origin, 1, 12)
   ) %>% 
-  filter(!duplicated(cbg))
-
-ca_tracts <- tracts("CA")
-
-zip_od_origin <-
-  full_zip_od_routing %>% 
-  select(tract) %>% 
-  left_join(ca_tracts %>% select(tract = GEOID)) %>% 
-  st_as_sf() %>% 
-  st_centroid() %>% 
-  st_coordinates()
-
-zip_od_destination <-
-  zip %>% 
-  st_centroid() %>% 
-  st_coordinates()
-  
-zip_od_route <- 
-  1:ceiling(nrow(zip_od_origin)/1000) %>% 
-  map_dfr(function(y){
-    
-    print(y)
-    
-    temp <- (y * 1000 - 999) : pmin(y * 1000, nrow(zip_od_origin)) %>% 
-      map_dfr(function(x){
-        tryCatch(
-          mb_directions(
-            origin = zip_od_origin[x, ],
-            destination = zip_od_destination,
-            profile = "driving-traffic"
-          ) %>% 
-            mutate(id = x),
-          error = function(e){
-            data.frame(id = x)
-          }
-        )
-      }) %>% 
-      st_as_sf()
-      
-      saveRDS(temp, paste0("temp",y,".rds"))
-      
-      return(temp)
-    
-  })
-
-
+  left_join(
+    full_zip_od_routed %>% 
+      select(cbg, duration, distance)
+  ) %>% 
+  mutate(
+    visits = S000 * 261
+  )
 ```
-
-
 
 
 
