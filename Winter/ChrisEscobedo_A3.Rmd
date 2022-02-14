@@ -29,16 +29,20 @@ This analysis will focus on the zip code area of 94804, which is in the South of
 To create the analysis of vehicle emissions, this report uses data from LODES for trip data. It uses data from 2013 to 2019 to calculate commute emissions for the zip code area in the south of Richmond as an origin and as a destination.
 
 ```{r, warning = FALSE}
-zctas <- zctas()
+# zctas <- zctas()
+# 
+# zip <- zctas %>% 
+#   filter(GEOID10 == 94804)
+# 
+# blocks <- blocks("CA")
+# 
+# zip_blocks <- blocks %>% 
+#   st_centroid() %>% 
+#   .[zip, ]
+# 
+# saveRDS(zip_blocks, "zip_blocks.rds")
 
-zip <- zctas %>% 
-  filter(GEOID10 == 94804)
-
-blocks <- blocks("CA")
-
-zip_blocks <- blocks %>% 
-  st_centroid() %>% 
-  .[zip, ]
+zip_blocks <- readRDS("zip_blocks.rds")
 
 ## compiling OD LODES data from 2013-2019
 # full_zip_od <- 2013:2019 %>% 
@@ -98,7 +102,7 @@ full_zip_od_routing <- full_zip_od_clean %>%
 
 ca_tracts <- tracts("CA")
 
-zip_od_origin <- 
+zip_od_origin <-
   full_zip_od_routing %>% 
   select(tract) %>% 
   left_join(ca_tracts %>% select(tract = GEOID)) %>% 
@@ -106,6 +110,30 @@ zip_od_origin <-
   st_centroid() %>% 
   st_coordinates()
 
+zip_od_destination <-
+  zip %>% 
+  st_centroid() %>% 
+  st_coordinates()
+  
+zip_od_route <- 
+  1:nrow(zip_od_origin) %>%
+  map_dfr(function(x){
+    
+    tryCatch(
+      mb_directions(
+        origin = zip_od_origin[x, ],
+        destination = zip_od_destination,
+        profile = "driving-traffic"
+      ) %>% 
+        mutate(id = x),
+      error = function(e){
+        data.frame(id = x)
+      }
+    )
+    
+    
+  }) %>% 
+  st_as_sf()
 
 
 ```
