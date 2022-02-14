@@ -16,6 +16,7 @@ library(tigris)
 library(sf)
 library(leaflet)
 library(censusapi)
+library(mapboxapi)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -118,6 +119,8 @@ zip_od_destination <-
 zip_od_route <- 
   1:nrow(zip_od_origin) %>%
   map_dfr(function(x){
+    
+    if(x%%100 == 0) print(x)
     
     tryCatch(
       mb_directions(
