@@ -174,8 +174,128 @@ full_zip_od_final <- full_zip_od_clean %>%
 ```
 
 
+```{r}
+acs_vars_2019_5yr <- readRDS("acs_vars_2019_5yr.csv")
 
-### Finish routing and vehicle information for thursday
+travel_time_mode <-
+  counties("CA", cb = T, progress_bar = F) %>%
+  pull(COUNTYFP) %>% 
+  map_dfr(function(x){
+    getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "block group:*",
+      regionin = paste0("state:06+county:", x),
+      vars = "group(B08134)"
+    )
+  }) %>% 
+  mutate(
+    cbg =
+      paste0(state,county,tract,block_group)
+  ) %>%
+  filter(cbg %in% full_zip_od_final$cbg) %>% 
+  select(!c(GEO_ID,state,county,tract,block_group,NAME) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "variable",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label), 
+    by = c("variable" = "name")
+  ) %>% 
+  select(-variable) %>% 
+  separate(
+    label,
+    into = c(NA, NA, "total", "mode", "carpool", "time"),
+    sep = "!!"
+  ) %>% 
+  mutate(
+    mode = case_when(
+      total %in% c(
+        "Less than 10 minutes",
+        "10 to 14 minutes",
+        "15 to 19 minutes",
+        "20 to 24 minutes",
+        "25 to 29 minutes",
+        "30 to 34 minutes",
+        "35 to 44 minutes",
+        "45 to 59 minutes",
+        "60 or more minutes"
+      ) ~ "Total",
+      mode == "Drove alone:" ~ mode,
+      carpool %in% c(
+        "In 2-person carpool:",
+        "In 3-or-more-person carpool:"
+      ) ~ carpool
+    ),
+    time = case_when(
+      mode == "Total" ~ total,
+      mode == "Drove alone:" ~ carpool,
+      mode == carpool ~ time
+    )
+  ) %>% 
+  filter(!is.na(time)) %>% 
+  select(-total, -carpool) %>% 
+  pivot_wider(
+    names_from = mode,
+    values_from = estimate
+  ) %>% 
+  mutate(
+    perc_veh1 = 'Drove alone:'/Total,
+    perc_veh2 = 'In 2-person carpool:'/Total,
+    perc_veh3 = 'In 3-or-more-person carpool:'/Total
+  )
+
+work_trips_richmond <-
+  full_zip_od_final %>% 
+  cbind(
+    fu%>% 
+      st_drop_geometry()
+  ) %>% 
+  mutate(
+    time = case_when(
+      duration < 10 ~ "Less than 10 minutes",
+      duration < 15 ~ "10 to 14 minutes",
+      duration < 20 ~ "15 to 19 minutes",
+      duration < 25 ~ "20 to 24 minutes",
+      duration < 30 ~ "25 to 29 minutes",
+      duration < 35 ~ "30 to 34 minutes",
+      duration < 45 ~ "35 to 44 minutes",
+      duration < 60 ~ "45 to 59 minutes",
+      TRUE ~ "60 or more minutes"
+    )
+  ) %>% 
+  left_join(
+    travel_time_mode %>% 
+      select(
+        origin,
+        time,
+        perc_veh1,
+        perc_veh2,
+        perc_veh3
+      ),
+    by = c("origin", "time")
+  ) %>% 
+  mutate(
+    vehicles = 
+      visits * perc_veh1 + 
+      visits * perc_veh2 / 2 +
+      visits * perc_veh3 / 3,
+    vmt = vehicles * distance * 2
+  )
+```
+
+
+Getting Population Data
+
+```{r}
+
+```
+
+
+
 
 
 
