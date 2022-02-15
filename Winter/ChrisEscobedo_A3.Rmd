@@ -253,15 +253,15 @@ travel_time_mode <-
     values_from = estimate
   ) %>% 
   mutate(
-    perc_veh1 = 'Drove alone:'/Total,
-    perc_veh2 = 'In 2-person carpool:'/Total,
-    perc_veh3 = 'In 3-or-more-person carpool:'/Total
+    perc_veh1 = `Drove alone:`/Total,
+    perc_veh2 = `In 2-person carpool:`/Total,
+    perc_veh3 = `In 3-or-more-person carpool:`/Total
   )
 
 work_trips_richmond <-
   full_zip_od_final %>% 
   cbind(
-    fu%>% 
+    zip_od_route%>% 
       st_drop_geometry()
   ) %>% 
   mutate(
