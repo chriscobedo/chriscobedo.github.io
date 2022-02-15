@@ -260,10 +260,6 @@ travel_time_mode <-
 
 work_trips_richmond <-
   full_zip_od_final %>% 
-  cbind(
-    zip_od_route%>% 
-      st_drop_geometry()
-  ) %>% 
   mutate(
     time = case_when(
       duration < 10 ~ "Less than 10 minutes",
@@ -278,15 +274,15 @@ work_trips_richmond <-
     )
   ) %>% 
   left_join(
-    travel_time_mode %>% 
+    travel_time_mode_clean %>% 
       select(
-        origin,
+        cbg,
         time,
         perc_veh1,
         perc_veh2,
         perc_veh3
       ),
-    by = c("origin", "time")
+    by = c("cbg", "time")
   ) %>% 
   mutate(
     vehicles = 
