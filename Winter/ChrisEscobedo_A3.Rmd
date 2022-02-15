@@ -162,11 +162,11 @@ full_zip_od_final <- full_zip_od_clean %>%
       h_geocode,
       w_geocode
     ),
-    tract = substr(origin, 1, 11)
+    cbg = substr(origin, 1, 12)
   ) %>% 
   left_join(
     full_zip_od_routed %>% 
-      select(tract, duration, distance)
+      select(cbg, duration, distance)
   ) %>% 
   mutate(
     visits = S000 * 261
