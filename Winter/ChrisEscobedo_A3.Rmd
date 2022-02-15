@@ -188,7 +188,9 @@ travel_time_mode <-
       regionin = paste0("state:06+county:", x),
       vars = "group(B08134)"
     )
-  }) %>% 
+  }) 
+
+ travel_time_mode <- travel_time_mode %>% 
   mutate(
     cbg =
       paste0(state,county,tract,block_group)
