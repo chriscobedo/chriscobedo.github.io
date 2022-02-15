@@ -175,7 +175,15 @@ full_zip_od_final <- full_zip_od_clean %>%
 
 
 ```{r}
-acs_vars_2019_5yr <- readRDS("acs_vars_2019_5yr.csv")
+# acs_vars_2019_5yr_all <-
+#   listCensusMetadata(
+#     name = "2019/acs/acs5/",
+#     type = "variables"
+#   )
+# 
+# saveRDS(acs_vars_2019_5yr_all, "acs_vars_2019_5yr_all.csv")
+
+acs_vars_2019_5yr_all <- readRDS("acs_vars_2019_5yr_all.csv")
 
 travel_time_mode <-
   counties("CA", cb = T, progress_bar = F) %>%
@@ -190,7 +198,7 @@ travel_time_mode <-
     )
   }) 
 
- travel_time_mode <- travel_time_mode %>% 
+ travel_time_mode_clean <- travel_time_mode %>% 
   mutate(
     cbg =
       paste0(state,county,tract,block_group)
@@ -203,7 +211,7 @@ travel_time_mode <-
     values_to = "estimate"
   ) %>%
   left_join(
-    acs_vars_2019_5yr %>% 
+    acs_vars_2019_5yr_groups %>% 
       select(name, label), 
     by = c("variable" = "name")
   ) %>% 
