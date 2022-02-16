@@ -293,6 +293,39 @@ work_trips_richmond <-
   )
 ```
 
+### Greenhouse Gas Emissions
+
+Next we will use data from California Air Resources Board (CARB) Emission Factors (EMFAC) model. This model  includes emissions rates data, year by year.
+
+```{r, warning = False}
+emfac <- 
+  read_csv("EMFAC2021-range.csv", skip = 8) %>% 
+  transmute(
+    Year = `Calendar Year`,
+    Category = `Vehicle Category`,
+    Fuel_Type = Fuel,
+    Percent_Trips = Trips/sum(Trips),
+    Percent_Miles = `Total VMT`/sum(`Total VMT`),
+    `MTCO2_Running_Exhaust` = CO2_RUNEX/`Total VMT`,
+    `MTCO2_Start_Exhaust` = CO2_STREX/Trips
+  )
+
+work_trips_richmond_ghg <-
+  emfac %>% 
+  mutate(
+    trips = Percent_Trips * sum(work_trips_richmond$visits, na.rm = T),
+    vmt = Percent_Miles * sum(work_trips_richmond$vmt, na.rm = T),
+    ghg = vmt*MTCO2_Running_Exhaust + trips*MTCO2_Start_Exhaust*2
+  )
+```
+
+The cumulative amount of greenhouse gas emissions for vehicles entering or leaving the South Richmond zip code area from 20139-2019 is displayed below, in metric tonnes of CO2.
+
+```{r}
+sum(work_trips_richmond_ghg$ghg)
+```
+
+This 
 
 Getting Population Data
 
