@@ -325,9 +325,9 @@ The cumulative amount of greenhouse gas emissions for vehicles entering or leavi
 sum(work_trips_richmond_ghg$ghg)
 ```
 
-This 
+## Building Emissions
 
-Getting Population Data
+Next, we will conduct an analysis of building emissions for the same area, using PG&E electricity and gas data for the range of 2013 to 2019. 
 
 ```{r}
 
