@@ -329,7 +329,7 @@ sum(work_trips_richmond_ghg$ghg)
 
 Next, we will conduct an analysis of building emissions for the same area, using PG&E electricity and gas data for the range of 2013 to 2019. 
 
-```{r, include = False, warning=FALSE}
+```{r, include = FALSE, warning=FALSE}
 pge_elec_emissions_factor <-
   data.frame(
     year = c(2013:2019),
