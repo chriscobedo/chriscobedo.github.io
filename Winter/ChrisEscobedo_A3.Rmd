@@ -174,7 +174,7 @@ full_zip_od_final <- full_zip_od_clean %>%
 ```
 
 
-```{r}
+```{r, warning=FALSE}
 # acs_vars_2019_5yr_all <-
 #   listCensusMetadata(
 #     name = "2019/acs/acs5/",
@@ -211,7 +211,7 @@ travel_time_mode <-
     values_to = "estimate"
   ) %>%
   left_join(
-    acs_vars_2019_5yr_groups %>% 
+    acs_vars_2019_5yr_all %>% 
       select(name, label), 
     by = c("variable" = "name")
   ) %>% 
@@ -297,7 +297,7 @@ work_trips_richmond <-
 
 Next we will use data from California Air Resources Board (CARB) Emission Factors (EMFAC) model. This model  includes emissions rates data, year by year.
 
-```{r, warning = False}
+```{r, warning = FALSE}
 emfac <- 
   read_csv("EMFAC2021-range.csv", skip = 8) %>% 
   transmute(
@@ -416,6 +416,31 @@ pge_data <-
 ```
 
 
+```{r, warning=FALSE}
+richmond_pge_data <-
+  pge_data %>% 
+  filter(ZIPCODE %in% c("94804")) %>% 
+  filter(CUSTOMERCLASS %in% c(
+    "Elec- Commercial",
+    "Elec- Residential",
+    "Gas- Commercial",
+    "Gas- Residential"
+  )) %>% 
+  mutate(
+    ENERGYTYPE = substr(CUSTOMERCLASS,1,1)
+  ) %>% 
+  group_by(ZIPCODE, ENERGYTYPE, YEAR) %>% 
+  summarize(
+    TOTALKBTU = sum(TOTALKBTU, na.rm=T),
+    TOTALTCO2E = sum(TOTALTCO2E, na.rm=T), 
+    TOTALCUSTOMERS = mean(TOTALCUSTOMERS, na.rm=T)
+  ) %>% 
+  group_by(ENERGYTYPE, YEAR) %>%
+  summarize(across(
+    c(TOTALKBTU,TOTALTCO2E,TOTALCUSTOMERS),
+    ~sum(.,na.rm=T)
+  ))
+```
 
 
 
