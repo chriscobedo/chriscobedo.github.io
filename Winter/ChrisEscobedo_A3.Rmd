@@ -454,7 +454,7 @@ richmond_pge_data <-
 
 ### Plot of Building Emissions
 
-Below is a graph of the total annual building emissions. The total emissions were estimated from the PG&E data, and normalized using population, jobs, and CDDs and HDDs.
+Below is a graph of the total annual amount of KBTU. The total amounts were estimated from the PG&E data, and normalized using population, jobs, and CDDs and HDDs.
 
 ```{r}
 ## population data
@@ -556,10 +556,21 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
   )
 
 building_emissions_plot <- richmond_pge_data_normalized %>% 
-  ggplot(
-    
+  ggplot()+
+    geom_line(
+    aes(
+      x = YEAR,
+      y = norm,
+      color = ENERGYTYPE
+    )
+  ) +
+  labs(
+    x = "Year",
+    y = "Total KBTU, normalized by populations and jobs",
+    title = "TOTAL KBTU"
   )
 
+building_emissions_plot
 ```
 
 
