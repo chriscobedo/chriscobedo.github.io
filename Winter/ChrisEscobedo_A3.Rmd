@@ -413,10 +413,7 @@ pge_data <-
       })
     
   })
-```
 
-
-```{r, warning=FALSE}
 richmond_pge_data <-
   pge_data %>% 
   filter(ZIPCODE %in% c("94804")) %>% 
@@ -441,6 +438,21 @@ richmond_pge_data <-
     ~sum(.,na.rm=T)
   ))
 ```
+
+### Graph of total Greenhouse Gas Emissions 
+
+Below is a graph that shows the total annual greenhouse gas emission for buildings and vehicles for the zip code area in the South of Richmond. It shows these amounts from 2013 to 2019.
+
+```{r, warning=FALSE}
+
+
+```
+
+
+
+
+
+
 
 
 
