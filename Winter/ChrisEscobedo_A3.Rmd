@@ -441,7 +441,7 @@ richmond_pge_data <-
 
 ### Graph of Building Emissions
 
-Below is a graph of the total annual building emissions
+Below is a graph of the total annual building emissions. The total emissions were estimated from the PG&E data, and normalized using population, jobs, and CDDs and HDDs.
 
 ```{r}
 
