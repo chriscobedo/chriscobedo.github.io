@@ -547,15 +547,11 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
   left_join(richmond_cbgs_pop) %>% 
   left_join(dd) %>% 
   mutate(
-     ## normalize emissions 
-    # norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
-    #   TOTALKBTU/jobs,
-    #   TOTALKBTU/pop
-    # ),
-   norm = case_when(ENERGYTYPE %in% c("Elec- Commercial") ~ TOTALKBTU/jobs/CDD_mean,
-                    ENERGYTYPE %in% c("Elec- Residential") ~ TOTALKBTU/pop/CDD_mean,
-                    ENERGYTYPE %in% c("Gas- Commercial") ~ TOTALKBTU/jobs/HDD_mean,
-                    ENERGYTYPE %in% c("Gas- Residential") ~ TOTALKBTU/pop/HDD_mean,
+   norm = case_when(
+     ENERGYTYPE %in% c("Elec- Commercial") ~ TOTALKBTU/jobs/CDD_mean,
+     ENERGYTYPE %in% c("Elec- Residential") ~ TOTALKBTU/pop/CDD_mean,
+     ENERGYTYPE %in% c("Gas- Commercial") ~ TOTALKBTU/jobs/HDD_mean,
+     ENERGYTYPE %in% c("Gas- Residential") ~ TOTALKBTU/pop/HDD_mean,
     )
   )
 
