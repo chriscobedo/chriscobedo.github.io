@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 ```
 
-```{r}
+```{r, warning=FALSE}
 library(lehdr)
 library(tidyverse)
 library(tigris)
@@ -325,7 +325,7 @@ The cumulative amount of greenhouse gas emissions for vehicles entering or leavi
 sum(work_trips_richmond_ghg$ghg)
 ```
 
-## Building Emissions
+## Building Emissions Analysis
 
 Next, we will conduct an analysis of building emissions for the same area, using PG&E electricity and gas data for the range of 2013 to 2019. 
 
@@ -447,6 +447,34 @@ Below is a graph of the total annual building emissions. The total emissions wer
 ## population data
 
 ## job data
+richmond_jobs <- 2013:2019 %>% 
+  map_dfr(function(year){
+
+    print(year)
+
+    temp <- ca_od <- grab_lodes(
+      state = "ca", 
+      year = 2013, 
+      lodes_type = "wac", 
+      job_type = "JT01",
+      state_part = "main", 
+      agg_geo = "block"
+    ) %>%
+    filter(
+      w_geocode %in% zip_blocks$GEOID10
+    ) %>%
+    mutate(
+      year = year,
+      jobs = C000
+    ) %>% 
+    select(year, w_geocode, jobs)
+
+    saveRDS(temp, paste0("temp_jobs", year, ".rds"))
+
+    return(temp)
+
+  })
+
 
 ##normalized buildings emissions
 richmond_pge_data_normalized <- richmond_pge_data %>% 
