@@ -88,19 +88,19 @@ full_zip_od_clean <- full_zip_od %>%
 
 
 
-```{r, warning = False}
-# full_zip_od_routing <- full_zip_od_clean %>% 
-#   mutate(
-#     origin = ifelse(
-#       direction == "inbound",
-#       h_geocode,
-#       w_geocode
-#     ),
-#     cbg = origin %>% substr(1,12),
-#     tract = origin %>% substr(1,11)
-#   ) %>% 
-#   filter(!duplicated(cbg))
-# 
+```{r, warning = FALSE}
+full_zip_od_routing <- full_zip_od_clean %>%
+  mutate(
+    origin = ifelse(
+      direction == "inbound",
+      h_geocode,
+      w_geocode
+    ),
+    cbg = origin %>% substr(1,12),
+    tract = origin %>% substr(1,11)
+  ) %>%
+  filter(!duplicated(cbg))
+
 # ca_tracts <- tracts("CA")
 # 
 # zip_od_origin <-
@@ -329,8 +329,90 @@ sum(work_trips_richmond_ghg$ghg)
 
 Next, we will conduct an analysis of building emissions for the same area, using PG&E electricity and gas data for the range of 2013 to 2019. 
 
-```{r}
+```{r, include = False, warning=FALSE}
+pge_elec_emissions_factor <-
+  data.frame(
+    year = c(2013:2019),
+    factor = c(427,435,405,294,210,206,2.68)
+  )
 
+pge_data <- 
+  2013:2019 %>% 
+  map_dfr(function(yr){
+    
+    print(yr)
+    
+    factor <- 
+      pge_elec_emissions_factor %>% 
+      filter(year == yr) %>% 
+      pull(factor)
+    
+    1:4 %>% 
+      map_dfr(function(quarter){
+        
+        print(quarter)
+        
+        c("Electric","Gas") %>% 
+          map_dfr(function(type){
+            
+            print(type)
+            
+            filename <- 
+              paste0(
+                "pge/PGE_",
+                yr,
+                "_Q",
+                quarter,
+                "_",
+                type,
+                "UsageByZip.csv"
+              )
+            
+            temp <- read_csv(filename)
+            
+            if(yr == 2017 & quarter == 4) {
+              temp <- 
+                temp %>% 
+                filter(MONTH != 9)
+            }
+            
+            if(yr == 2014 & quarter == 3 & type == "Gas"){
+              temp <- temp %>% 
+                mutate(
+                  TOTALTHM = TotalTherms
+                )
+            }
+            
+            temp <-
+              temp %>% 
+              rename_all(toupper) %>% 
+              mutate(
+                TOTALKBTU = ifelse(
+                  substr(CUSTOMERCLASS,1,1) == "E",
+                  TOTALKWH * 3.412,
+                  TOTALTHM * 99.976
+                ),
+                TOTALTCO2E = ifelse(
+                  substr(CUSTOMERCLASS,1,1) == "E",
+                  TOTALKWH/1000 * factor * 0.000453592,
+                  TOTALTHM * 0.00531
+                )
+              ) %>% 
+              select(
+                ZIPCODE,
+                YEAR,
+                MONTH,
+                CUSTOMERCLASS,
+                TOTALKBTU,
+                TOTALTCO2E,
+                TOTALCUSTOMERS
+              )
+             
+          })
+        
+      })
+    
+  })
 ```
 
 
