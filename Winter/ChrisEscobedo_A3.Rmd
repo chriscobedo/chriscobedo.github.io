@@ -566,13 +566,14 @@ building_emissions_plot <- richmond_pge_data_normalized %>%
   ) +
   labs(
     x = "Year",
-    y = "Total KBTU, normalized by populations and jobs",
-    title = "TOTAL KBTU"
+    y = "TOTAL KBTU",
+    title = "Total KBTU, normalized by population, jobs, HDDs and CDDs"
   )
 
 building_emissions_plot
 ```
 
+This plot demonstrates just how disproportionate electricity use is when compared to residential use, as well as gas usage for both residential and commercial use. This might imply that there is an industry that is using a large amount of electricity, specifically per the number of jobs it is producing. This implies an electricity heavy industry in the region that does not create a proportional amount of jobs for its electricty use.
 
 ### Graph of total Greenhouse Gas Emissions 
 
