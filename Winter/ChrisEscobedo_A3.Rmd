@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = F, warnings = F, message = F)
 
 ```{r, warning=FALSE}
 library(lehdr)
+library(mapview)
 library(tidyverse)
 library(tigris)
 library(sf)
@@ -157,6 +158,8 @@ full_zip_od_routing <- full_zip_od_clean %>%
 # saveRDS(zip_od_route, "zip_od_route.rds")
 
 zip_od_route <- readRDS("zip_od_route.rds")
+
+mapview(zip)
 
 ```
 
@@ -449,7 +452,7 @@ richmond_pge_data <-
   ))
 ```
 
-### Graph of Building Emissions
+### Plot of Building Emissions
 
 Below is a graph of the total annual building emissions. The total emissions were estimated from the PG&E data, and normalized using population, jobs, and CDDs and HDDs.
 
@@ -512,6 +515,22 @@ richmond_jobs_sum <- richmond_jobs %>%
   group_by(year) %>% 
   summarize(jobs = sum(jobs))
 
+## HDD and CDD
+dd <- read_csv("hdd.csv") %>% 
+  mutate(
+    DD = "CDD"
+  ) %>% rbind(
+    read_csv("cdd.csv") %>% 
+      mutate(
+        DD = "HDD")
+  ) %>% 
+  mutate(
+    YEAR = as.numeric(time %>% substr(1,4))
+  ) %>% 
+  group_by(YEAR, DD) %>% 
+  filter(YEAR < 2020 & YEAR > 2012)
+  summarize(total = sum(mean))
+
 ##normalized buildings emissions
 richmond_pge_data_normalized <- richmond_pge_data %>% 
   ## left_join pop and jobs data to buildings per year
@@ -522,9 +541,10 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
   mutate(
      ## normalize emissions 
     norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
-      TOTALTCO2E/jobs,
-      TOTALTCO2E/pop
-    )
+      TOTALKBTU/jobs,
+      TOTALKBTU/pop
+    ),
+    case_when(ENERGYTYPE %in% c("Elec- Commercial") ~ TOTALKBTU/jobs/
   )
 
 ```
