@@ -516,27 +516,27 @@ richmond_jobs_sum <- richmond_jobs %>%
   summarize(jobs = sum(jobs))
 
 ## HDD and CDD
-dd <- read_csv("cdd.csv") %>% 
+cdd <- read_csv("cdd.csv") %>% 
   mutate(
     YEAR = as.numeric(time %>% substr(1,4))
   ) %>% 
-  group_by(YEAR) %>% 
   filter(YEAR < 2020 & YEAR > 2012) %>% 
-  transmute(
+  mutate(
     CDD_mean = mean
-  ) %>% 
-  rbind(
-    read_csv("hdd.csv") %>% 
+  )
+
+hdd <-read_csv("hdd.csv") %>% 
       mutate(
         YEAR = as.numeric(time %>% substr(1,4))
       ) %>% 
-      group_by(YEAR) %>% 
       filter(YEAR < 2020 & YEAR > 2012) %>% 
-      transmute(
+      mutate(
         HDD_mean = mean
         )
-    )
 
+dd <- cdd %>% 
+  cbind(hdd %>% select(HDD_mean)) %>% 
+  select(YEAR, CDD_mean, HDD_mean)
 
 ##normalized buildings emissions
 richmond_pge_data_normalized <- richmond_pge_data %>% 
@@ -545,14 +545,23 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
               select(YEAR = year, jobs)
   ) %>% 
   left_join(richmond_cbgs_pop) %>% 
-  left_join(dd %>% select(HDD_mean, CDD_mean)) %>% 
+  left_join(dd) %>% 
   mutate(
      ## normalize emissions 
-    norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
-      TOTALKBTU/jobs,
-      TOTALKBTU/pop
-    ),
-    case_when(ENERGYTYPE %in% c("Elec- Commercial") ~ TOTALKBTU/jobs/
+    # norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
+    #   TOTALKBTU/jobs,
+    #   TOTALKBTU/pop
+    # ),
+   norm = case_when(ENERGYTYPE %in% c("Elec- Commercial") ~ TOTALKBTU/jobs/CDD_mean,
+                    ENERGYTYPE %in% c("Elec- Residential") ~ TOTALKBTU/pop/CDD_mean,
+                    ENERGYTYPE %in% c("Gas- Commercial") ~ TOTALKBTU/jobs/HDD_mean,
+                    ENERGYTYPE %in% c("Gas- Residential") ~ TOTALKBTU/pop/HDD_mean,
+    )
+  )
+
+building_emissions_plot <- richmond_pge_data_normalized %>% 
+  ggplot(
+    
   )
 
 ```
