@@ -424,7 +424,7 @@ richmond_pge_data <-
     "Gas- Residential"
   )) %>% 
   mutate(
-    ENERGYTYPE = substr(CUSTOMERCLASS,1,1)
+    ENERGYTYPE = CUSTOMERCLASS
   ) %>% 
   group_by(ZIPCODE, ENERGYTYPE, YEAR) %>% 
   summarize(
@@ -444,6 +444,16 @@ richmond_pge_data <-
 Below is a graph of the total annual building emissions. The total emissions were estimated from the PG&E data, and normalized using population, jobs, and CDDs and HDDs.
 
 ```{r}
+## population data
+
+## job data
+
+##normalized buildings emissions
+richmond_pge_data_normalized <- richmond_pge_data %>% 
+  ## left_join pop and jobs data to buildings per year
+  mutate(
+     ## normalize emissions 
+  )
 
 ```
 
