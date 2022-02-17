@@ -446,6 +446,7 @@ Below is a graph of the total annual building emissions. The total emissions wer
 ```{r}
 ## population data
 
+
 ## job data
 richmond_jobs <- 2013:2019 %>% 
   map_dfr(function(year){
@@ -454,7 +455,7 @@ richmond_jobs <- 2013:2019 %>%
 
     temp <- ca_od <- grab_lodes(
       state = "ca", 
-      year = 2013, 
+      year = year, 
       lodes_type = "wac", 
       job_type = "JT01",
       state_part = "main", 
@@ -475,10 +476,18 @@ richmond_jobs <- 2013:2019 %>%
 
   })
 
+richmond_jobs_sum <- richmond_jobs %>% 
+  group_by(year) %>% 
+  summarize(jobs = sum(jobs))
 
 ##normalized buildings emissions
 richmond_pge_data_normalized <- richmond_pge_data %>% 
   ## left_join pop and jobs data to buildings per year
+  left_join(richmond_jobs_sum %>% 
+              select(YEAR = year, jobs)
+  ) %>% 
+  left_join()
+  
   mutate(
      ## normalize emissions 
   )
