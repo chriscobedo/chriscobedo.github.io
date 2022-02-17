@@ -516,20 +516,27 @@ richmond_jobs_sum <- richmond_jobs %>%
   summarize(jobs = sum(jobs))
 
 ## HDD and CDD
-dd <- read_csv("hdd.csv") %>% 
-  mutate(
-    DD = "CDD"
-  ) %>% rbind(
-    read_csv("cdd.csv") %>% 
-      mutate(
-        DD = "HDD")
-  ) %>% 
+dd <- read_csv("cdd.csv") %>% 
   mutate(
     YEAR = as.numeric(time %>% substr(1,4))
   ) %>% 
-  group_by(YEAR, DD) %>% 
-  filter(YEAR < 2020 & YEAR > 2012)
-  summarize(total = sum(mean))
+  group_by(YEAR) %>% 
+  filter(YEAR < 2020 & YEAR > 2012) %>% 
+  transmute(
+    CDD_mean = mean
+  ) %>% 
+  rbind(
+    read_csv("hdd.csv") %>% 
+      mutate(
+        YEAR = as.numeric(time %>% substr(1,4))
+      ) %>% 
+      group_by(YEAR) %>% 
+      filter(YEAR < 2020 & YEAR > 2012) %>% 
+      transmute(
+        HDD_mean = mean
+        )
+    )
+
 
 ##normalized buildings emissions
 richmond_pge_data_normalized <- richmond_pge_data %>% 
@@ -538,6 +545,7 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
               select(YEAR = year, jobs)
   ) %>% 
   left_join(richmond_cbgs_pop) %>% 
+  left_join(dd %>% select(HDD_mean, CDD_mean)) %>% 
   mutate(
      ## normalize emissions 
     norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
