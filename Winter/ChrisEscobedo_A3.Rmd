@@ -42,6 +42,16 @@ To create the analysis of vehicle emissions, this report uses data from LODES fo
 #   .[zip, ]
 # 
 # saveRDS(zip_blocks, "zip_blocks.rds")
+# 
+# block_groups <- block_groups("CA")
+# 
+# zip_cbg <- block_groups %>% 
+#   st_centroid() %>% 
+#   .[zip, ]
+#   
+# saveRDS(zip_cbg, "zip_cbg.rds")                     
+
+zip_cbg <- readRDS("zip_cbg.rds")
 
 zip_blocks <- readRDS("zip_blocks.rds")
 
@@ -445,7 +455,29 @@ Below is a graph of the total annual building emissions. The total emissions wer
 
 ```{r}
 ## population data
-
+richmond_cbgs_pop <-
+  2013:2019 %>%  
+  map_dfr(function(year){
+    getCensus(
+      name = "acs/acs5",
+      vintage = year,
+      region = "block group:*",
+      regionin = "state:06+county:013",
+      vars = "B01001_001E"
+    ) %>% 
+      mutate(
+        YEAR = year
+      )
+  }) %>% 
+  transmute(
+    block_group =
+      paste0(state,county,tract,block_group),
+    pop = B01001_001E,
+    YEAR = YEAR
+  ) %>% 
+  filter(block_group %in% zip_cbg$GEOID) %>% 
+  group_by(YEAR) %>% 
+  summarize(pop = sum(pop))
 
 ## job data
 richmond_jobs <- 2013:2019 %>% 
@@ -486,10 +518,13 @@ richmond_pge_data_normalized <- richmond_pge_data %>%
   left_join(richmond_jobs_sum %>% 
               select(YEAR = year, jobs)
   ) %>% 
-  left_join()
-  
+  left_join(richmond_cbgs_pop) %>% 
   mutate(
      ## normalize emissions 
+    norm = if_else(ENERGYTYPE %in% c("Elec- Commercial, Gas- Commercial"),
+      TOTALTCO2E/jobs,
+      TOTALTCO2E/pop
+    )
   )
 
 ```
