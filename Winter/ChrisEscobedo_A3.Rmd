@@ -439,6 +439,15 @@ richmond_pge_data <-
   ))
 ```
 
+### Graph of Building Emissions
+
+Below is a graph of the total annual building emissions
+
+```{r}
+
+```
+
+
 ### Graph of total Greenhouse Gas Emissions 
 
 Below is a graph that shows the total annual greenhouse gas emission for buildings and vehicles for the zip code area in the South of Richmond. It shows these amounts from 2013 to 2019.
