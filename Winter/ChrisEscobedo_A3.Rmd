@@ -101,7 +101,7 @@ full_zip_od_clean <- full_zip_od %>%
 
 *This analysis assumes that commute data originating and ending in the same census block would be negligible, especially when compared to trips crossing boundaries of census block boundaries. Because this analysis groups trip origin and destination points by census block, the commute data that is within a single census block is disregarded and treated as zero. Of course, this will remove a non-zero number of trips and emissions from the final analysis. The assumption is that this omission will not likely constitute a large enough amount of emissions that the advantages of grouping by the census block to simplify the analysis will outweigh the disadvantages.*
 
-Below is a map of the census blocks in this zip code that will be used for this analysis.
+Below is a map of the zip code area that will be used for this analysis.
 
 ```{r, warning = FALSE}
 full_zip_od_routing <- full_zip_od_clean %>%
@@ -653,7 +653,9 @@ ggplot(
 ```
 The graph above  shows a gradual decrease in carbon emissions over the years, and also shows that light light-duty trucks have higher total emissions in the region.
 
-The graph below shows the vehicle miles traveled associated with each vehicle type
+The graph below shows the vehicle miles traveled associated with each vehicle type. 
+
+
 
 ```{r, warning = FALSE}
 ggplot(
@@ -672,7 +674,11 @@ ggplot(
   facet_grid(. ~ Category)
 ```
 
+Interesting to note is that LDT1 (light light-duty trucks) have significantly less VMT, but more carbon emissions. 
 
+Another interesting trend is that although VMT is not decreasing by much, although it has slightly gone down after 2017, carbon emissions are still decreasing. This shows that although driving has not changed much, fuel type has had a notiecable impact on carbon emissions.
+
+This likeley indicates a shift towards electric vehicles. This is a plan that the city is likely to pursue. Given how difficult is it to change driving patterns, changing the fuel type is a way to decrease carbon emissions immediately. Although, changing car stock comes with its own challenges and time delays. 
 
 
 
