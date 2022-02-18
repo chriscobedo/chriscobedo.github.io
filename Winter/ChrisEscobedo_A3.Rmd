@@ -33,9 +33,13 @@ To create the analysis of vehicle emissions, this report uses data from LODES fo
 ```{r, warning = FALSE}
 # zctas <- zctas()
 # 
-# zip <- zctas %>% 
-#   filter(GEOID10 == 94804)
+#  zip <- zctas %>% 
+#    filter(GEOID10 == 94804)
 # 
+# saveRDS(zip, "richmond_south_zip.rds")
+
+zip <- readRDS("richmond_south_zip.rds")
+ 
 # blocks <- blocks("CA")
 # 
 # zip_blocks <- blocks %>% 
@@ -159,9 +163,7 @@ full_zip_od_routing <- full_zip_od_clean %>%
 
 zip_od_route <- readRDS("zip_od_route.rds")
 
-mapview(zip_blocks)
-
-
+mapview(zip)
 ```
 
 
