@@ -596,7 +596,34 @@ Below is a graph that shows the total annual greenhouse gas emission for buildin
 
 ```{r, warning=FALSE}
 
+full_emissions <- richmond_pge_data_normalized %>% 
+  group_by(YEAR) %>% 
+  summarize(TOTALTCO2E = mean(norm)) %>% 
+  mutate(
+    type = "Buildings"
+  ) %>% 
+  ungroup() %>% 
+  rbind(work_trips_richmond_ghg %>% select(YEAR = Year, TOTALTCO2E = ghg) %>% group_by(YEAR) %>% summarize(TOTALTCO2E = mean(TOTALTCO2E)) %>% mutate(type = "Vehicles"))
+  
+
+
+ggplot(
+  full_emissions, 
+  aes(
+    x = as.factor(YEAR), 
+    y = TOTALTCO2E
+  )
+) + 
+  geom_bar(
+    stat = "identity", aes(fill = type), position = "stack"
+  ) + 
+  labs(
+    x = "Year", y = "tCO2e", title = "South Richmond Annual Emissions by sector, 2013 to 2019"
+  ) 
 ```
+
+The graph clearly shows that the estimated greenhouse gas emissions from vehicles are much higher than that of buildings.
+The emissions of buildings have been normalized by population, jobs, and degree days of cooling and heating.
 
 
 
