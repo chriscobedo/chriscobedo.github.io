@@ -311,7 +311,7 @@ Next we will use data from California Air Resources Board (CARB) Emission Factor
 
 ```{r, warning = FALSE}
 emfac <- 
-  read_csv("EMFAC2021-range.csv", skip = 8) %>% 
+  read_csv("EMFAC2021-no-plug.csv", skip = 8) %>% 
   transmute(
     Year = `Calendar Year`,
     Category = `Vehicle Category`,
@@ -625,8 +625,52 @@ ggplot(
 The graph clearly shows that the estimated greenhouse gas emissions from vehicles are much higher than that of buildings.
 The emissions of buildings have been normalized by population, jobs, and degree days of cooling and heating.
 
+### Increasing Electric Vehicle trend
 
+The graph below shows the emissions by car type and fuel type over the years. The graph shows zero emissions associated with electric vehicles, which is obviously not the whole picture, as it leaves out electricity generation. 
 
+```{r, warning = FALSE}
+work_trips_richmond_types <- work_trips_richmond_ghg %>% 
+  mutate(
+    Category = if_else(Category == "LDA", "Passenger", "light light-duty trucks")
+  )
+
+ggplot(
+  work_trips_richmond_types,
+  aes(
+    x = as.factor(Year), 
+    y = ghg
+  )
+) + 
+  geom_bar(
+    stat = "identity", aes(fill = Fuel_Type), position = "stack"
+  ) + 
+  labs(
+    x = "Year", y = "tCO2e", title = "South Richmond Emissions by fuel Type for Passenger Cars, 2013 to 2019"
+  )+
+ # coord_flip() +
+  facet_grid(. ~ Category)
+```
+The graph above  shows a gradual decrease in carbon emissions over the years, and also shows that light light-duty trucks have higher total emissions in the region.
+
+The graph below shows the vehicle miles traveled associated with each vehicle type
+
+```{r, warning = FALSE}
+ggplot(
+  work_trips_richmond_ghg,
+  aes(
+    x = as.factor(Year), 
+    y = vmt
+  )
+) + 
+  geom_bar(
+    stat = "identity", aes(fill = Fuel_Type), position = "stack"
+  ) + 
+  labs(
+    x = "Year", y = "VMT", title = "South Richmond VMT by Vehicle Type, 2013 to 2019"
+  ) +
+  facet_grid(. ~ Category)
+```
 
 
 
