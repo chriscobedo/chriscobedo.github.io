@@ -438,8 +438,6 @@ pge_data <-
     
   })
 
-
-
 richmond_pge_data <-
   pge_data %>% 
   filter(ZIPCODE %in% c("94804")) %>% 
