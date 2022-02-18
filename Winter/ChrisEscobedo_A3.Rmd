@@ -18,7 +18,6 @@ library(sf)
 library(leaflet)
 library(censusapi)
 library(mapboxapi)
-library(conflicted)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -98,7 +97,7 @@ full_zip_od_clean <- full_zip_od %>%
 
 *This analysis assumes that commute data originating and ending in the same census block would be negligible, especially when compared to trips crossing boundaries of census block boundaries. Because this analysis groups trip origin and destination points by census block, the commute data that is within a single census block is disregarded and treated as zero. Of course, this will remove a non-zero number of trips and emissions from the final analysis. The assumption is that this omission will not likely constitute a large enough amount of emissions that the advantages of grouping by the census block to simplify the analysis will outweigh the disadvantages.*
 
-
+Below is a map of the census blocks in this zip code that will be used for this analysis.
 
 ```{r, warning = FALSE}
 full_zip_od_routing <- full_zip_od_clean %>%
@@ -160,13 +159,13 @@ full_zip_od_routing <- full_zip_od_clean %>%
 
 zip_od_route <- readRDS("zip_od_route.rds")
 
-mapview(zip)
+mapview(zip_blocks)
 
 
 ```
 
 
-```{r}
+```{r, warning=FALSE}
 full_zip_od_routed <- full_zip_od_routing %>% 
   cbind(zip_od_route)
 
