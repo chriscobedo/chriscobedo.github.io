@@ -18,6 +18,7 @@ library(sf)
 library(leaflet)
 library(censusapi)
 library(mapboxapi)
+library(conflicted)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -160,6 +161,7 @@ full_zip_od_routing <- full_zip_od_clean %>%
 zip_od_route <- readRDS("zip_od_route.rds")
 
 mapview(zip)
+
 
 ```
 
