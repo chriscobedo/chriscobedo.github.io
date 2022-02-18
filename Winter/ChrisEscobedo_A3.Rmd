@@ -202,17 +202,13 @@ full_zip_od_final <- full_zip_od_clean %>%
 acs_vars_2019_5yr_all <- readRDS("acs_vars_2019_5yr_all.csv")
 
 travel_time_mode <-
-  counties("CA", cb = T, progress_bar = F) %>%
-  pull(COUNTYFP) %>% 
-  map_dfr(function(x){
     getCensus(
       name = "acs/acs5",
       vintage = 2019,
       region = "block group:*",
-      regionin = paste0("state:06+county:", x),
+      regionin = paste0("state:06+county:+county:013"),
       vars = "group(B08134)"
     )
-  }) 
 
  travel_time_mode_clean <- travel_time_mode %>% 
   mutate(
@@ -311,7 +307,7 @@ work_trips_richmond <-
 
 ### Greenhouse Gas Emissions
 
-Next we will use data from California Air Resources Board (CARB) Emission Factors (EMFAC) model. This model  includes emissions rates data, year by year.
+Next we will use data from California Air Resources Board (CARB) Emission Factors (EMFAC) model to estimate the carbon emissions from these work trips from or to the South of Richmond. This model includes emissions rates data, year by year.
 
 ```{r, warning = FALSE}
 emfac <- 
@@ -335,10 +331,22 @@ work_trips_richmond_ghg <-
   )
 ```
 
-The cumulative amount of greenhouse gas emissions for vehicles entering or leaving the South Richmond zip code area from 20139-2019 is displayed below, in metric tonnes of CO2.
+The annual amount of greenhouse gas emissions for vehicles entering or leaving the South Richmond zip code area from 20139-2019 is displayed below, in metric tonnes of CO2. It does show a slight, but steady decrease in greenhouse gas emissions from vehicles in the region.
 
-```{r}
-sum(work_trips_richmond_ghg$ghg)
+```{r, warning=FALSE}
+work_trips_richmond_plot <- work_trips_richmond_ghg %>% 
+  group_by(Year) %>% 
+  summarize(GHG_average = mean(ghg)) %>% 
+  ggplot()+
+    geom_line(
+    aes(
+      x = Year,
+      y = GHG_average,
+    )
+  )
+  
+
+work_trips_richmond_plot
 ```
 
 ## Building Emissions Analysis
@@ -430,6 +438,8 @@ pge_data <-
     
   })
 
+
+
 richmond_pge_data <-
   pge_data %>% 
   filter(ZIPCODE %in% c("94804")) %>% 
@@ -486,33 +496,37 @@ richmond_cbgs_pop <-
   summarize(pop = sum(pop))
 
 ## job data
-richmond_jobs <- 2013:2019 %>% 
-  map_dfr(function(year){
+# richmond_jobs <- 2013:2019 %>% 
+#   map_dfr(function(year){
+# 
+#     print(year)
+# 
+#     temp <- ca_od <- grab_lodes(
+#       state = "ca", 
+#       year = year, 
+#       lodes_type = "wac", 
+#       job_type = "JT01",
+#       state_part = "main", 
+#       agg_geo = "block"
+#     ) %>%
+#     filter(
+#       w_geocode %in% zip_blocks$GEOID10
+#     ) %>%
+#     mutate(
+#       year = year,
+#       jobs = C000
+#     ) %>% 
+#     select(year, w_geocode, jobs)
+# 
+#     saveRDS(temp, paste0("temp_jobs", year, ".rds"))
+# 
+#     return(temp)
+# 
+#   })
+# 
+# saveRDS(richmond_jobs, "richmond_jobs.rds")
 
-    print(year)
-
-    temp <- ca_od <- grab_lodes(
-      state = "ca", 
-      year = year, 
-      lodes_type = "wac", 
-      job_type = "JT01",
-      state_part = "main", 
-      agg_geo = "block"
-    ) %>%
-    filter(
-      w_geocode %in% zip_blocks$GEOID10
-    ) %>%
-    mutate(
-      year = year,
-      jobs = C000
-    ) %>% 
-    select(year, w_geocode, jobs)
-
-    saveRDS(temp, paste0("temp_jobs", year, ".rds"))
-
-    return(temp)
-
-  })
+richmond_jobs <- readRDS("richmond_jobs.rds")
 
 richmond_jobs_sum <- richmond_jobs %>% 
   group_by(year) %>% 
