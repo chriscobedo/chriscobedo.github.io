@@ -16,12 +16,18 @@ library(tigris)
 library(sf)
 library(leaflet)
 library(censusapi)
+library(raster)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
 ```{r}
+slr <- 25
+rp <- 20
 
+path <- paste0("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OCOF/san_mateo_flooding_slr",str_pad(slr, 3, "left", "0"), "/flooding/v2.1/county_san_mateo_flddepth_slr", str_pad(slr, 3, "left", "0"), "_w", str_pad(rp, 3, "left", "0"), ".tif")
+
+test_flood <- raster(path)
 ```
 
 
