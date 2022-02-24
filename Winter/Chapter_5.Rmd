@@ -1,0 +1,33 @@
+---
+title: "Chapter5"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(lehdr)
+library(tidyverse)
+library(tigris)
+library(sf)
+library(leaflet)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
