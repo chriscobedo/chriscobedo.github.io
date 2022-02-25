@@ -22,8 +22,6 @@ library(mapview)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-
-
 ```{r}
 slr <- 25
 rp <- 20
