@@ -23,7 +23,7 @@ library(mapboxapi)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r, warning + F}
+```{r, warning = F}
 slr <- 25
 rp <- 20
 
@@ -31,40 +31,27 @@ path <- paste0("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OCOF/san_ma
 
 test_flood <- raster(path)
 
-# Belle Haven CBGs - 060816117002, 060816117003, 060816117001
-bh_boundary <- block_groups("CA", "San Mateo") %>% 
-  filter(GEOID %in% c("060816117003")) #, "060816117002", "060816117001"))
+# RW Shores CBGs - 060816103043, 060816103042, 	060816103041, 	060816103031,	060816103032, 	060816103033, 	060816103034
+rws_boundary <- block_groups("CA", "San Mateo") %>% 
+  filter(GEOID %in% c("060816103043", "060816103042", "060816103041", "060816103031",	"060816103032", "060816103033", 	"060816103034")) 
 
-mapview(bh_boundary)
+mapview(rws_boundary)
 
-test_flood_bh <- test_flood %>% 
+test_flood_rws <- test_flood %>% 
   crop(
-    bh_boundary %>% 
+    rws_boundary %>% 
       st_transform(26910) %>% 
       st_bbox()
   )
 
-plot(test_flood_bh)
+plot(test_flood_rws)
+```
 
-epa_boundary <- places("CA") %>% 
-  filter(NAME == "Menlo Park")
 
-## epa
-epa_boundary <- places("CA") %>% 
-  filter(NAME == "East Palo Alto")
-
-test_flood_epa <- test_flood %>% 
-  crop(
-    epa_boundary %>% 
-      st_transform(26910) %>% 
-      st_bbox()
-  )
-
-plot(test_flood_epa)
-
+```{r, warning = F}
 flood_pal <- colorNumeric(
   palette = "Blues",
-  domain = values(test_flood_epa),
+  domain = values(test_flood_rws),
   na.color = "transparent"
 )
 
@@ -75,16 +62,14 @@ leaflet() %>%
     options = tileOptions(opacity = 0.5)
   ) %>% 
   addRasterImage(
-    test_flood_epa,
+    test_flood_rws,
     colors = flood_pal
   ) %>% 
   addLegend(
     pal = flood_pal,
-    values = values(test_flood_epa),
+    values = values(test_flood_rws),
     title = "Flood depth, cm"
   )
 ```
 
-```{r}
-```
 
