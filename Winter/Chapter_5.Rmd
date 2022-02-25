@@ -18,11 +18,12 @@ library(leaflet)
 library(censusapi)
 library(raster)
 library(mapview)
+library(mapboxapi)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-```{r}
+```{r, warning + F}
 slr <- 25
 rp <- 20
 
@@ -32,7 +33,7 @@ test_flood <- raster(path)
 
 # Belle Haven CBGs - 060816117002, 060816117003, 060816117001
 bh_boundary <- block_groups("CA", "San Mateo") %>% 
-  filter(GEOID %in% c("060816117003", "060816117002", "060816117001"))
+  filter(GEOID %in% c("060816117003")) #, "060816117002", "060816117001"))
 
 mapview(bh_boundary)
 
@@ -43,7 +44,45 @@ test_flood_bh <- test_flood %>%
       st_bbox()
   )
 
+plot(test_flood_bh)
 
+epa_boundary <- places("CA") %>% 
+  filter(NAME == "Menlo Park")
+
+## epa
+epa_boundary <- places("CA") %>% 
+  filter(NAME == "East Palo Alto")
+
+test_flood_epa <- test_flood %>% 
+  crop(
+    epa_boundary %>% 
+      st_transform(26910) %>% 
+      st_bbox()
+  )
+
+plot(test_flood_epa)
+
+flood_pal <- colorNumeric(
+  palette = "Blues",
+  domain = values(test_flood_epa),
+  na.color = "transparent"
+)
+
+leaflet() %>% 
+  addMapboxTiles(
+    style_id = "satellite-streets-v11",
+    username = "mapbox",
+    options = tileOptions(opacity = 0.5)
+  ) %>% 
+  addRasterImage(
+    test_flood_epa,
+    colors = flood_pal
+  ) %>% 
+  addLegend(
+    pal = flood_pal,
+    values = values(test_flood_epa),
+    title = "Flood depth, cm"
+  )
 ```
 
 ```{r}
