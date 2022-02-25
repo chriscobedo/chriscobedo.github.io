@@ -1,5 +1,5 @@
 ---
-title: "Chapter5"
+title: "ChrisEscobedo_A4"
 author: "Chris"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: html_document
@@ -22,7 +22,9 @@ library(mapview)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
+## Location
 
+The analysis centered on Belle Haven, a historical under-resourced neighborhood in Menlo Park. The map below shows the three census block groups that make up the neighborhood and which will be used for the analysis. 
 
 ```{r}
 slr <- 25
@@ -44,10 +46,5 @@ test_flood_bh <- test_flood %>%
       st_transform(26910) %>% 
       st_bbox()
   )
-
-
-```
-
-```{r}
 ```
 
