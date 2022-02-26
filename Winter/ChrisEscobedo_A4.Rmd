@@ -22,25 +22,47 @@ library(mapview)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-## Location
+## Belle Haven
 
 The analysis centered on Belle Haven, a historically under-resourced neighborhood in Menlo Park. The map below shows the three census block groups that make up the neighborhood and which will be used for the analysis. 
 
 ```{r, warning = F}
-slr <- 25
-rp <- 20
-
-path <- paste0("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OCOF/san_mateo_flooding_slr",str_pad(slr, 3, "left", "0"), "/flooding/v2.1/county_san_mateo_flddepth_slr", str_pad(slr, 3, "left", "0"), "_w", str_pad(rp, 3, "left", "0"), ".tif")
-
-test_flood <- raster(path)
-
 # Belle Haven CBGs - 	060816117001,	060816117002, 060816117003
 bh_boundary <- block_groups("CA", "San Mateo") %>% 
   filter(GEOID %in% c("060816117001",	"060816117002", "060816117003")) 
 
-mapview(bh_boundary)
+cbg_pal <- colorNumeric(
+  palette = "Purples",
+  domain = as.numeric(bh_boundary$GEOID)
+)
+
+leaflet() %>% 
+  addMapboxTiles(
+    style_id = "satellite-streets-v11",
+    username = "mapbox",
+    options = tileOptions(opacity = 0.8)
+  ) %>% 
+  addPolygons(
+    data = bh_boundary,
+    fillColor = "violet",
+    color = "purple",
+    opacity = 1,
+    fillOpacity = .5,
+    weight = 2,
+    label = ~paste0(
+      "CBG: ", 
+      GEOID
+    ),
+    highlightOptions = highlightOptions(
+      weight = 4,
+      opacity = 5
+    )
+  ) 
 ```
 
+### Flood Maps
+
+Below are nine maps of flood risk of different scenarios, using Data from OCOF. 
 
 ```{r, warning = F}
 
@@ -54,22 +76,33 @@ for(slr in c("000","025","050")){
     
     flood <- raster(path) %>% 
       crop(
-        epa_boundary %>% 
+        bh_boundary %>% 
           st_transform(26910) %>% 
           st_bbox()
       )
     
-    writeRaster(flood, paste0("flood/SLR",slr,"_RP",rp,"_epa_flood.tif"), overwrite = T)
-    
+    writeRaster(flood, paste0("flood/SLR",slr,"_RP",rp,"_bh_flood.tif"), overwrite = T)
   }
 }
+
+SLR000_RP001 <- raster("flood/SLR000_RP001_bh_flood.tif")
+SLR000_RP020 <- raster("flood/SLR000_RP020_bh_flood.tif")
+SLR000_RP100 <- raster("flood/SLR000_RP100_bh_flood.tif")
+
+SLR025_RP001 <- raster("flood/SLR025_RP001_bh_flood.tif")
+SLR025_RP020 <- raster("flood/SLR025_RP020_bh_flood.tif")
+SLR025_RP100 <- raster("flood/SLR025_RP100_bh_flood.tif")
+
+SLR050_RP001 <- raster("flood/SLR050_RP001_bh_flood.tif")
+SLR050_RP020 <- raster("flood/SLR050_RP020_bh_flood.tif")
+SLR050_RP100 <- raster("flood/SLR050_RP100_bh_flood.tif")
 ```
 
 
 ```{r, warning = F}
 flood_pal <- colorNumeric(
   palette = "Blues",
-  domain = values(test_flood_bh),
+  domain = values(SLR000_RP001),
   na.color = "transparent"
 )
 
@@ -80,12 +113,12 @@ leaflet() %>%
     options = tileOptions(opacity = 0.5)
   ) %>% 
   addRasterImage(
-    test_flood_bh,
+    SLR000_RP001,
     colors = flood_pal
   ) %>% 
   addLegend(
     pal = flood_pal,
-    values = values(test_flood_bh),
+    values = values(SLR000_RP001),
     title = "Flood depth, cm"
   )
 ```
