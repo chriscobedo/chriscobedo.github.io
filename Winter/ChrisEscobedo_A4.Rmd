@@ -60,9 +60,9 @@ leaflet() %>%
   ) 
 ```
 
-### Flood Maps
+## Creating Flood Maps
 
-Below are nine maps of flood risk of different scenarios, using Data from OCOF. 
+This analysis uses Data from OCOF on flood risk to Belle Haven, given nine different potential scenarios of sea level rise and storm frequency.
 
 ```{r, warning = F}
 
