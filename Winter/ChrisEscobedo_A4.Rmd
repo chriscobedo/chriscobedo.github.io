@@ -18,6 +18,7 @@ library(leaflet)
 library(censusapi)
 library(raster)
 library(mapview)
+library(stars)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -98,7 +99,7 @@ SLR050_RP020 <- raster("flood/SLR050_RP020_bh_flood.tif")
 SLR050_RP100 <- raster("flood/SLR050_RP100_bh_flood.tif")
 ```
 
-
+map of max flood 
 ```{r, warning = F}
 flood_pal <- colorNumeric(
   palette = "Blues",
@@ -122,4 +123,73 @@ leaflet() %>%
     title = "Flood depth, cm"
   )
 ```
+
+
+## Building Analysis
+
+building data from...
+
+below is a map of the buildings that would be impacted by the max flooding event in Belle Haven. 
+
+```{r, warning=FALSE}
+osm_bldg <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_buildings_a_free_1.shp")
+
+bh_boundary_tf <- bh_boundary %>% st_transform(4326)
+
+bh_bldg <- osm_bldg[bh_boundary_tf, ]
+
+flood_max <- 
+  raster("flood/SLR050_RP100_bh_flood.tif")
+
+flood_max_extent <- 
+  flood_max %>% 
+  st_as_stars() %>% 
+  mutate(SLR050_RP100_bh_flood = ifelse(
+    !is.na(SLR050_RP100_bh_flood),
+    1,
+    NA
+  )) %>% 
+  st_as_sf(merge = T) %>% 
+  st_set_crs(26910) %>% 
+  st_make_valid() %>% 
+  st_transform(4326)
+
+bh_bldg_flooded_max <-
+  bh_bldg %>% 
+  st_transform(4326) %>% 
+  .[flood_max_extent,]
+
+flood_pal <- colorNumeric(
+  palette = "Blues",
+  domain = values(flood_max),
+  na.color = "transparent"
+)
+
+leaflet() %>% 
+  addMapboxTiles(
+    style_id = "satellite-streets-v11",
+    username = "mapbox",
+    options = tileOptions(opacity = 0.5)
+  ) %>% 
+  addRasterImage(
+    flood_max,
+    colors = flood_pal,
+    opacity = 0.75
+  ) %>% 
+  addPolygons(
+    data = bh_bldg_flooded_max,
+    fill = F,
+    color = "red",
+    weight = 0.5
+  ) %>% 
+  addLegend(
+    pal = flood_pal,
+    values = values(flood_max),
+    title = "Flood depth, cm"
+  )
+```
+
+
+
+
 
