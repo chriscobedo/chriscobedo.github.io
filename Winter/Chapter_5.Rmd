@@ -19,6 +19,7 @@ library(censusapi)
 library(raster)
 library(mapview)
 library(mapboxapi)
+library(stars)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -72,4 +73,35 @@ leaflet() %>%
   )
 ```
 
+buildings :
+
+```{r, warning=FALSE}
+osm_bldg <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_buildings_a_free_1.shp")
+
+bh_boundary_tf <- bh_boundary %>% st_transform(4326)
+
+bh_bldg <- osm_bldg[bh_boundary_tf, ]
+
+flood_max <- 
+  raster("flood/SLR050_RP100_bh_flood.tif")
+
+flood_max_extent <- 
+  flood_max %>% 
+  st_as_stars() %>% 
+  mutate(SLR050_RP100_bh_flood = ifelse(
+    !is.na(SLR050_RP100_bh_flood),
+    1,
+    NA
+  )) %>% 
+  st_as_sf(merge = T) %>% 
+  st_set_crs(26910) %>% 
+  st_make_valid() %>% 
+  st_transform(4326)
+
+bh_bldg_flooded_max <-
+  bh_bldg %>% 
+  st_transform(4326) %>% 
+  .[flood_max_extent,]
+
+```
 
