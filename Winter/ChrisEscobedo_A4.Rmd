@@ -19,6 +19,7 @@ library(censusapi)
 library(raster)
 library(mapview)
 library(stars)
+library(mapboxapi)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
