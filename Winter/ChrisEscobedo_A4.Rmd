@@ -137,7 +137,7 @@ building data from...
 
 below is a map of the buildings that would be impacted by the max flooding event in Belle Haven. 
 
-```{r, warning=FALSE}
+```{r, include=FALSE, warning=FALSE}
 osm_bldg <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gis_osm_buildings_a_free_1.shp")
 
 bh_boundary_tf <- bh_boundary %>% st_transform(4326)
@@ -167,7 +167,11 @@ flood_pal <- colorNumeric(
   domain = values(flood_max),
   na.color = "transparent"
 )
+```
 
+Below is a map of ...
+
+```{r, warning=FALSE}
 leaflet() %>% 
   addMapboxTiles(
     style_id = "satellite-streets-v11",
