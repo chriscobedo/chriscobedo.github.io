@@ -199,7 +199,61 @@ leaflet() %>%
 building analysis maps
 
 ```{r}
+if_else(minValue(SLR000_RP001)  )
 
+bh_bldg_exposure <- NULL
+
+for(slr in c("000","025","050")){
+  
+  for(rp in c("001","020","100")){
+    
+    print(paste0("SLR",slr,"_RP",rp))
+    
+    flood <- raster( paste0("flood/SLR",slr,"_RP",rp,"_bh_flood.tif"))
+    
+    flood_extent <- 
+      (flood > -Inf) %>% 
+      st_as_stars() %>% 
+      st_as_sf(merge = T) %>% 
+      st_set_crs(26910) %>% 
+      st_make_valid() %>% 
+      st_transform(4326)
+    
+    bh_bldg_flooded <-
+      bh_bldg_flooded_max[flood_extent,] %>% 
+      st_transform(26910)
+    
+    flood[is.na(flood)] <- 0
+    
+    flood_crop <-
+      crop(flood, bh_bldg_flooded)
+    
+    temp <-
+      extract(
+        flood_crop,
+        bh_bldg_flooded,
+        fun = mean
+      ) %>% 
+      as.data.frame() %>% 
+      rename(avg_depth = V1) %>% 
+      cbind(
+        epa_bldg_flooded %>% 
+          st_drop_geometry() %>% 
+          dplyr::select(osm_id)
+      ) %>% 
+      mutate(
+        SLR = slr,
+        RP = rp
+      )
+    
+    bh_bldg_exposure <- 
+      bh_bldg_exposure %>% 
+      rbind(temp)
+    
+  }
+}
+
+saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
 ```
 
 
