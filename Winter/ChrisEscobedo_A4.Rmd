@@ -20,6 +20,7 @@ library(raster)
 library(mapview)
 library(stars)
 library(mapboxapi)
+library(plotly)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -106,7 +107,7 @@ SLR050_RP100 <- raster("flood/SLR050_RP100_bh_flood.tif")
 Below is a map of of the maximum flood risk for Belle Haven. The maximum risk assumes a sea level rise of 50 centimeters and a storm strength that only occurs every 100 years. 
 
 ```{r, warning = F}
-flood_max <- raster("flood/SLR050_RP100_bh_flood.tif")
+flood_max <- raster("flood/SLR050_RP001_bh_flood.tif")
 
 flood_pal <- colorNumeric(
   palette = "Blues",
@@ -198,126 +199,76 @@ leaflet() %>%
 
 building analysis maps
 
-```{r}
-flood <- SLR050_RP100
+```{r, warning=FALSE, include=FALSE}
+# bh_bldg_exposure <- NULL
+# 
+# for(slr in c("050","025","000")){
+#   
+#   for(rp in c("100","020","001")){
+#     
+#     print(paste0("SLR",slr,"_RP",rp))
+#     
+#     flood <- raster( paste0("flood/SLR",slr,"_RP",rp,"_bh_flood.tif"))
+#     
+#     flood_extent <- 
+#       (flood > -Inf) %>% 
+#       st_as_stars() %>% 
+#       st_as_sf(merge = T) %>% 
+#       st_set_crs(26910) %>% 
+#       st_make_valid() %>% 
+#       st_transform(4326)
+#       
+#     bh_bldg_flooded <-
+#       bh_bldg_flooded_max[flood_extent,] %>% 
+#       st_transform(26910)
+#       
+#     if(!dim(bh_bldg_flooded)[1] == 0){
+#       
+#       flood[is.na(flood)] <- 0
+#       
+#       temp <- 
+#         raster::extract(
+#           flood,
+#           bh_bldg_flooded,
+#           fun = mean
+#         ) %>% 
+#         as.data.frame() %>% 
+#         rename(avg_depth = V1) %>% 
+#         cbind(
+#           bh_bldg_flooded %>% 
+#             st_drop_geometry() %>% 
+#             dplyr::select(osm_id)
+#         ) %>% 
+#         mutate(
+#           SLR = slr,
+#           RP = rp
+#         )
+#       
+#       bh_bldg_exposure <- 
+#         bh_bldg_exposure %>% 
+#         rbind(temp)
+#     }
+#   }
+# }
+# saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
 
-if (dim(bh_bldg_flooded)[1] == 0){print("empty")}
-
-temp <- if(dim(bh_bldg_flooded)[1] == 0){
-  flood
-}
-
-bh_bldg_exposure <- NULL
-
-for(slr in c("050","025","000")){
-  
-  for(rp in c("100","020","001")){
-    
-    print(paste0("SLR",slr,"_RP",rp))
-    
-    flood <- raster( paste0("flood/SLR",slr,"_RP",rp,"_bh_flood.tif"))
-    
-    flood_extent <- 
-      (flood > -Inf) %>% 
-      st_as_stars() %>% 
-      st_as_sf(merge = T) %>% 
-      st_set_crs(26910) %>% 
-      st_make_valid() %>% 
-      st_transform(4326)
-    
-    bh_bldg_flooded <-
-      bh_bldg_flooded_max[flood_extent,] %>% 
-      st_transform(26910)
-    
-    flood[is.na(flood)] <- 0
-    
-    # flood_crop <-
-    #   crop(flood, bh_bldg_flooded)
-    
-    temp <- if(dim(bh_bldg_flooded)[1] == 0){
-              flood
-            } else {
-              raster::extract(
-                flood,
-                bh_bldg_flooded,
-                fun = mean
-              )
-      } %>% 
-      as.data.frame() %>% 
-      rename(avg_depth = V1) %>% 
-      cbind(
-        bh_bldg_flooded %>% 
-          st_drop_geometry() %>% 
-          dplyr::select(osm_id)
-      ) %>% 
-      mutate(
-        SLR = slr,
-        RP = rp
-      )
-    
-    bh_bldg_exposure <- 
-      bh_bldg_exposure %>% 
-      rbind(temp)
-    
-  }
-}
-
-saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
+bh_bldg_exposure <- readRDS("bh_bldg_exposure.rds")
 ```
 
-test
-```{r}
-if(is.na(minValue(flood))){print("works")}else{print("nope")}
 
-for(slr in c("050","025","000")){
-  
-  for(rp in c("100","020","001")){
-    
-    print(paste0("SLR",slr,"_RP",rp))
-    
-    flood <- raster( paste0("flood/SLR",slr,"_RP",rp,"_bh_flood.tif"))
-    
-    if(!is.na(minValue(flood))){
-    
-      flood_extent <- 
-        (flood > -Inf) %>% 
-        st_as_stars() %>% 
-        st_as_sf(merge = T) %>% 
-        st_set_crs(26910) %>% 
-        st_make_valid() %>% 
-        st_transform(4326)
-      
-      bh_bldg_flooded <-
-        bh_bldg_flooded_max[flood_extent,] %>% 
-        st_transform(26910)
-      
-      flood[is.na(flood)] <- 0
-      
-      temp <- 
-        raster::extract(
-          flood,
-          bh_bldg_flooded,
-          fun = mean
-        ) %>% 
-        as.data.frame() %>% 
-        rename(avg_depth = V1) %>% 
-        cbind(
-          bh_bldg_flooded %>% 
-            st_drop_geometry() %>% 
-            dplyr::select(osm_id)
-        ) %>% 
-        mutate(
-          SLR = slr,
-          RP = rp
-        )
-      
-      bh_bldg_exposure <- 
-        bh_bldg_exposure %>% 
-        rbind(temp)
-    }
-  }
-}
+
+```{r, warning=FALSE, include=FALSE}
+
+
 ```
+
+
+
+
+
+
+
+
 
 
 
