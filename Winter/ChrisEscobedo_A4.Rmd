@@ -104,7 +104,7 @@ map of max flood
 ```{r, warning = F}
 flood_pal <- colorNumeric(
   palette = "Blues",
-  domain = values(SLR000_RP001),
+  domain = values(SLR050_RP100),
   na.color = "transparent"
 )
 
@@ -115,12 +115,12 @@ leaflet() %>%
     options = tileOptions(opacity = 0.5)
   ) %>% 
   addRasterImage(
-    SLR000_RP001,
+    SLR050_RP100,
     colors = flood_pal
   ) %>% 
   addLegend(
     pal = flood_pal,
-    values = values(SLR000_RP001),
+    values = values(SLR050_RP100),
     title = "Flood depth, cm"
   )
 ```
