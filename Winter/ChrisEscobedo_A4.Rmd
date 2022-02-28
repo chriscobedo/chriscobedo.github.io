@@ -106,6 +106,8 @@ SLR050_RP100 <- raster("flood/SLR050_RP100_bh_flood.tif")
 Below is a map of of the maximum flood risk for Belle Haven. The maximum risk assumes a sea level rise of 50 centimeters and a storm strength that only occurs every 100 years. 
 
 ```{r, warning = F}
+flood_max <- raster("flood/SLR050_RP100_bh_flood.tif")
+
 flood_pal <- colorNumeric(
   palette = "Blues",
   domain = values(flood_max),
@@ -141,9 +143,6 @@ osm_bldg <- st_read("/Volumes/GoogleDrive/Shared drives/SFBI/Data Library/OSM/gi
 bh_boundary_tf <- bh_boundary %>% st_transform(4326)
 
 bh_bldg <- osm_bldg[bh_boundary_tf, ]
-
-flood_max <- 
-  raster("flood/SLR050_RP100_bh_flood.tif")
 
 flood_max_extent <- 
   flood_max %>% 
