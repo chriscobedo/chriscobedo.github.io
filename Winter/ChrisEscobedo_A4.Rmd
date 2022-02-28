@@ -251,37 +251,64 @@ building analysis maps
 #   }
 # }
 # saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
+#
+# vulnerability <- data.frame(
+#   depth = c(-2:16),
+#   perc_damage = c(
+#     0,
+#     0.025,
+#     0.134,
+#     0.233,
+#     0.321,
+#     0.401,
+#     0.471,
+#     0.532,
+#     0.586,
+#     0.632,
+#     0.672,
+#     0.705,
+#     0.732,
+#     0.754,
+#     0.772,
+#     0.785,
+#     0.795,
+#     0.802,
+#     0.807
+#   )
+# )
+# 
+# bh_bldg_exposure <- 
+#   readRDS("bh_bldg_exposure.rds") %>% 
+#   mutate(
+#     avg_depth = avg_depth*0.0328084 - 2 # cm to ft, subtract first floor elevation
+#   )
+# 
+# bh_bldg_perc_damage <- 
+#   approx(
+#     x = vulnerability$depth,
+#     y = vulnerability$perc_damage,
+#     xout = bh_bldg_exposure$avg_depth
+#   ) %>% 
+#   .[2] %>% 
+#   as.data.frame() %>% 
+#   rename(perc_damage = y) %>% 
+#   cbind(bh_bldg_exposure)
+# 
+# saveRDS(bh_bldg_perc_damage,"bh_bldg_perc_damage.rds")
 
-bh_bldg_exposure <- readRDS("bh_bldg_exposure.rds")
+bh_bldg_perc_damage <- readRDS("bh_bldg_perc_damage.rds")
 ```
 
-## Vulnerability Assesment
 
-```{r, warning=FALSE, include=FALSE}
-vulnerability <- data.frame(
-  depth = c(-2:16),
-  perc_damage = c(
-    0,
-    0.025,
-    0.134,
-    0.233,
-    0.321,
-    0.401,
-    0.471,
-    0.532,
-    0.586,
-    0.632,
-    0.672,
-    0.705,
-    0.732,
-    0.754,
-    0.772,
-    0.785,
-    0.795,
-    0.802,
-    0.807
-  )
-)
+
+```{r, warning=FALSE}
+bh_blocks <- blocks("CA", "San Mateo") %>% 
+  mutate(
+    cbg = substr(GEOID10,1,12)
+  ) %>% 
+  filter(cbg %in% c("060816117001",	"060816117002", "060816117003")) 
+
+mapview(bh_blocks)
 ```
 
 
