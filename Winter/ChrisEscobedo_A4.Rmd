@@ -254,6 +254,42 @@ building analysis maps
 # saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
 #
 
+#get vehicle count
+
+
+#get population
+bh_blocks <- blocks("CA", "San Mateo") %>% 
+  mutate(
+    cbg = substr(GEOID10,1,12)
+  ) %>% 
+  filter(cbg %in% c("060816117001",	"060816117002", "060816117003")) 
+
+pop_2020 <-
+  getCensus(
+    name = "dec/pl",
+    vintage = 2020,
+    region = "block:*", 
+    regionin = "state:06+county:081,085",
+    vars = "P1_001N"
+  ) %>% 
+  transmute(
+    block =
+      paste0(state,county,tract,block),
+    pop = P1_001N
+  )
+
+bh_pop_2020 <- pop_2020 %>% 
+  left_join(bh_blocks %>% select(block = GEOID10)) %>% 
+  st_as_sf() %>% 
+  st_centroid() %>% 
+  .[bh_blocks, ] %>% 
+  st_drop_geometry() %>% 
+  left_join(bh_blocks %>% select(block = GEOID10)) %>% 
+  st_as_sf()
+
+mapview(bh_pop_2020)
+
+## attach vehicles to buildings based on pop 
 
 ```
 
@@ -301,38 +337,7 @@ bh_bldg_perc_damage <- readRDS("bh_bldg_perc_damage.rds")
 
 
 
-```{r, warning=FALSE}
-bh_blocks <- blocks("CA", "San Mateo") %>% 
-  mutate(
-    cbg = substr(GEOID10,1,12)
-  ) %>% 
-  filter(cbg %in% c("060816117001",	"060816117002", "060816117003")) 
 
-pop_2020 <-
-  getCensus(
-    name = "dec/pl",
-    vintage = 2020,
-    region = "block:*", 
-    regionin = "state:06+county:081,085",
-    vars = "P1_001N"
-  ) %>% 
-  transmute(
-    block =
-      paste0(state,county,tract,block),
-    pop = P1_001N
-  )
-
-bh_pop_2020 <- pop_2020 %>% 
-  left_join(bh_blocks %>% select(block = GEOID10)) %>% 
-  st_as_sf() %>% 
-  st_centroid() %>% 
-  .[bh_blocks, ] %>% 
-  st_drop_geometry() %>% 
-  left_join(bh_blocks %>% select(block = GEOID10)) %>% 
-  st_as_sf()
-
-mapview(bh_pop_2020)
-```
 
 
 ```{r, warning=FALSE}
