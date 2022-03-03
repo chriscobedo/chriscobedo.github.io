@@ -253,10 +253,105 @@ building analysis maps
 # }
 # saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
 #
+```
 
+
+```{r, warning=FALSE, include=FALSE}
 #get vehicle count
 
+## vehicle percent change by decade
+emfac <- 
+  read_csv("/Users/Chris/Downloads/EMFAC_20-50.csv", skip = 8) %>% 
+  transmute(
+    year = `Calendar Year`,
+    trips = Trips
+  ) %>%
+  filter(
+    year %in% c(2020, 2030, 2040, 2050)
+  ) %>% 
+  group_by(year) %>% 
+  summarize(total = sum(trips)) %>% 
+  mutate(
+    perc_change = (total - lag(total)) / lag(total)
+  ) 
 
+# vehicle count
+acs_vars_2019_5yr <-
+  listCensusMetadata(
+    name = "2019/acs/acs5",
+    type = "variables"
+  )
+
+vehicles_available <- 
+  getCensus(
+      name = "acs/acs5",
+      vintage = 2019,
+      region = "block group:*",
+      regionin = paste0("state:06+county:081"),
+      vars = "group(B25044)"
+  ) %>% 
+    mutate(
+    cbg =
+      paste0(state,county,tract,block_group)
+  ) %>% 
+  filter(cbg %in% bh_boundary$GEOID) %>% 
+  select(!c(GEO_ID,state,county,tract,block_group,NAME) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "variable",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label), 
+    by = c("variable" = "name")
+  ) %>% 
+  select(-variable) %>% 
+  separate(
+    label,
+    into = c(NA, NA, "tenure", "vehicles_available"),
+    sep = "!!"
+  ) %>% 
+  mutate(
+    vehicles_available = case_when(
+      vehicles_available %in% c(
+        "No vehicle available"
+      ) ~ 0,
+      vehicles_available %in% c(
+        "1 vehicle available"
+      ) ~ 1,
+      vehicles_available %in% c(
+        "2 vehicles available"
+      ) ~ 2,
+      vehicles_available %in% c(
+        "3 vehicles available"
+      ) ~ 3,
+      vehicles_available %in% c(
+        "4 vehicles available"
+      ) ~ 4,
+      vehicles_available %in% c(
+        "5 or more vehicles available"
+      ) ~ 5,
+    ),
+    tenure = case_when(
+      tenure %in% c(
+        "Owner occupied:"
+      ) ~ "owner",
+      tenure %in% c(
+        "Renter occupied:"
+      ) ~ "renter",
+    )
+  ) %>% 
+  filter(!is.na(vehicles_available) & !is.na(tenure)) 
+
+total_vehicle_count <- vehicles_available %>% 
+  
+
+
+```
+
+
+```{r, warning=FALSE, include=FALSE}
 #get population
 bh_blocks <- blocks("CA", "San Mateo") %>% 
   mutate(
