@@ -272,7 +272,7 @@ emfac <-
   group_by(year) %>% 
   summarize(total = sum(trips)) %>% 
   mutate(
-    perc_change = (total - lag(total)) / lag(total)
+    perc_change = (total - first(total)) / first(total)
   ) 
 
 # vehicle count
@@ -352,7 +352,9 @@ total_vehicle_count <- vehicles_available_bh %>%
   summarize(estimate = sum(total))
 
 decade_change <- emfac %>% 
-  
+  mutate(
+    perc_change = if_else(perc_change) == 0, 1, perc_change)
+  )
 
 vehicle_count_decade <- total_vehicle_count %>% 
   mutate(
@@ -372,7 +374,12 @@ vehicle_count_decade <- total_vehicle_count %>%
    mutate(
     year = 2050
     )
-  ) 
+  ) %>% 
+  left_join(emfac) %>% 
+  mutate(
+    estimate = (estimate * perc_change) + estimate
+  )
+  
 
 
 
