@@ -331,15 +331,18 @@ bh_pop_2020 <- pop_2020 %>%
   left_join(bh_blocks %>% select(block = GEOID10)) %>% 
   st_as_sf()
 
-
+mapview(bh_pop_2020)
 ```
 
 
 ```{r, warning=FALSE}
+
 ```
 
 
+## Discussion
 
+There is reason to expect that the derived AAL are still underestimates, because they do not account for increasing storm frequency and severity due to climate change.
 
 
 
