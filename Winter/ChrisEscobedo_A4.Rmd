@@ -351,7 +351,32 @@ total_vehicle_count <- vehicles_available_bh %>%
   group_by(cbg) %>% 
   summarize(estimate = sum(total))
 
+decade_change <- emfac %>% 
+  
 
+vehicle_count_decade <- total_vehicle_count %>% 
+  mutate(
+    year = 2020
+  ) %>% 
+  rbind(total_vehicle_count %>% 
+   mutate(
+    year = 2030
+    )
+  ) %>% 
+  rbind(total_vehicle_count %>% 
+   mutate(
+    year = 2040
+    )
+  ) %>% 
+  rbind(total_vehicle_count %>% 
+   mutate(
+    year = 2050
+    )
+  ) 
+
+
+
+  
 ```
 
 
