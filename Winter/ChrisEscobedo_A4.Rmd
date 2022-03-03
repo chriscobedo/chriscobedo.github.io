@@ -21,6 +21,7 @@ library(mapview)
 library(stars)
 library(mapboxapi)
 library(plotly)
+library(jsonlite)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
@@ -252,49 +253,48 @@ building analysis maps
 # }
 # saveRDS(bh_bldg_exposure,"bh_bldg_exposure.rds")
 #
-# vulnerability <- data.frame(
-#   depth = c(-2:16),
-#   perc_damage = c(
-#     0,
-#     0.025,
-#     0.134,
-#     0.233,
-#     0.321,
-#     0.401,
-#     0.471,
-#     0.532,
-#     0.586,
-#     0.632,
-#     0.672,
-#     0.705,
-#     0.732,
-#     0.754,
-#     0.772,
-#     0.785,
-#     0.795,
-#     0.802,
-#     0.807
-#   )
-# )
-# 
-# bh_bldg_exposure <- 
-#   readRDS("bh_bldg_exposure.rds") %>% 
-#   mutate(
-#     avg_depth = avg_depth*0.0328084 - 2 # cm to ft, subtract first floor elevation
-#   )
-# 
-# bh_bldg_perc_damage <- 
-#   approx(
-#     x = vulnerability$depth,
-#     y = vulnerability$perc_damage,
-#     xout = bh_bldg_exposure$avg_depth
-#   ) %>% 
-#   .[2] %>% 
-#   as.data.frame() %>% 
-#   rename(perc_damage = y) %>% 
-#   cbind(bh_bldg_exposure)
-# 
-# saveRDS(bh_bldg_perc_damage,"bh_bldg_perc_damage.rds")
+
+
+```
+
+
+```{r, warning=FALSE, include=FALSE}
+vulnerability <- data.frame(
+  depth = c(0,0.5,1:10),
+  perc_damage = c(
+    0,
+    .076,
+    0.28,
+    0.462,
+    0.622,
+    0.76,
+    0.876,
+    0.97,
+    0.100,
+    0.100,
+    0.100,
+    0.100
+  )
+)
+
+bh_bldg_exposure <-
+  readRDS("bh_bldg_exposure.rds") %>%
+  mutate(
+    avg_depth = avg_depth*0.0328084 # cm to ft
+  )
+
+bh_bldg_perc_damage <-
+  approx(
+    x = vulnerability$depth,
+    y = vulnerability$perc_damage,
+    xout = bh_bldg_exposure$avg_depth
+  ) %>%
+  .[2] %>%
+  as.data.frame() %>%
+  rename(perc_damage = y) %>%
+  cbind(bh_bldg_exposure)
+
+saveRDS(bh_bldg_perc_damage,"bh_bldg_perc_damage.rds")
 
 bh_bldg_perc_damage <- readRDS("bh_bldg_perc_damage.rds")
 ```
