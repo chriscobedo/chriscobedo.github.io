@@ -82,8 +82,7 @@ bh_boundary_tf <- bh_boundary %>% st_transform(4326)
 
 bh_bldg <- osm_bldg[bh_boundary_tf, ]
 
-flood_max <- 
-  raster("flood/SLR050_RP100_bh_flood.tif")
+flood_max <- raster("flood/SLR050_RP100_bh_flood.tif")
 
 flood_max_extent <- 
   flood_max %>% 
