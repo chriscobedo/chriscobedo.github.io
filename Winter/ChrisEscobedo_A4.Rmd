@@ -477,6 +477,17 @@ saveRDS(bh_vehicle_perc_damage_per_building,"bh_vehicle_perc_damage_per_building
 bh_vehicle_perc_damage_per_building <- readRDS("bh_vehicle_perc_damage_per_building")
 ```
 
+## Plot of Vulnerability to Vehicle Damage
+
+```{r, warning=FALSE}
+
+
+```
+
+
+
+
+
 ## Analysing Risk
 
 The dollar amount used to estimate damage in money to each car was calculated using Kelly Blue Book's average price for a used car in 2022, which is $28,000. The price for a used car was chosen since the majority of car sales are for used cars.
