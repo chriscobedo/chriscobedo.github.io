@@ -412,10 +412,6 @@ vehicles_to_buildings <- bh_bldg %>%
     count(vehicles_to_buildings, vars=block) %>% select(vars, buildings_total_block = n) %>% st_drop_geometry(), 
     by = c("block" = "vars")
   )
-  
-test <- 
-      count(vehicles_to_buildings, vars=block)
-  )
 
 
 mapview(vehicles_to_buildings)
