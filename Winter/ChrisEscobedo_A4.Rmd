@@ -480,8 +480,66 @@ bh_vehicle_perc_damage_per_building <- readRDS("bh_vehicle_perc_damage_per_build
 ## Plot of Vulnerability to Vehicle Damage
 
 ```{r, warning=FALSE}
+bh_vehicle_perc_damage_plot <- 
+  expand.grid(
+    osm_id = unique(bh_vehicle_perc_damage_per_building$osm_id),
+    SLR = unique(bh_vehicle_perc_damage_per_building$SLR),
+    RP = unique(bh_vehicle_perc_damage_per_building$RP)
+  ) %>% 
+  left_join(bh_vehicle_perc_damage_per_building) %>% 
+  mutate(
+    avg_depth = ifelse(
+      is.na(avg_depth),
+      0,
+      avg_depth
+    ),
+    perc_damage = ifelse(
+      is.na(perc_damage),
+      0,
+      perc_damage
+    )
+  )
 
-
+bh_plot <- 
+  plot_ly() %>% 
+  add_trace(
+    data = 
+      bh_vehicle_perc_damage_plot %>% 
+        filter(RP == "100") %>% 
+        mutate(SLR = SLR %>% as.numeric()),
+    x = ~avg_depth,
+    y = ~perc_damage,
+    frame = ~SLR,
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      color = 'rgba(17, 157, 255, 0.01)',
+      size = 15
+    ),
+    showlegend = F
+  ) %>% 
+  add_trace(
+    data = vulnerability,
+    x = ~depth,
+    y = ~perc_damage,
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      color = 'rgb(0,0,0)'
+    ),
+    showlegend = F
+  ) %>% 
+  layout(
+    xaxis = list(
+      title = "Average Flood Depth",
+      zeroline = FALSE
+    ),
+    yaxis = list(
+      title = "Percent Damage"
+    ),
+    title = "Bell Haven Vehicle damage during<br>100-year storm, by base sea level rise"
+  ) %>% 
+  config(displayModeBar = F)
 ```
 
 
