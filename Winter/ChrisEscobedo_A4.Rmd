@@ -410,7 +410,9 @@ vehicles_to_buildings <- bh_bldg %>%
   st_join(bh_boundary_tf) %>% 
   st_join(bh_pop_2020 %>% st_transform(4326)) %>% 
   left_join(total_vehicle_count %>% select(cbg, vehicle_total_cbg = estimate), by = c("GEOID" = "cbg")) %>% 
-  select(osm_id, GEOID, block, pop, vehicle_total_cbg) %>% 
+  select(osm_id, GEOID, block, pop, vehicle_total_cbg)
+
+vehicles_to_buildings <- vehicles_to_buildings %>% 
   left_join(
     count(vehicles_to_buildings, vars=block) %>% select(vars, buildings_total_block = n) %>% st_drop_geometry(), 
     by = c("block" = "vars")
