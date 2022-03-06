@@ -411,8 +411,15 @@ vehicles_to_buildings <- bh_bldg %>%
   left_join(
     count(vehicles_to_buildings, vars=block) %>% select(vars, buildings_total_block = n) %>% st_drop_geometry(), 
     by = c("block" = "vars")
+  ) %>% 
+  left_join(
+    (vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% summarize(total_pop_cbg = sum(pop))) %>% st_drop_geometry() 
+  ) %>% 
+  mutate(
+    perc_pop = pop / total_pop_cbg
   )
 
+test <- vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% summarize(total = sum(pop))
 
 mapview(vehicles_to_buildings)
 ```
