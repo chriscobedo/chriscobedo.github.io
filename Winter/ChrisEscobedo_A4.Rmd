@@ -597,6 +597,9 @@ bh_vehicle_aal_by_year <-
   left_join(
     emfac %>% select(year, perc_change)
   ) %>% 
+  mutate(
+    damage = (damage * perc_change) + damage
+  ) %>% 
   pivot_longer(
     c(damage,occurrence),
     names_to = "key",
@@ -609,8 +612,6 @@ bh_vehicle_aal_by_year <-
   replace(is.na(.), 0) %>% 
   mutate(
     damage = 
-      occurrence_000 * (damage_000 + damage_025)/2 + 
-      occurrence_025 * (damage_025 + damage_050)/2 + 
       occurrence_050 * (damage_050)
   ) %>% 
   select(osm_id, year, damage)
