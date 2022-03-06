@@ -537,6 +537,8 @@ bh_plot <-
     title = "Bell Haven Vehicle damage during<br>100-year storm, by base sea level rise"
   ) %>% 
   config(displayModeBar = F)
+
+bh_plot
 ```
 
 ## Analysing Risk
@@ -703,6 +705,8 @@ bh_vehicle_aal_by_year_map %>%
 
 
 ## Discussion
+
+The final map shows that Belle Haven will not have to worry much about flooding costs in the near future with AALs at zero dollars in 2020. In 2050, the likelihood of higher sea level rise casues a higher AAL for the neighborhood, but still relatively few buildings will have to worry about vehicle damage.
 
 There is reason to expect that the derived AAL are still underestimates, because they do not account for increasing storm frequency and severity due to climate change.
 
