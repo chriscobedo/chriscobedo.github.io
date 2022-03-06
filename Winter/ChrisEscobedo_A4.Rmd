@@ -542,10 +542,6 @@ bh_plot <-
   config(displayModeBar = F)
 ```
 
-
-
-
-
 ## Analysing Risk
 
 The dollar amount used to estimate damage in money to each car was calculated using Kelly Blue Book's average price for a used car in 2022, which is $28,000. The price for a used car was chosen since the majority of car sales are for used cars.
@@ -562,6 +558,23 @@ bh_vehicle_damage <-
     damage = vehicles_building * (28000) * perc_damage
   ) %>% 
   select(osm_id, SLR, RP, damage)
+
+bh_vehicle_aal_by_slr <-
+  bh_vehicle_damage %>% 
+  pivot_wider(
+    names_from = RP,
+    values_from = damage
+  ) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(
+    damage = 
+      0.95*(`001`+`020`)/2 + 
+      0.04*(`020`+`100`)/2 + 
+      0.01*(`100`)
+  ) %>% 
+  select(osm_id, SLR, damage)
+
+
 ```
 
 
