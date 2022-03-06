@@ -427,9 +427,6 @@ vehicles_to_buildings <- bh_bldg %>%
     vehicles_building = vehicles_by_block_pop * perc_pop_building
   ) %>% 
   distinct(osm_id, .keep_all = TRUE)
-
-  
-mapview(osm_bldg %>% filter(osm_id == 123673848)) + mapview(bh_pop_2020)
 ```
 
 *Disclaimer: The census data retrieved for population was missing two blocks in the Northwestern area of Belle Haven. Although this area would likely be affected by flood risk, the data may show under-representation due to this lack of data. Those blocks were removed from the vehicle data, but they are technically part of Belle Haven and will not be represented.* 
