@@ -591,6 +591,12 @@ bh_vehicle_aal_by_year <-
     names_to = "year",
     values_to = "occurrence"
   ) %>% 
+  mutate(
+    year = as.numeric(year)
+  ) %>% 
+  left_join(
+    emfac %>% select(year, perc_change)
+  ) %>% 
   pivot_longer(
     c(damage,occurrence),
     names_to = "key",
