@@ -428,12 +428,12 @@ vehicles_to_buildings <- bh_bldg %>%
     perc_pop = pop / total_pop_cbg,
     vehicles_by_block_pop = vehicle_total_cbg * perc_pop,
     perc_pop_building = pop_building / pop,
-    vechiles_building = vehicles_by_block_pop * perc_pop_building
-  )
+    vehicles_building = vehicles_by_block_pop * perc_pop_building
+  ) %>% 
+  distinct(osm_id, .keep_all = TRUE)
 
-test <- vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% summarize(total = sum(pop))
-
-mapview(vehicles_to_buildings)
+  
+mapview(vehicles_to_buildings %>% filter(osm_id == 123525465)) + mapview(bh_blocks)
 ```
 
 *Disclaimer: The census data retrieved for population was missing two blocks in the Northwestern area of Belle Haven. Although this area would likely be affected by flood risk, the data may show under-representation due to this lack of data. Those blocks were removed from the vehicle data, but they are technically part of Belle Haven and will not be represented.* 
@@ -461,9 +461,9 @@ bh_bldg_exposure <-
   readRDS("bh_bldg_exposure.rds") %>%
   mutate(
     avg_depth = avg_depth*0.0328084 # cm to ft
-  )
+  ) 
 
-bh_bldg_perc_damage <-
+bh_vehicle_perc_damage_per_building <-
   approx(
     x = vulnerability$depth,
     y = vulnerability$perc_damage,
@@ -474,10 +474,34 @@ bh_bldg_perc_damage <-
   rename(perc_damage = y) %>%
   cbind(bh_bldg_exposure)
 
-saveRDS(bh_bldg_perc_damage,"bh_bldg_perc_damage.rds")
+saveRDS(bh_vehicle_perc_damage_per_building,"bh_vehicle_perc_damage_per_building")
 
-bh_bldg_perc_damage <- readRDS("bh_bldg_perc_damage.rds")
+bh_vehicle_perc_damage_per_building <- readRDS("bh_vehicle_perc_damage_per_building")
 ```
+
+## Analysing Risk
+
+The dollar amount used to estimate damage in money to each car was calculated using Kelly Blue Book's average price for a new car in 2022, which is $47,000. 
+
+```{r, warning=FALSE, include=FALSE}
+bh_vehicle_damage <-
+  bh_vehicle_perc_damage_per_building %>% 
+  left_join(
+    vehicles_to_buildings %>%
+      st_drop_geometry() %>% 
+      select(osm_id, vehicles_building)
+  ) %>% 
+  mutate(
+    damage = vehicles_buildings * (COST OF CAR) * perc_damage
+  ) %>% 
+  select(osm_id, SLR, RP, damage)
+```
+
+
+
+
+
+
 
 
 
