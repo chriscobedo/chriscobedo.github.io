@@ -404,14 +404,19 @@ mapview(bh_pop_2020)
 
 ## attach vehicles to buildings based on pop 
 vehicles_to_buildings <- bh_bldg %>% 
+  st_join(bh_boundary_tf) %>% 
+  st_join(bh_pop_2020 %>% st_transform(4326)) %>% 
+  left_join(total_vehicle_count, by = c("GEOID" = "cbg")) %>% 
+  select(osm_id, GEOID, block, pop) %>% 
   mutate(
-    total_buildings = nrow(vehicles_to_buildings),
-  ) %>% 
-  st_join(bh_boundary_tf)
+    buildings_ = nrow(vehicles_to_buildings),
+  )
+  
 
 mapview(vehicles_to_buildings)
 ```
 
+*Disclaimer: The census data retrieved for population was missing two blocks in the Northwestern area of Belle Haven. Although this area would likely be affected by flood risk, the data may show underepresentation due to this lack of data.* 
 
 ```{r, warning=FALSE, include=FALSE}
 vulnerability <- data.frame(
