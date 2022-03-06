@@ -243,6 +243,13 @@ building analysis maps
 #
 ```
 
+### Vehicle data
+
+To compile an estimate of vehicles per building, several data sources were used. 
+
+Census data was used to get population data at the block level. Vehicle counts were retrieved from census data about vehicle availability per household. The total count of 2020 vehicles for the whole CBG were than matched to each building, assuming population was distributed evenly across buildings in a block, and vehicles were distributed evenly across the population.
+
+EMFAC data was used to get a count for vehicles in the county, to be used for the rate of change of vehciles over decades
 
 ```{r, warning=FALSE, include=FALSE}
 #get vehicle count
