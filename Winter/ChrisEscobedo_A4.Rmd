@@ -422,8 +422,13 @@ vehicles_to_buildings <- bh_bldg %>%
   left_join(
     (vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% summarize(total_pop_cbg = sum(pop))) %>% st_drop_geometry() 
   ) %>% 
+  filter(!is.na(pop)) %>% 
   mutate(
-    perc_pop = pop / total_pop_cbg
+    pop_building = pop / buildings_total_block,
+    perc_pop = pop / total_pop_cbg,
+    vehicles_by_block_pop = vehicle_total_cbg * perc_pop,
+    perc_pop_building = pop_building / pop,
+    vechiles_building = vehicles_by_block_pop * perc_pop_building
   )
 
 test <- vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% summarize(total = sum(pop))
@@ -431,7 +436,7 @@ test <- vehicles_to_buildings %>% group_by(GEOID) %>% filter(!is.na(pop)) %>% su
 mapview(vehicles_to_buildings)
 ```
 
-*Disclaimer: The census data retrieved for population was missing two blocks in the Northwestern area of Belle Haven. Although this area would likely be affected by flood risk, the data may show underepresentation due to this lack of data.* 
+*Disclaimer: The census data retrieved for population was missing two blocks in the Northwestern area of Belle Haven. Although this area would likely be affected by flood risk, the data may show under-representation due to this lack of data. Those blocks were removed from the vehicle data, but they are technically part of Belle Haven and will not be represented.* 
 
 ```{r, warning=FALSE, include=FALSE}
 vulnerability <- data.frame(
