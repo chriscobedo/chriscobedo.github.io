@@ -620,19 +620,85 @@ bh_vehicle_aal_by_year <-
 
 ```
 
-
-
-
-
-
-
-
-
-
-
+Below is a map of the “average annualized loss” (AAL) for each building in vehicle damages for the year 2020 and 2050
 
 ```{r, warning=FALSE}
+bh_vehicle_aal_by_year_map <-
+  bh_vehicle_aal_by_year %>% 
+  pivot_wider(
+    names_from = year,
+    values_from = damage
+  ) %>% 
+  mutate(
+    change = `2050`-`2020`
+  ) %>% 
+  left_join(
+    bh_bldg_flooded_max %>%
+      select(osm_id)
+  ) %>% 
+  st_as_sf() %>% 
+  st_transform(4326)
 
+aal_pal <- colorNumeric(
+  palette = "Reds",
+  domain = c(0,bh_vehicle_aal_by_year_map$`2050`)
+)
+
+bh_vehicle_aal_by_year_map %>% 
+  leaflet() %>% 
+  addMapboxTiles(
+    style_id = "light-v9",
+    username = "mapbox"
+  ) %>% 
+  addPolygons(
+    fillColor = ~aal_pal(`2020`),
+    color = "gray",
+    fillOpacity = 1,
+    opacity = 1,
+    weight = 0.25,
+    highlightOptions = highlightOptions(
+      color = "white",
+      weight = 2
+    ),
+    label = ~paste0("$",prettyNum(signif(`2020`,2),",")," average annualized loss in 2020"),
+    group = "2020"
+  ) %>% 
+  addPolygons(
+    fillColor = ~aal_pal(`2050`),
+    color = "gray",
+    fillOpacity = 1,
+    opacity = 1,
+    weight = 0.25,
+    highlightOptions = highlightOptions(
+      color = "white",
+      weight = 2
+    ),
+    label = ~paste0("$",prettyNum(signif(`2050`,2),",")," average annualized loss in 2050"),
+    group = "2050"
+  ) %>% 
+  addPolygons(
+    fillColor = ~aal_pal(change),
+    color = "gray",
+    fillOpacity = 1,
+    opacity = 1,
+    weight = 0.25,
+    highlightOptions = highlightOptions(
+      color = "white",
+      weight = 2
+    ),
+    label = ~paste0("$",prettyNum(signif(change,2),",")," change in average annualized loss from 2020 to 2050"),
+    group = "Change"
+  ) %>% 
+  addLegend(
+    pal = aal_pal,
+    values = ~`2050`,
+    title = "AAL"
+  ) %>% 
+  addLayersControl(
+    baseGroups = c("2020","2050","Change"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>% 
+  showGroup("2050")
 ```
 
 
