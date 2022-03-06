@@ -159,7 +159,6 @@ flood_pal <- colorNumeric(
 )
 ```
 
-Below is a map of ...
 
 ```{r, warning=FALSE}
 leaflet() %>% 
@@ -186,7 +185,6 @@ leaflet() %>%
   )
 ```
 
-building analysis maps
 
 ```{r, warning=FALSE, include=FALSE}
 # bh_bldg_exposure <- NULL
