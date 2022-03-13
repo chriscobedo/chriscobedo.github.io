@@ -1,0 +1,77 @@
+---
+title: "ChrisEscobedo_A5"
+author: "Chris"
+ddate: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r, warning=FALSE}
+library(lehdr)
+library(tidyverse)
+library(tigris)
+library(sf)
+library(leaflet)
+library(censusapi)
+library(raster)
+library(mapview)
+library(stars)
+library(mapboxapi)
+library(plotly)
+library(jsonlite)
+library(flexdashboard)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+## Intro
+
+
+
+```{r, include=FALSE, warning = F}
+
+```
+
+
+DASHBOARD:
+
+```{r}
+# smc_places <- places("CA", cb = T) %>%
+#  st_centroid() %>%   .[counties("CA") %>% filter(NAME == "San Mateo"),] %>%
+#   st_drop_geometry() %>%
+#   left_join(places("CA", cb = T) %>% select(PLACEFP)) %>%   
+#   st_as_sf()
+# saveRDS(smc_places, "smc_places.rds")
+smc_places <- readRDS("smc_places.rds")
+
+# smc_cbgs <- block_groups("CA","San Mateo", cb = T)
+# saveRDS(smc_cbgs, "smc_cbgs.rds")
+smc_cbgs <- readRDS("smc_cbgs.rds")
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
