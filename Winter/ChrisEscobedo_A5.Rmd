@@ -111,7 +111,6 @@ smc_sensors_clean %>%
   )
 
 ## getting purple air data by week
-
 ssf_boundary <- places("CA", cb = T) %>% 
   filter(NAME == "South San Francisco") %>% 
   st_transform(4326)
@@ -119,73 +118,50 @@ ssf_boundary <- places("CA", cb = T) %>%
 ssf_sensors <- smc_sensors_clean %>% 
   .[ssf_boundary,]
 
-full_sensor_daily <- 1:4 %>% 
-   map_dfr(function(week){
+week_start <- c("01", "08","15", "22")
+
+full_sensor_daily <- week_start %>% 
+   map_dfr(function(week_start){
      
-    start <- paste0("2022-02-", 01, "%2000:08:00")
-    end <- paste0("2022-02-", 05, "%2000:08:00")
+    if(week_start != "22"){
+    start <- paste0("2022-02-", week_start, "%2000:08:00")
+    
+    week_end <- as.character(as.numeric(week_start) + 7) %>% 
+        str_pad(2, side = c("left"), pad = "0")
+    
+    end <- paste0("2022-02-", week_end, "%2000:08:00")
+    } else {
+      start <- paste0("2022-02-", week_start, "%2000:08:00")
+      end <- paste0("2022-03-01%2000:08:00")
+    }
+      
+    print(start)
+    print(end)
     
     sensor_data <- 
-      1:nrow(stanford_sensors) %>% 
+      1:nrow(ssf_sensors) %>% 
       map_dfr(function(row){
       
-      print(paste0(row,". ",stanford_sensors[row,]$sensor_index))
+      print(paste0(row,". ",ssf_sensors[row,]$sensor_index))
       
       a1 <- read_csv(paste0(
         "https://api.thingspeak.com/channels/",
-        stanford_sensors[row,]$primary_id_a,
+        ssf_sensors[row,]$primary_id_a,
         "/feeds.csv?api_key=",
-        stanford_sensors[row,]$primary_key_a,
+        ssf_sensors[row,]$primary_key_a,
         "&average=1440&round=3&start=",start,
         "&end=", end, 
         "&timezone=America/Los_Angeles"
       ), show_col_types = F) %>% 
-        set_names(c("created_at","PM1.0_CF_1_ug/m3_A","PM2.5_CF_1_ug/m3_A","PM10.0_CF_1_ug/m3_A","Uptime_Minutes_A","RSSI_dbm_A","Temperature_F_A","Humidity_%_A","PM2.5_CF_ATM_ug/m3_A"))
+        set_names(c("created_at","PM1.0_CF_1_ug/m3_A","PM2.5_CF_1_ug/m3_A","PM10.0_CF_1_ug/m3_A","Uptime_Minutes_A","RSSI_dbm_A","Temperature_F_A","Humidity_%_A","PM2.5_CF_ATM_ug/m3_A")
+      ) %>% 
+    transmute(
+      date = as.Date(created_at),
+      ID = as.numeric(ssf_sensors[row,]$sensor_index),
+      Location = ssf_sensors[row,]$location_type,
+      PM25 = 0.524*as.numeric(`PM2.5_CF_1_ug/m3_A`) - 0.0852*as.numeric(`Humidity_%_A`) + 5.72
+    )
           
-      a2 <- read_csv(paste0(
-        "https://api.thingspeak.com/channels/",
-        stanford_sensors[row,]$secondary_id_a,
-        "/feeds.csv?api_key=",
-        stanford_sensors[row,]$secondary_key_a,
-        "&average=1440&round=3&start=",start,
-        "&end=", end, 
-        "&timezone=America/Los_Angeles"
-      ), show_col_types = F) %>% 
-        set_names(c("created_at","0.3um/dl_A","0.5um/dl_A","1.0um/dl_A","2.5um/dl_A","5.0um/dl_A","10.0um/dl_A","PM1.0_CF_ATM_ug/m3_A","PM10_CF_ATM_ug/m3_A"))
-        
-      b1 <- read_csv(paste0(
-        "https://api.thingspeak.com/channels/",
-        stanford_sensors[row,]$primary_id_b,
-        "/feeds.csv?api_key=",
-        stanford_sensors[row,]$primary_key_b,
-        "&average=1440&round=3&start=",start,
-        "&end=", end, 
-        "&timezone=America/Los_Angeles"
-      ), show_col_types = F) %>% 
-        set_names(c("created_at","PM1.0_CF_1_ug/m3_B","PM2.5_CF_1_ug/m3_B","PM10.0_CF_1_ug/m3_B","HEAP_B","ADC0_voltage_B","Atmos_Pres_B","Not_Used_B","PM2.5_CF_ATM_ug/m3_B"))
-      
-      b2 <- read_csv(paste0(
-        "https://api.thingspeak.com/channels/",
-        stanford_sensors[row,]$secondary_id_b,
-        "/feeds.csv?api_key=",
-        stanford_sensors[row,]$secondary_key_b,
-        "&average=1440&round=3&start=",start,
-        "&end=", end, 
-        "&timezone=America/Los_Angeles"
-      ), show_col_types = F) %>% 
-        set_names(c("created_at","0.3um/dl_B","0.5um/dl_B","1.0um/dl_B","2.5um/dl_B","5.0um/dl_B","10.0um/dl_B","PM1.0_CF_ATM_ug/m3_B","PM10_CF_ATM_ug/m3_B"))
-      
-      combined <- a1 %>% 
-        left_join(a2, by = "created_at") %>% 
-        left_join(b1, by = "created_at") %>% 
-        left_join(b2, by = "created_at") %>% 
-        transmute(
-          date = as.Date(created_at),
-          ID = as.numeric(stanford_sensors[row,]$sensor_index),
-          Location = stanford_sensors[row,]$location_type,
-          PM25 = 0.524*as.numeric(`PM2.5_CF_1_ug/m3_A`) - 0.0852*as.numeric(`Humidity_%_A`) + 5.72
-        )
-    
     }) %>% 
       group_by(date, Location) %>% 
       summarize(
