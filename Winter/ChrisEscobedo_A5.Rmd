@@ -111,60 +111,77 @@ smc_sensors_clean %>%
   )
 
 ## getting purple air data by week
-ssf_boundary <- places("CA", cb = T) %>% 
-  filter(NAME == "South San Francisco") %>% 
-  st_transform(4326)
+# ssf_boundary <- places("CA", cb = T) %>% 
+#   filter(NAME == "South San Francisco") %>% 
+#   st_transform(4326)
+# 
+# ssf_sensors <- smc_sensors_clean %>% 
+#   .[ssf_boundary,]
+# 
+# week_start <- c("01", "08","15", "22")
+# 
+# sensor_daily_ssf <- week_start %>% 
+#    map_dfr(function(week_start){
+# 
+#     start <- paste0("2022-02-", week_start, "%2000:08:00")
+#     
+#     week_end <- as.character(as.numeric(week_start) + 6) %>% 
+#         str_pad(2, side = c("left"), pad = "0")
+#     
+#     end <- paste0("2022-02-", week_end, "%2000:08:00")
+# 
+#     print(start)
+#     print(end)
+#     
+#     sensor_data <- 
+#       1:nrow(ssf_sensors) %>% 
+#       map_dfr(function(row){
+#       
+#       print(paste0(row,". ",ssf_sensors[row,]$sensor_index))
+#       
+#       a1 <- read_csv(paste0(
+#         "https://api.thingspeak.com/channels/",
+#         ssf_sensors[row,]$primary_id_a,
+#         "/feeds.csv?api_key=",
+#         ssf_sensors[row,]$primary_key_a,
+#         "&average=1440&round=3&start=",start,
+#         "&end=", end, 
+#         "&timezone=America/Los_Angeles"
+#       ), show_col_types = F) %>% 
+#         set_names(c("created_at","PM1.0_CF_1_ug/m3_A","PM2.5_CF_1_ug/m3_A","PM10.0_CF_1_ug/m3_A","Uptime_Minutes_A","RSSI_dbm_A","Temperature_F_A","Humidity_%_A","PM2.5_CF_ATM_ug/m3_A")
+#       ) %>% 
+#     transmute(
+#       date = as.Date(created_at),
+#       ID = as.numeric(ssf_sensors[row,]$sensor_index),
+#       Location = ssf_sensors[row,]$location_type,
+#       PM25 = 0.524*as.numeric(`PM2.5_CF_1_ug/m3_A`) - 0.0852*as.numeric(`Humidity_%_A`) + 5.72
+#     )
+#           
+#     }) %>% 
+#       group_by(date, Location) %>% 
+#       summarize(
+#         PM25 = mean(PM25, na.rm = T)
+#       ) %>% 
+#       mutate(
+#         city = "South San Francisco"
+#       )
+#   
+#     return(sensor_data)
+# })
+# 
+# full_sensor_ssf <- sensor_daily_ssf %>% filter(Location %in% c("outside"))
+# full_sensor_epa <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/epa_sensor_data.rds")
+# full_sensor_fc <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/fc_sensor_data.rds")
+# full_sensor_belmont <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/feb_daily_belmont_data.rds")
+# full_sensor_rwc <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/rwc_outdoor_weighted.rds")
+# full_sensor_sm <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/sm_outdoor_weighted.rds")
+# 
+# daily_outdoor_sensor_combined <- full_sensor_belmont %>% 
+#   bind_rows(full_sensor_epa, full_sensor_fc, full_sensor_rwc, full_sensor_sm, full_sensor_ssf) 
+#  
+# saveRDS(daily_outdoor_sensor_combined,"daily_outdoor_sensor_combined")
 
-ssf_sensors <- smc_sensors_clean %>% 
-  .[ssf_boundary,]
-
-week_start <- c("01", "08","15", "22")
-
-full_sensor_daily <- week_start %>% 
-   map_dfr(function(week_start){
-
-    start <- paste0("2022-02-", week_start, "%2000:08:00")
-    
-    week_end <- as.character(as.numeric(week_start) + 6) %>% 
-        str_pad(2, side = c("left"), pad = "0")
-    
-    end <- paste0("2022-02-", week_end, "%2000:08:00")
-
-    print(start)
-    print(end)
-    
-    sensor_data <- 
-      1:nrow(ssf_sensors) %>% 
-      map_dfr(function(row){
-      
-      print(paste0(row,". ",ssf_sensors[row,]$sensor_index))
-      
-      a1 <- read_csv(paste0(
-        "https://api.thingspeak.com/channels/",
-        ssf_sensors[row,]$primary_id_a,
-        "/feeds.csv?api_key=",
-        ssf_sensors[row,]$primary_key_a,
-        "&average=1440&round=3&start=",start,
-        "&end=", end, 
-        "&timezone=America/Los_Angeles"
-      ), show_col_types = F) %>% 
-        set_names(c("created_at","PM1.0_CF_1_ug/m3_A","PM2.5_CF_1_ug/m3_A","PM10.0_CF_1_ug/m3_A","Uptime_Minutes_A","RSSI_dbm_A","Temperature_F_A","Humidity_%_A","PM2.5_CF_ATM_ug/m3_A")
-      ) %>% 
-    transmute(
-      date = as.Date(created_at),
-      ID = as.numeric(ssf_sensors[row,]$sensor_index),
-      Location = ssf_sensors[row,]$location_type,
-      PM25 = 0.524*as.numeric(`PM2.5_CF_1_ug/m3_A`) - 0.0852*as.numeric(`Humidity_%_A`) + 5.72
-    )
-          
-    }) %>% 
-      group_by(date, Location) %>% 
-      summarize(
-        PM25 = mean(PM25, na.rm = T)
-      )
-  
-    return(sensor_data)
-})
+daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
 ## FROM CLASS DEMO
 
