@@ -22,10 +22,7 @@ library(jsonlite)
 library(flexdashboard)
 
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
-```
 
-
-```{r global, include = FALSE}
 ## PART 1 
 pa_api <- "F5058268-99B3-11EC-B9BF-42010A800003"
 
