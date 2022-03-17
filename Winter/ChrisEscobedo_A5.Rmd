@@ -221,7 +221,7 @@ Inputs {.sidebar}
 checkboxGroupInput(
   inputId = "city", 
   label = "Jurisdiction:",
-  choices = c("", smc_places$NAME), 
+  choices = c(smc_places$NAME), 
   ## selected = "East Palo Alto"
 )
 ```
@@ -241,7 +241,7 @@ observeEvent(input$city, {
   cities <- c(input$city)
   
   chart <- daily_outdoor_sensor_combined %>% 
-    filter(city %in% cities) %>% 
+    filter(NAME %in% cities) %>% 
     ggplot(
       aes(
         x = date,
