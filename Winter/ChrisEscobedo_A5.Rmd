@@ -252,7 +252,7 @@ observeEvent(input$city, {
     ) +
     geom_line(
       aes(
-        color = cities %>% factor()
+        color = NAME %>% factor()
       )
     ) +
     labs(
