@@ -214,7 +214,7 @@ smc_pm25_voronoi_cbg <-
 daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
 
-## PART 2
+## PART 2 - EQUITY
 
 
 ```
