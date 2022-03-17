@@ -262,7 +262,9 @@ observeEvent(input$city, {
         paste0("Daily Average PM2.5 for February"),
       color = "City"
     ) + 
-    theme(legend.position = "bottom")
+    theme(
+      legend.position = "bottom"
+    )
   
   output$plot <- renderPlotly({
     chart %>% 
@@ -330,11 +332,13 @@ output$map <- renderLeaflet({
 ```{r, context = "server"}
 observeEvent(input$city, {
   
+  cities <- c(input$city)
+  
   selected <- smc_places %>% 
-    filter(NAME == input$city)
+    filter(NAME %in% cities)
   
   leafletProxy("map") %>% 
-    removeShape("selected") %>% 
+##    removeShape("selected") %>% 
     addPolygons(
       data = selected,
       fill = F,
