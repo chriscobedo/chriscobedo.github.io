@@ -1,0 +1,128 @@
+---
+title: "equity"
+author: "Chris"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo = F, warnings = F, message = F)
+```
+
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(tigris)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
+```
+
+
+```{r}
+smc_pm25_voronoi
+
+smc_pm25_voronoi_cbg <-
+  smc_pm25_voronoi %>% 
+  st_intersection(smc_cbgs) %>% 
+  st_make_valid() %>% 
+  mutate(
+    area = st_area(.) %>% as.numeric()
+  ) %>% 
+  st_drop_geometry() %>% 
+  group_by(GEOID) %>% 
+  summarize(
+    PM25 = weighted.mean(PM25, area, na.rm = T)
+  ) %>% 
+  left_join(smc_cbgs %>% dplyr::select(GEOID)) %>% 
+  st_as_sf()
+
+mapview(smc_pm25_voronoi_cbg)
+
+## race 
+dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
+
+names(dec_vars_2020) <- dec_vars_2020[1,]
+
+dec_vars_2020 <- dec_vars_2020 [2:10,] %>% 
+   mutate(
+    name = NAME,
+    label = `Geographic Area Name`
+   )
+
+smc_race <- read_csv("DECENNIALPL2020.SMC.csv") %>% 
+  .[-1,] %>% 
+  select(!c(NAME)) %>%
+  pivot_longer(
+    ends_with("N"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>% 
+  left_join(
+    dec_vars_2020 %>% 
+    select(name, label)
+  ) %>% 
+  filter(!is.na(label)) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"multiple","race"),
+    sep = "!!"
+  ) %>% 
+  mutate(
+    race = if_else(is.na(race) & multiple == 'Population of two or more races:',
+      'two or more races',
+      race
+    )
+  ) %>% 
+  filter(!is.na(race)) %>% 
+  mutate(
+    GEOID = str_remove_all(GEO_ID, "1000000US")
+  ) %>%
+  select(-c(GEO_ID, multiple)) %>%
+  filter(GEOID %in% smc_cbgs$GEOID) %>% 
+  left_join(complete_map %>% 
+    select(GEOID10, total)
+  ) %>% 
+  mutate(
+    bucket = as.character(round(total, 2))
+  )
+
+richmond_race_total <-
+  richmond_score_race %>% 
+  group_by(race) %>% 
+  summarize(estimate = sum(as.numeric(estimate))) %>%
+  mutate(bucket = "Total")
+
+richmond_score_race %>% 
+  group_by(bucket, race) %>% 
+  summarize(estimate = sum(as.numeric(estimate))) %>% 
+  rbind(richmond_race_total) %>% 
+  ggplot() +
+  geom_bar(
+    aes(
+      x = bucket %>% factor(levels = rev(c("Total","0.26", "0.27","0.28","0.29","0.3","0.31","0.32","0.33","0.34"))),
+      y = estimate,
+      fill = race %>% factor(levels = rev(unique(richmond_score_race$race)))
+    ),
+    stat = "identity",
+    position = "fill"
+  ) +
+  labs(
+    x = "Rounded Score Buckets",
+    y = "Proportion of Households",
+    title = "North Richmond Block Scores by Race",
+    fill = "Race Makeup of Score Bucket"
+  ) +
+  coord_flip() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical"
+  )  +
+  guides(
+    fill = guide_legend(
+      reverse = T
+    )
+  )
+```

@@ -219,6 +219,9 @@ daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
 ```
 
+Page 1
+===================================== 
+
 Inputs {.sidebar}
 -------------------------------------
 
@@ -337,10 +340,10 @@ output$map <- renderLeaflet({
 ```{r, context = "server"}
 observeEvent(input$city, {
   
-  cities <- c(input$city)
+  cities <- c(input$city) 
   
   selected <- smc_places %>% 
-    filter(NAME %in% cities)
+    filter(NAME %in% c(input$city))
   
   leafletProxy("map") %>% 
     removeShape("selected") %>% 
@@ -356,9 +359,69 @@ observeEvent(input$city, {
 })
 ```
 
+Page 2
+===================================== 
 
+Inputs {.sidebar}
+-------------------------------------
 
+```{r}
+checkboxGroupInput(
+  inputId = "city", 
+  label = "Jurisdiction:",
+  choices = c(smc_places$NAME), 
+  selected = "Redwood City"
+)
+```
 
+Row
+-------------------------------------
+
+### Plot
+
+```{r}
+plotlyOutput("plot2")
+```
+
+```{r, context = "server"}
+observeEvent(input$city, {
+  
+  cities <- c(input$city)
+  
+  chart <- daily_outdoor_sensor_combined %>% 
+    filter(city %in% cities) %>% 
+    ggplot(
+      aes(
+        x = date,
+        y = PM25
+      )
+    ) +
+    geom_point(
+    ) +
+    geom_line(
+      aes(
+        color = city %>% factor()
+      )
+    ) +
+    labs(
+      x = "",
+      y = "PM2.5",
+      title = 
+        paste0("Daily Average PM2.5 for February"),
+      color = "City"
+    ) + 
+    theme(
+      legend.position = "bottom"
+    )
+  
+  output$plot2 <- renderPlotly({
+    chart %>% 
+      ggplotly() %>% 
+      config(displayModeBar = F)
+  })
+  
+})
+```
 
 
 
