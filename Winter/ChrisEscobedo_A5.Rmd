@@ -239,8 +239,10 @@ plotlyOutput("plot")
 ```{r, context = "server"}
 observeEvent(input$city, {
   
+  cities <- c(input$city)
+  
   chart <- daily_outdoor_sensor_combined %>% 
-    filter(city == input$city) %>% 
+    filter(city %in% cities) %>% 
     ggplot(
       aes(
         x = date,
@@ -251,15 +253,15 @@ observeEvent(input$city, {
     ) +
     geom_line(
       aes(
-        color = input$city
+        color = cities %>% factor()
       )
     ) +
     labs(
       x = "",
       y = "PM2.5",
       title = 
-        paste0("Daily Average PM2.5 for ", input$city),
-      color = "Year"
+        paste0("Daily Average PM2.5 for February"),
+      color = "City"
     ) + 
     theme(legend.position = "bottom")
   
