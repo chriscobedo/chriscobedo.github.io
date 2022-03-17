@@ -241,7 +241,7 @@ observeEvent(input$city, {
   cities <- c(input$city)
   
   chart <- daily_outdoor_sensor_combined %>% 
-    filter(NAME %in% cities) %>% 
+    filter(city %in% cities) %>% 
     ggplot(
       aes(
         x = date,
@@ -252,7 +252,7 @@ observeEvent(input$city, {
     ) +
     geom_line(
       aes(
-        color = NAME %>% factor()
+        color = city %>% factor()
       )
     ) +
     labs(
