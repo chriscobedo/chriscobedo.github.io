@@ -23,65 +23,69 @@ library(flexdashboard)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 
 ## PART 1 
-pa_api <- "F5058268-99B3-11EC-B9BF-42010A800003"
+# pa_api <- "F5058268-99B3-11EC-B9BF-42010A800003"
+# 
+# json <- fromJSON(paste0(
+#     "https://api.purpleair.com/v1/sensors?api_key=",
+#     pa_api,
+#     "&fields=name,location_type,latitude,longitude,pm2.5_1week,temperature,humidity,primary_id_a,primary_key_a,secondary_id_a,secondary_key_a,primary_id_b,primary_key_b,secondary_id_b,secondary_key_b"
+#   ))
+# 
+# all_sensors <- json %>% 
+#   .$data %>% 
+#   as.data.frame() %>% 
+#   set_names(json$fields) %>% 
+#   filter(
+#     !is.na(longitude),
+#     !is.na(latitude)
+#   ) %>% 
+#   st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>% 
+#   mutate(location_type = ifelse(
+#     location_type == 0,
+#     "outside",
+#     "inside"
+#   ))
+# 
+# smc_sensors <-
+#   all_sensors %>% 
+#   .[counties("CA") %>% filter(NAME == "San Mateo") %>% st_transform(4326), ]
+# 
+# smc_sensors_clean <- smc_sensors %>% 
+#   filter(
+#     !is.na(pm2.5_1week),
+#     !is.na(humidity)
+#   ) %>% 
+#   mutate(
+#     PM25 = 0.524*as.numeric(pm2.5_1week) - 0.0852*as.numeric(humidity) + 5.72,
+#     AQI = case_when(
+#       PM25 <= 12 ~ 
+#         paste(round(50/12*PM25), "Good"),
+#       PM25 <= 35.4 ~ 
+#         paste(round((100-51)/(35.4-12)*(PM25 - 12) + 51), "Moderate"),
+#       PM25 <= 55.4 ~
+#         paste(round((150-101)/(55.4-35.4)*(PM25 - 35.4) + 101), "Moderately Unhealthy"),
+#       PM25 <= 150.4 ~
+#         paste(round((200-151)/(150.4-55.4)*(PM25 - 55.4) + 151), "Unhealthy"),
+#       PM25 <= 250.4 ~
+#         paste(round((300-201)/(250.4-150.4)*(PM25 - 150.4) + 201), "Very Unhealthy"),
+#       TRUE ~ 
+#         paste(round((500-301)/(500.4-250.5)*(PM25 - 250.5) + 301), "Hazardous")
+#     )
+#   ) %>% 
+#   separate(
+#     AQI,
+#     into = c("AQI","AQI_Cat"),
+#     sep = " ",
+#     extra = "merge"
+#   ) %>% 
+#   mutate(
+#     AQI = as.numeric(AQI),
+#     AQI_Cat = AQI_Cat %>% factor(levels = c("Good", "Moderate","Moderately Unhealthy","Unhealthy","Very Unhealthy","Hazardous"))
+#   )
+# 
+# saveRDS(smc_sensors_clean,"smc_sensors_clean.rds")
 
-json <- fromJSON(paste0(
-    "https://api.purpleair.com/v1/sensors?api_key=",
-    pa_api,
-    "&fields=name,location_type,latitude,longitude,pm2.5_1week,temperature,humidity,primary_id_a,primary_key_a,secondary_id_a,secondary_key_a,primary_id_b,primary_key_b,secondary_id_b,secondary_key_b"
-  ))
-
-all_sensors <- json %>% 
-  .$data %>% 
-  as.data.frame() %>% 
-  set_names(json$fields) %>% 
-  filter(
-    !is.na(longitude),
-    !is.na(latitude)
-  ) %>% 
-  st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>% 
-  mutate(location_type = ifelse(
-    location_type == 0,
-    "outside",
-    "inside"
-  ))
-
-smc_sensors <-
-  all_sensors %>% 
-  .[counties("CA") %>% filter(NAME == "San Mateo") %>% st_transform(4326), ]
-
-smc_sensors_clean <- smc_sensors %>% 
-  filter(
-    !is.na(pm2.5_1week),
-    !is.na(humidity)
-  ) %>% 
-  mutate(
-    PM25 = 0.524*as.numeric(pm2.5_1week) - 0.0852*as.numeric(humidity) + 5.72,
-    AQI = case_when(
-      PM25 <= 12 ~ 
-        paste(round(50/12*PM25), "Good"),
-      PM25 <= 35.4 ~ 
-        paste(round((100-51)/(35.4-12)*(PM25 - 12) + 51), "Moderate"),
-      PM25 <= 55.4 ~
-        paste(round((150-101)/(55.4-35.4)*(PM25 - 35.4) + 101), "Moderately Unhealthy"),
-      PM25 <= 150.4 ~
-        paste(round((200-151)/(150.4-55.4)*(PM25 - 55.4) + 151), "Unhealthy"),
-      PM25 <= 250.4 ~
-        paste(round((300-201)/(250.4-150.4)*(PM25 - 150.4) + 201), "Very Unhealthy"),
-      TRUE ~ 
-        paste(round((500-301)/(500.4-250.5)*(PM25 - 250.5) + 301), "Hazardous")
-    )
-  ) %>% 
-  separate(
-    AQI,
-    into = c("AQI","AQI_Cat"),
-    sep = " ",
-    extra = "merge"
-  ) %>% 
-  mutate(
-    AQI = as.numeric(AQI),
-    AQI_Cat = AQI_Cat %>% factor(levels = c("Good", "Moderate","Moderately Unhealthy","Unhealthy","Very Unhealthy","Hazardous"))
-  )
+smc_sensors_clean <- readRDS("smc_sensors_clean.rds")
 
 smc_pm25_voronoi <-
   smc_sensors_clean %>%
