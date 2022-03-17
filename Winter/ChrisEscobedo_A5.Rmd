@@ -222,7 +222,7 @@ checkboxGroupInput(
   inputId = "city", 
   label = "Jurisdiction:",
   choices = c(smc_places$NAME), 
-  ## selected = "East Palo Alto"
+  selected = "Redwood City"
 )
 ```
 
