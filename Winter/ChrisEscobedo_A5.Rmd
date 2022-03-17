@@ -3,7 +3,7 @@ title: "ChrisEscobedo_A5"
 runtime: shiny
 output: 
   flexdashboard::flex_dashboard:
-    vertical_layout: fill
+    orientation: rows
 ---
 
 ```{r global, include=FALSE}
@@ -231,7 +231,7 @@ checkboxGroupInput(
 )
 ```
 
-Column
+Row
 -------------------------------------
 
 ### Plot
@@ -280,7 +280,7 @@ observeEvent(input$city, {
 })
 ```
 
-Column
+Row
 -------------------------------------
 
 ### Map
@@ -343,7 +343,7 @@ observeEvent(input$city, {
     filter(NAME %in% cities)
   
   leafletProxy("map") %>% 
-##    removeShape("selected") %>% 
+    removeShape("selected") %>% 
     addPolygons(
       data = selected,
       fill = F,
