@@ -88,27 +88,58 @@ smc_sensors_clean <- smc_sensors %>%
     AQI_Cat = AQI_Cat %>% factor(levels = c("Good", "Moderate","Moderately Unhealthy","Unhealthy","Very Unhealthy","Hazardous"))
   )
 
-#map
-aqi_pal2 <- colorQuantile(
-  palette = "RdYlGn",
-  reverse = T,
-  domain = smc_sensors_clean$AQI,
-  n = 5
-)
+smc_pm25_voronoi <-
+  smc_sensors_clean %>%
+  filter(location_type == "outside") %>% 
+  st_union() %>% 
+  st_voronoi() %>% 
+  st_cast() %>% 
+  st_as_sf() %>% 
+  st_intersection(.,st_union(counties("CA") %>% filter(NAME == "San Mateo") %>% st_transform(4326))) %>% 
+  st_join(smc_sensors_clean %>% filter(location_type == "outside"))
 
-smc_sensors_clean %>% 
-  leaflet() %>% 
-  addProviderTiles(provider = providers$CartoDB.Positron) %>% 
-  addCircleMarkers(
-    color = ~aqi_pal2(AQI),
-    label = ~paste0(AQI,", ",AQI_Cat),
-    radius = 5,
-    opacity = 0.75
+ggplot(smc_pm25_voronoi) + geom_sf()  
+
+# smc_places <- places("CA", cb = T) %>%
+#  st_centroid() %>%
+#  .[counties("CA") %>% filter(NAME == "San Mateo"),] %>%
+#   st_drop_geometry() %>%
+#   left_join(places("CA", cb = T) %>% select(PLACEFP)) %>%
+#   st_as_sf() %>% 
+#   filter(NAME %in% c("Belmont", "East Palo Alto", "Foster City", "Redwood City", "San Mateo", "South San Francisco"))
+# 
+# saveRDS(smc_places, "smc_places.rds")
+
+smc_places <- readRDS("smc_places.rds")
+
+smc_sensors_clean_outside <- smc_sensors_clean %>% 
+  filter(location_type == "outside") %>% 
+  .[smc_places %>% st_transform(4326), ]
+
+# smc_cbgs <- block_groups("CA","San Mateo", cb = T) %>% 
+#   st_transform(4326)
+# saveRDS(smc_cbgs, "smc_cbgs.rds")
+
+smc_cbgs <- readRDS("smc_cbgs.rds")
+
+smc_cbg_places <- smc_cbgs %>% 
+  .[smc_places %>% st_transform(4326),]
+
+smc_pm25_voronoi_cbg <-
+  smc_pm25_voronoi %>% 
+  st_intersection(smc_cbg_places) %>% 
+  st_make_valid() %>% 
+  mutate(
+    area = st_area(.) %>% as.numeric()
   ) %>% 
-  addLegend(
-    pal = aqi_pal2,
-    values = ~AQI
-  )
+  st_drop_geometry() %>% 
+  group_by(GEOID) %>% 
+  summarize(
+    PM25 = weighted.mean(PM25, area, na.rm = T)
+  ) %>% 
+  left_join(smc_cbg_places %>% dplyr::select(GEOID)) %>% 
+  st_as_sf()
+
 
 ## getting purple air data by week
 # ssf_boundary <- places("CA", cb = T) %>% 
@@ -174,7 +205,12 @@ smc_sensors_clean %>%
 # full_sensor_fc <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/fc_sensor_data.rds")
 # full_sensor_belmont <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/feb_daily_belmont_data.rds")
 # full_sensor_rwc <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/rwc_outdoor_weighted.rds")
-# full_sensor_sm <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/sm_outdoor_weighted.rds")
+# full_sensor_sm <- readRDS(
+#   "/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/sm_outdoor_weighted.rds"
+#   ) %>% 
+#   mutate(
+#     city = "San Mateo"
+#   )
 # 
 # daily_outdoor_sensor_combined <- full_sensor_belmont %>%
 #   bind_rows(full_sensor_epa, full_sensor_fc, full_sensor_rwc, full_sensor_sm, full_sensor_ssf)
@@ -183,20 +219,13 @@ smc_sensors_clean %>%
 
 daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
-## FROM CLASS DEMO
 
-# smc_places <- places("CA", cb = T) %>%
-#  st_centroid() %>%   
-#  .[counties("CA") %>% filter(NAME == "San Mateo"),] %>%
-#   st_drop_geometry() %>%
-#   left_join(places("CA", cb = T) %>% select(PLACEFP)) %>%   
-#   st_as_sf()
-# saveRDS(smc_places, "smc_places.rds")
-smc_places <- readRDS("smc_places.rds")
 
-# smc_cbgs <- block_groups("CA","San Mateo", cb = T)
-# saveRDS(smc_cbgs, "smc_cbgs.rds")
-smc_cbgs <- readRDS("smc_cbgs.rds")
+full_sensors <- daily_outdoor_sensor_combined %>% 
+  left_join(smc_places, by = c("city" = "NAME")) %>% 
+  st_as_sf()
+
+mapview(full_sensors)
 ```
 
 Inputs {.sidebar}
@@ -223,15 +252,26 @@ plotlyOutput("plot")
 ```{r, context = "server"}
 observeEvent(input$city, {
   
-  chart <- smc_places %>% 
-    filter(NAME == input$city) %>% 
+  chart <- daily_outdoor_sensor_combined %>% 
+    filter(city == input$city) %>% 
     ggplot(
       aes(
-        x = ALAND,
-        y = AWATER
+        x = date,
+        y = PM25
       )
     ) +
-    geom_point()
+    geom_point(
+    ) +
+    geom_line(
+    ) +
+    labs(
+      x = "",
+      y = "PM2.5",
+      title = 
+        paste0("Daily Average PM2.5 for ", input$city),
+      color = "Year"
+    ) + 
+    theme(legend.position = "bottom")
   
   output$plot <- renderPlotly({
     chart %>% 
@@ -252,27 +292,47 @@ leafletOutput("map")
 ```
 
 ```{r, context = "server"}
-cbg_pal <- colorNumeric(
+pm25_pal <- colorNumeric(
   palette = "RdYlGn",
-  domain = 
-    smc_cbgs$ALAND
+  reverse = T,
+  domain = c(
+    smc_pm25_voronoi_cbg$PM25,
+    smc_sensors_clean_outside$PM25
+  )
 )
   
 output$map <- renderLeaflet({
   leaflet() %>% 
-    addProviderTiles(provider = providers$CartoDB.Positron) %>% 
-    addPolygons(
-      data = smc_cbgs,
-      fillColor = ~cbg_pal(ALAND),
-      color = "white",
-      opacity = 0.5,
-      fillOpacity = 0.5,
-      weight = 1,
-      highlightOptions = highlightOptions(
-        weight = 2,
-        opacity = 1
-      )
+  addProviderTiles(provider = providers$CartoDB.Positron) %>% 
+  addPolygons(
+    data = smc_pm25_voronoi_cbg,
+    fillColor = ~pm25_pal(PM25),
+    fillOpacity = 0.5,
+    color = "white",
+    weight = 0.5,
+    label = ~PM25,
+    highlightOptions = highlightOptions(
+      weight = 2,
+      opacity = 1
     )
+  ) %>% 
+  addCircleMarkers(
+    data = smc_sensors_clean_outside,
+    fillColor = ~pm25_pal(PM25),
+    fillOpacity = 1,
+    color = "black",
+    weight = 0.5,
+    radius = 5,
+    label = ~PM25
+  ) %>% 
+  addLegend(
+    pal = pm25_pal,
+    values = c(
+      smc_pm25_voronoi_cbg$PM25,
+      smc_sensors_clean_outside$PM25
+    ),
+    title = "Weekly Average PM2.5<br>for 3/16 by CBG"
+  )
 })
 ```
 
