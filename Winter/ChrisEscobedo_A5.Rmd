@@ -250,6 +250,9 @@ observeEvent(input$city, {
     geom_point(
     ) +
     geom_line(
+      aes(
+        color = input$city
+      )
     ) +
     labs(
       x = "",
