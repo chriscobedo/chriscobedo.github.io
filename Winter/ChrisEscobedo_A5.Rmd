@@ -13,7 +13,6 @@ library(tigris)
 library(sf)
 library(leaflet)
 library(censusapi)
-library(raster)
 library(mapview)
 library(stars)
 library(plotly)
@@ -220,7 +219,7 @@ Inputs {.sidebar}
 -------------------------------------
 
 ```{r}
-selectInput(
+checkboxGroupInput(
   inputId = "city", 
   label = "Jurisdiction:",
   choices = c("", smc_places$NAME), 
