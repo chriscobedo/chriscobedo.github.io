@@ -24,7 +24,6 @@ library(flexdashboard)
 Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 ```
 
-Data from purple air
 
 ```{r global, include = FALSE}
 ## PART 1 
@@ -98,8 +97,6 @@ smc_pm25_voronoi <-
   st_intersection(.,st_union(counties("CA") %>% filter(NAME == "San Mateo") %>% st_transform(4326))) %>% 
   st_join(smc_sensors_clean %>% filter(location_type == "outside"))
 
-ggplot(smc_pm25_voronoi) + geom_sf()  
-
 # smc_places <- places("CA", cb = T) %>%
 #  st_centroid() %>%
 #  .[counties("CA") %>% filter(NAME == "San Mateo"),] %>%
@@ -139,7 +136,6 @@ smc_pm25_voronoi_cbg <-
   ) %>% 
   left_join(smc_cbg_places %>% dplyr::select(GEOID)) %>% 
   st_as_sf()
-
 
 ## getting purple air data by week
 # ssf_boundary <- places("CA", cb = T) %>% 
@@ -218,14 +214,6 @@ smc_pm25_voronoi_cbg <-
 # saveRDS(daily_outdoor_sensor_combined,"daily_outdoor_sensor_combined.rds")
 
 daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
-
-
-
-full_sensors <- daily_outdoor_sensor_combined %>% 
-  left_join(smc_places, by = c("city" = "NAME")) %>% 
-  st_as_sf()
-
-mapview(full_sensors)
 ```
 
 Inputs {.sidebar}
