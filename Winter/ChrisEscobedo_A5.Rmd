@@ -176,10 +176,10 @@ smc_sensors_clean %>%
 # full_sensor_rwc <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/rwc_outdoor_weighted.rds")
 # full_sensor_sm <- readRDS("/Users/Chris/Documents/GitHub/chriscobedo.github.io/Winter/sensors/sm_outdoor_weighted.rds")
 # 
-# daily_outdoor_sensor_combined <- full_sensor_belmont %>% 
-#   bind_rows(full_sensor_epa, full_sensor_fc, full_sensor_rwc, full_sensor_sm, full_sensor_ssf) 
-#  
-# saveRDS(daily_outdoor_sensor_combined,"daily_outdoor_sensor_combined")
+# daily_outdoor_sensor_combined <- full_sensor_belmont %>%
+#   bind_rows(full_sensor_epa, full_sensor_fc, full_sensor_rwc, full_sensor_sm, full_sensor_ssf)
+# 
+# saveRDS(daily_outdoor_sensor_combined,"daily_outdoor_sensor_combined.rds")
 
 daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
