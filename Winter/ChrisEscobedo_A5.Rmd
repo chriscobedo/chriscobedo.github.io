@@ -212,6 +212,11 @@ smc_pm25_voronoi_cbg <-
 # saveRDS(daily_outdoor_sensor_combined,"daily_outdoor_sensor_combined.rds")
 
 daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
+
+
+## PART 2
+
+
 ```
 
 Inputs {.sidebar}
