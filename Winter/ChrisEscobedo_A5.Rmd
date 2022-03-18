@@ -232,6 +232,13 @@ checkboxGroupInput(
   choices = c(smc_places$NAME), 
   selected = "Redwood City"
 )
+
+selectInput(
+  inputId = "equity", 
+  label = "Pick a type of equity analysis:",
+  choices = c("Income", "Race"), 
+  selected = "Income"
+)
 ```
 
 Row
