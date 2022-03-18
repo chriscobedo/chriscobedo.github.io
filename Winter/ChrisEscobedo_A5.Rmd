@@ -45,7 +45,7 @@ Sys.setenv(CENSUS_KEY="c7ce771b506b13ca6875d12a179606f8087fa381")
 #   ))
 # 
 # smc_sensors <-
-#   all_sensors %>% 
+#   all_sensors %>%
 #   .[counties("CA") %>% filter(NAME == "San Mateo") %>% st_transform(4326), ]
 # 
 # smc_sensors_clean <- smc_sensors %>% 
