@@ -535,32 +535,32 @@ observeEvent(input$city, {
 })
 ```
 
-Row
--------------------------------------
+<!-- Row -->
+<!-- ------------------------------------- -->
 
-### Plot
+<!-- ### Plot -->
 
-```{r}
-plotlyOutput("equity_plot")
-```
+<!-- ```{r} -->
+<!-- plotlyOutput("equity_plot") -->
+<!-- ``` -->
 
-```{r, context = "server"}
-observeEvent(input$equity, {
-  
-  if(inpuy$equity == "Income"){
-    chart <- smc_income_plot
-  } else {
-    chart <- smc_race_plot
-  }
-  
-  output$equity_plot <- renderPlotly({
-    chart %>% 
-      ggplotly() %>% 
-      config(displayModeBar = F)
-  })
-  
-})
-```
+<!-- ```{r, context = "server"} -->
+<!-- observeEvent(input$equity, { -->
+
+<!--   if(inpuy$equity == "Income"){ -->
+<!--     chart <- smc_income_plot -->
+<!--   } else { -->
+<!--     chart <- smc_race_plot -->
+<!--   } -->
+
+<!--   output$equity_plot <- renderPlotly({ -->
+<!--     chart %>% -->
+<!--       ggplotly() %>% -->
+<!--       config(displayModeBar = F) -->
+<!--   }) -->
+
+<!-- }) -->
+<!-- ``` -->
 
 
 
