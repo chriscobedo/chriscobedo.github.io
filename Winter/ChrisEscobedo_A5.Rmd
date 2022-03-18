@@ -544,9 +544,6 @@ observeEvent(input$city, {
 })
 ```
 
-Row
--------------------------------------
-
 ### PM2.5 Equity Analysis for San  Mateo County
 
 ```{r}
