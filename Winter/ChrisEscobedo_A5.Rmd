@@ -7,7 +7,6 @@ output:
 ---
 
 ```{r global, include=FALSE}
-library(lehdr)
 library(tidyverse)
 library(tigris)
 library(sf)
