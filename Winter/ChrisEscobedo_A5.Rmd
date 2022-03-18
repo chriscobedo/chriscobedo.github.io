@@ -413,7 +413,7 @@ selectInput(
 Row
 -------------------------------------
 
-### Plot
+### Outdoor average PM2.5 by jurisdiction in San Mateo County for February
 
 ```{r}
 plotlyOutput("plot")
@@ -462,7 +462,7 @@ observeEvent(input$city, {
 Row
 -------------------------------------
 
-### Map
+### Map of PM2.5 by CBG averaged using voronoi technique.
 
 ```{r}
 leafletOutput("map")
@@ -538,7 +538,7 @@ observeEvent(input$city, {
 Row
 -------------------------------------
 
-### Plot
+### PM2.5 Equity Analysis for San  Mateo County
 
 ```{r}
 plotlyOutput("equity_plot")
