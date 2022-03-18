@@ -52,7 +52,7 @@ smc_income <-
   mutate(
     GEOID = paste0(state,county,tract,block_group)
   ) %>% 
-  select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+  select(!c(county,tract,block_group,GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
   pivot_longer(
     ends_with("E"),
     names_to = "name",
