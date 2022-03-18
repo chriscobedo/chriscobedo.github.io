@@ -40,6 +40,37 @@ smc_pm25_voronoi_cbg <-
 
 mapview(smc_pm25_voronoi_cbg)
 
+##income
+smc_income <-
+  getCensus(
+    name = "acs/acs5",
+    vintage = 2019,
+    region = "block group:*",
+    regionin = "state:06+county:081",
+    vars = "group(B19001)"
+  ) %>%
+  mutate(
+    GEOID = paste0(state,county,tract,block_group)
+  ) %>% 
+  select(!c(GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+  pivot_longer(
+    ends_with("E"),
+    names_to = "name",
+    values_to = "estimate"
+  ) %>%
+  left_join(
+    acs_vars_2019_5yr %>% 
+      select(name, label)
+  ) %>% 
+  select(-name) %>% 
+  separate(
+    label,
+    into = c(NA,NA,"income"),
+    sep = "!!"
+  ) %>% 
+  filter(!is.na(income))
+
+
 ## race 
 dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
 
@@ -50,6 +81,10 @@ dec_vars_2020 <- dec_vars_2020 [2:10,] %>%
     name = NAME,
     label = `Geographic Area Name`
    )
+
+smc_race <- smc_race %>% 
+  left_join(smc_cbgs) %>% 
+  st_as_sf()
 
 smc_race <- read_csv("DECENNIALPL2020.SMC.csv") %>% 
   .[-1,] %>% 
@@ -82,38 +117,40 @@ smc_race <- read_csv("DECENNIALPL2020.SMC.csv") %>%
   ) %>%
   select(-c(GEO_ID, multiple)) %>%
   filter(GEOID %in% smc_cbgs$GEOID) %>% 
-  left_join(complete_map %>% 
-    select(GEOID10, total)
-  ) %>% 
+  left_join(smc_pm25_voronoi_cbg %>% 
+    select(GEOID, PM25)
+  ) %>%
   mutate(
-    bucket = as.character(round(total, 2))
+    bucket = as.character(round(PM25))
   )
 
-richmond_race_total <-
-  richmond_score_race %>% 
+smc_race_total <-
+  smc_race %>% 
   group_by(race) %>% 
   summarize(estimate = sum(as.numeric(estimate))) %>%
   mutate(bucket = "Total")
 
-richmond_score_race %>% 
+
+
+smc_race %>% 
   group_by(bucket, race) %>% 
   summarize(estimate = sum(as.numeric(estimate))) %>% 
-  rbind(richmond_race_total) %>% 
+  rbind(smc_race_total) %>% 
   ggplot() +
   geom_bar(
     aes(
-      x = bucket %>% factor(levels = rev(c("Total","0.26", "0.27","0.28","0.29","0.3","0.31","0.32","0.33","0.34"))),
+      x = bucket %>% factor(levels = rev(c("Total", "0", "1","2","3","4","5","6","7","8","9","11"))),
       y = estimate,
-      fill = race %>% factor(levels = rev(unique(richmond_score_race$race)))
+      fill = race %>% factor(levels = rev(unique(smc_race$race)))
     ),
     stat = "identity",
     position = "fill"
   ) +
   labs(
-    x = "Rounded Score Buckets",
+    x = "PM25",
     y = "Proportion of Households",
-    title = "North Richmond Block Scores by Race",
-    fill = "Race Makeup of Score Bucket"
+    title = "San Mateo County PM2.5 exposure by Race",
+    fill = "Race"
   ) +
   coord_flip() +
   theme(
