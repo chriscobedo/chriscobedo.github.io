@@ -3,7 +3,7 @@ title: "ChrisEscobedo_A5"
 runtime: shiny
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    vertical_layout: scroll
 ---
 
 ```{r global, include=FALSE}
