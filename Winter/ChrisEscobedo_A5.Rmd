@@ -318,10 +318,6 @@ dec_vars_2020 <- dec_vars_2020 [2:10,] %>%
     label = `Geographic Area Name`
    )
 
-smc_race <- smc_race %>%
-  left_join(smc_cbgs) %>%
-  st_as_sf()
-
 smc_race <- read_csv("DECENNIALPL2020.SMC.csv") %>%
   .[-1,] %>%
   select(!c(NAME)) %>%
@@ -381,7 +377,7 @@ smc_race_plot <- smc_race %>%
     position = "fill"
   ) +
   labs(
-    x = "PM25",
+    x = "PM2.5",
     y = "Proportion of Households",
     title = "San Mateo County PM2.5 exposure by Race",
     fill = "Race"
