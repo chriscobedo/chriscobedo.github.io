@@ -215,7 +215,177 @@ daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 
 
 ## PART 2 - EQUITY
+## income
+# smc_income <-
+#   getCensus(
+#     name = "acs/acs5",
+#     vintage = 2019,
+#     region = "block group:*",
+#     regionin = "state:06+county:081",
+#     vars = "group(B19001)"
+#   ) %>%
+#   mutate(
+#     GEOID = paste0(state,county,tract,block_group)
+#   ) %>% 
+#   select(!c(county,tract,block_group,GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
+#   pivot_longer(
+#     ends_with("E"),
+#     names_to = "name",
+#     values_to = "estimate"
+#   ) %>%
+#   left_join(
+#     acs_vars_2019_5yr %>% 
+#       select(name, label)
+#   ) %>% 
+#   select(-name) %>% 
+#   separate(
+#     label,
+#     into = c(NA,NA,"income"),
+#     sep = "!!"
+#   ) %>% 
+#   filter(!is.na(income)) %>% 
+#   filter(GEOID %in% smc_cbgs$GEOID) %>% 
+#   left_join(smc_pm25_voronoi_cbg %>%
+#     select(GEOID, PM25)
+#   ) %>%
+#   mutate(
+#     bucket = as.character(round(PM25))
+#   )
+# 
+# smc_income_total <-
+#   smc_income %>%
+#   group_by(income) %>%
+#   summarize(estimate = sum(as.numeric(estimate))) %>%
+#   mutate(bucket = "Total")
+# 
+# smc_income_plot <- smc_income %>%
+#   group_by(bucket, income) %>%
+#   summarize(estimate = sum(as.numeric(estimate))) %>%
+#   rbind(smc_race_total) %>%
+#   ggplot() +
+#   geom_bar(
+#     aes(
+#       x = bucket %>% factor(levels = rev(c("Total", "0", "1","2","3","4","5","6","7","8","9","11"))),
+#       y = estimate,
+#       fill = income %>% factor(levels = rev(unique(smc_income$income)))
+#     ),
+#     stat = "identity",
+#     position = "fill"
+#   ) +
+#   labs(
+#     x = "PM25",
+#     y = "Proportion of Households",
+#     title = "San Mateo County PM2.5 exposure by Income",
+#     fill = "Income"
+#   ) +
+#   coord_flip() +
+#   theme(
+#     legend.position = "bottom",
+#     legend.direction = "vertical"
+#   )  +
+#   guides(
+#     fill = guide_legend(
+#       reverse = T
+#     )
+#   )
+# 
+# saveRDS(smc_income_plot, "smc_income_plot.rds")
 
+smc_income_plot <- readRDS("smc_income_plot.rds")
+
+## race 
+# dec_vars_2020 <- read_csv("DECENNIALPL2020.P1_metadata.csv")
+# 
+# names(dec_vars_2020) <- dec_vars_2020[1,]
+# 
+# dec_vars_2020 <- dec_vars_2020 [2:10,] %>% 
+#    mutate(
+#     name = NAME,
+#     label = `Geographic Area Name`
+#    )
+# 
+# smc_race <- smc_race %>% 
+#   left_join(smc_cbgs) %>% 
+#   st_as_sf()
+# 
+# smc_race <- read_csv("DECENNIALPL2020.SMC.csv") %>% 
+#   .[-1,] %>% 
+#   select(!c(NAME)) %>%
+#   pivot_longer(
+#     ends_with("N"),
+#     names_to = "name",
+#     values_to = "estimate"
+#   ) %>% 
+#   left_join(
+#     dec_vars_2020 %>% 
+#     select(name, label)
+#   ) %>% 
+#   filter(!is.na(label)) %>% 
+#   select(-name) %>% 
+#   separate(
+#     label,
+#     into = c(NA,NA,"multiple","race"),
+#     sep = "!!"
+#   ) %>% 
+#   mutate(
+#     race = if_else(is.na(race) & multiple == 'Population of two or more races:',
+#       'two or more races',
+#       race
+#     )
+#   ) %>% 
+#   filter(!is.na(race)) %>% 
+#   mutate(
+#     GEOID = str_remove_all(GEO_ID, "1500000US")
+#   ) %>%
+#   select(-c(GEO_ID, multiple)) %>%
+#   filter(GEOID %in% smc_cbgs$GEOID) %>% 
+#   left_join(smc_pm25_voronoi_cbg %>% 
+#     select(GEOID, PM25)
+#   ) %>%
+#   mutate(
+#     bucket = as.character(round(PM25))
+#   )
+# 
+# smc_race_total <-
+#   smc_race %>% 
+#   group_by(race) %>% 
+#   summarize(estimate = sum(as.numeric(estimate))) %>%
+#   mutate(bucket = "Total")
+# 
+# smc_race_plot <- smc_race %>% 
+#   group_by(bucket, race) %>% 
+#   summarize(estimate = sum(as.numeric(estimate))) %>% 
+#   rbind(smc_race_total) %>% 
+#   ggplot() +
+#   geom_bar(
+#     aes(
+#       x = bucket %>% factor(levels = rev(c("Total", "0", "1","2","3","4","5","6","7","8","9","11"))),
+#       y = estimate,
+#       fill = race %>% factor(levels = rev(unique(smc_race$race)))
+#     ),
+#     stat = "identity",
+#     position = "fill"
+#   ) +
+#   labs(
+#     x = "PM25",
+#     y = "Proportion of Households",
+#     title = "San Mateo County PM2.5 exposure by Race",
+#     fill = "Race"
+#   ) +
+#   coord_flip() +
+#   theme(
+#     legend.position = "bottom",
+#     legend.direction = "vertical"
+#   )  +
+#   guides(
+#     fill = guide_legend(
+#       reverse = T
+#     )
+#   )
+#   
+# saveRDS(smc_race_plot, "smc_race_plot.rds")
+
+smc_race_plot <- readRDS("smc_race_plot.rds")
 
 ```
 
@@ -369,59 +539,25 @@ observeEvent(input$city, {
 Page 2
 ===================================== 
 
-Inputs {.sidebar}
--------------------------------------
-
-```{r}
-checkboxGroupInput(
-  inputId = "city", 
-  label = "Jurisdiction:",
-  choices = c(smc_places$NAME), 
-  selected = "Redwood City"
-)
-```
-
 Row
 -------------------------------------
 
 ### Plot
 
 ```{r}
-plotlyOutput("plot2")
+plotlyOutput("equity_plot")
 ```
 
 ```{r, context = "server"}
-observeEvent(input$city, {
+observeEvent(input$equity, {
   
-  cities <- c(input$city)
+  if(inpuy$equity == "Income"){
+    chart <- smc_income_plot
+  } else {
+    chart <- smc_race_plot
+  }
   
-  chart <- daily_outdoor_sensor_combined %>% 
-    filter(city %in% cities) %>% 
-    ggplot(
-      aes(
-        x = date,
-        y = PM25
-      )
-    ) +
-    geom_point(
-    ) +
-    geom_line(
-      aes(
-        color = city %>% factor()
-      )
-    ) +
-    labs(
-      x = "",
-      y = "PM2.5",
-      title = 
-        paste0("Daily Average PM2.5 for February"),
-      color = "City"
-    ) + 
-    theme(
-      legend.position = "bottom"
-    )
-  
-  output$plot2 <- renderPlotly({
+  output$equity_plot <- renderPlotly({
     chart %>% 
       ggplotly() %>% 
       config(displayModeBar = F)
