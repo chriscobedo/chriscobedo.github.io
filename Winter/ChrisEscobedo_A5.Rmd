@@ -225,7 +225,7 @@ daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 #   ) %>%
 #   mutate(
 #     GEOID = paste0(state,county,tract,block_group)
-#   ) %>% 
+#   ) %>%
 #   select(!c(county,tract,block_group,GEO_ID,state,NAME) & !ends_with(c("EA","MA","M"))) %>%
 #   pivot_longer(
 #     ends_with("E"),
@@ -233,22 +233,34 @@ daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 #     values_to = "estimate"
 #   ) %>%
 #   left_join(
-#     acs_vars_2019_5yr %>% 
+#     acs_vars_2019_5yr %>%
 #       select(name, label)
-#   ) %>% 
-#   select(-name) %>% 
+#   ) %>%
+#   select(-name) %>%
 #   separate(
 #     label,
 #     into = c(NA,NA,"income"),
 #     sep = "!!"
-#   ) %>% 
-#   filter(!is.na(income)) %>% 
-#   filter(GEOID %in% smc_cbgs$GEOID) %>% 
+#   ) %>%
+#   filter(!is.na(income)) %>%
+#   filter(GEOID %in% smc_cbgs$GEOID) %>%
 #   left_join(smc_pm25_voronoi_cbg %>%
 #     select(GEOID, PM25)
 #   ) %>%
 #   mutate(
-#     bucket = as.character(round(PM25))
+#     bucket = as.character(round(PM25)),
+#     income = case_when(income %in% c("Less than $10,000", "$10,000 to $14,999") ~ "Less than $15,000",
+#                        income %in% c("$15,000 to $19,999", "$20,000 to $24,999") ~ "$15,000-24,999",
+#                        income %in% c("$25,000 to $29,999", "$30,000 to $34,999") ~ "$25,000-34,999",
+#                        income %in% c("$35,000 to $39,999", "$40,000 to $44,999") ~ "$35,000-44,999",
+#                        income %in% c("$45,000 to $49,999", "$50,000 to $59,999") ~ "$45,000-59,999",
+#                        income %in% c("$60,000 to $74,999") ~ "$60,000-74,999",
+#                        income %in% c("$75,000 to $99,999") ~ "$75,000-99,999",
+#                        income %in% c("$100,000 to $124,999") ~ "$100,000-124,999",
+#                        income %in% c("$125,000 to $149,999") ~ "$125,000-149,999",
+#                        income %in% c("$150,000 to $199,999") ~ "$150,000-199,999",
+#                        income %in% c("$200,000 or more") ~ "$200,000 or more"
+#                        )
 #   )
 # 
 # smc_income_total <-
@@ -260,7 +272,7 @@ daily_outdoor_sensor_combined <- readRDS("daily_outdoor_sensor_combined.rds")
 # smc_income_plot <- smc_income %>%
 #   group_by(bucket, income) %>%
 #   summarize(estimate = sum(as.numeric(estimate))) %>%
-#   rbind(smc_race_total) %>%
+#   rbind(smc_income_total) %>%
 #   ggplot() +
 #   geom_bar(
 #     aes(
@@ -387,9 +399,6 @@ smc_income_plot <- readRDS("smc_income_plot.rds")
 smc_race_plot <- readRDS("smc_race_plot.rds")
 
 ```
-
-Page 1
-===================================== 
 
 Inputs {.sidebar}
 -------------------------------------
@@ -524,7 +533,7 @@ observeEvent(input$city, {
   leafletProxy("map") %>% 
     removeShape("selected") %>% 
     addPolygons(
-      data = selected,
+      data = smc_places %>% filter(NAME %in% c(input$city)),
       fill = F,
       color = "black",
       weight = 2,
