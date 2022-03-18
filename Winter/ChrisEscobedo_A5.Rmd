@@ -462,9 +462,6 @@ observeEvent(input$city, {
 })
 ```
 
-Row
--------------------------------------
-
 ### Map of PM2.5 by CBG averaged using voronoi technique.
 
 ```{r}
